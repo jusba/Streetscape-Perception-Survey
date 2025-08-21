@@ -48,11 +48,11 @@ const generateQuestionImages = () => {
 
   const questionImages = {
 
-    comfort_rating: getRandomImages("comfort_rating", 1)     // Part 3: Rating scale
+    comfort_rating: getRandomImages("comfort_rating", 5)     // Part 3: Rating scale
 
   };
 
-  
+  console.log(questionImages)
   return questionImages;
 };
 
@@ -178,38 +178,55 @@ export const surveyPages = [
   
   
   {
-    name: "comfort_rating",
-    title: "Part 3: Comfort Rating", // 🔧 Change page title
-    description: "Please rate how comfortable you would feel in this street environment.", // 🔧 Change page description
+    name: "comfort_loop_page",
+    title: "Comfort Rating",
+    description: "Rate as many images as you like. Press Finish whenever you want to stop.",
     elements: [
-      // 🔧 IMAGE DISPLAY - Shows 1 random image
       {
-        type: "image",
-        name: "comfort_image",
-        imageLink: displayedImages.comfort_rating[0]?.imageLink, // Uses pre-generated image
-        imageFit: "cover", // Keep as "cover"
-        imageHeight: "300px", // 🔧 Adjust image height
-        imageWidth: "100%" // Keep as "100%"
-      },
-      // 🔧 RATING QUESTION - 1-5 scale
-      {
-        type: "radiogroup", // Keep as "radiogroup" for rating scale
-        name: "comfort_level", // 🔧 Change question name
-        title: "How comfortable would you feel walking in this street?", // 🔧 Change question text
-        isRequired: true, // 🔧 Set to false to make optional
-        choices: [
-          { value: 1, text: "Very Uncomfortable" }, // 🔧 Change scale labels
-          { value: 2, text: "Uncomfortable" },
-          { value: 3, text: "Neutral" },
-          { value: 4, text: "Comfortable" },
-          { value: 5, text: "Very Comfortable" }
-          // 🔧 TO ADD MORE SCALE POINTS: Add more choices with value 6, 7, etc.
+        type: "paneldynamic",
+        name: "comfort_loop",
+        title: "Rate images",
+        panelCount: 1,                  // we seed the first one; more get added in code
+        minPanelCount: 0,
+        maxPanelCount: 10000,           // effectively unlimited
+        allowAddPanel: false,
+        allowRemovePanel: false,
+        renderMode: "progressTop",
+        templateTitle: "Image {panelIndex} of {panelCount}",
+        templateElements: [
+          {
+            type: "image",
+            name: "image",
+            imageLink: "",              // you set this in code
+            imageFit: "cover",
+            imageHeight: "300px",
+            imageWidth: "100%"
+          },
+          {
+            // 👇 stores the URL/ID of the image currently shown
+            type: "text",
+            name: "imageUrl",
+            visible: false,
+            clearIfInvisible: "none"
+          },
+          {
+            // 👇 0–7 scale
+            type: "rating",
+            name: "rating",
+            title: "How comfortable would you feel walking in this street?",
+            isRequired: true,
+            rateMin: 0,
+            rateMax: 7,
+            rateStep: 1,
+            minRateDescription: "0 = Very uncomfortable",
+            maxRateDescription: "7 = Very comfortable"
+          }
         ]
-      }
-    ]
-  }
-];
+    }
+  ]
+}
 
+];
 // ========================================
 // 🔧 SURVEY CONFIGURATION
 // ========================================

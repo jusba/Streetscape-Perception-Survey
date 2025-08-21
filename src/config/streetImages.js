@@ -913,7 +913,7 @@ export const streetImages = imageFilenames.map(filename => `${SUPABASE_STORAGE_U
 
 
 // Function to get random images for questions
-export function getRandomImages(questionName, count = 4) {
+export function getRandomImages(questionName, count) {
   let images = [...streetImages];
   let result = [];
   
