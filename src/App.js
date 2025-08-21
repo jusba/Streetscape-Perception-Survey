@@ -101,9 +101,13 @@ export default function App() {
               dp.currentIndex = dp.currentIndex + 1; // skips validation
             }, 100); // slight delay to ensure panel is ready
           } else {
-            setTimeout(() => sender.tryComplete(), 100);
+            
+            setTimeout(() => m.completeLastPage(), 100);
+
           }
+
         }, 100);
+        
       });
     };
 
@@ -113,7 +117,10 @@ export default function App() {
 
 
     // === Save completion handler ===
-    m.onComplete.add(async (survey) => {
+    m.onComplete.add(async (survey,options) => {
+      
+      options.allowComplete = true;
+
       const responses = survey.data;
       console.log(responses)
       const completeData = {

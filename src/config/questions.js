@@ -214,7 +214,7 @@ export const surveyPages = [
             type: "rating",
             name: "rating",
             title: "How comfortable would you feel walking in this street?",
-            isRequired: true,
+            isRequired: false,
             rateMin: 0,
             rateMax: 7,
             rateStep: 1,
