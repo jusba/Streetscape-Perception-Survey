@@ -23,27 +23,35 @@ import { getRandomImages } from './streetImages.js';
 // Each participant sees the same set of images throughout their survey session.
 
 const generateQuestionImages = () => {
-  const questionImages = {
+  //const questionImages = {
     // 🔧 PERCEPTION QUESTIONS (Part 2)
     // Format: question_name: getRandomImages("question_name", number_of_images)
-    safety_perception: getRandomImages("safety_perception", 2),           // 2 images, choose 1
-    attractiveness_perception: getRandomImages("attractiveness_perception", 2), // 2 images, choose 1
-    walkability_perception: getRandomImages("walkability_perception", 2),       // 2 images, choose 1
-    liveliness_perception: getRandomImages("liveliness_perception", 4),         // 4 images, choose 1
-    relaxation_perception: getRandomImages("relaxation_perception", 4),         // 4 images, choose 1
-    cleanliness_perception: getRandomImages("cleanliness_perception", 4),       // 4 images, choose 1
+  //  safety_perception: getRandomImages("safety_perception", 2),           // 2 images, choose 1
+  //  attractiveness_perception: getRandomImages("attractiveness_perception", 2), // 2 images, choose 1
+  //  walkability_perception: getRandomImages("walkability_perception", 2),       // 2 images, choose 1
+  //  liveliness_perception: getRandomImages("liveliness_perception", 4),         // 4 images, choose 1
+  //  relaxation_perception: getRandomImages("relaxation_perception", 4),         // 4 images, choose 1
+  //  cleanliness_perception: getRandomImages("cleanliness_perception", 4),       // 4 images, choose 1
     
     // 🔧 OTHER QUESTIONS (Parts 3-6)
     // Each shows 1 random image alongside the question
-    comfort_rating: getRandomImages("comfort_rating", 1),     // Part 3: Rating scale
-    street_elements: getRandomImages("street_elements", 1),   // Part 4: Checkbox elements
-    feature_ranking: getRandomImages("feature_ranking", 1),   // Part 5: Ranking
-    open_feedback: getRandomImages("open_feedback", 1)        // Part 6: Text feedback
+  //  comfort_rating: getRandomImages("comfort_rating", 1),     // Part 3: Rating scale
+  //  street_elements: getRandomImages("street_elements", 1),   // Part 4: Checkbox elements
+  //  feature_ranking: getRandomImages("feature_ranking", 1),   // Part 5: Ranking
+  //  open_feedback: getRandomImages("open_feedback", 1)        // Part 6: Text feedback
     
     // 🔧 TO ADD NEW IMAGE QUESTIONS:
     // 1. Add a new line here: your_question_name: getRandomImages("your_question_name", count),
     // 2. Use displayedImages.your_question_name in the question definition below
+  //};
+
+
+  const questionImages = {
+
+    comfort_rating: getRandomImages("comfort_rating", 1)     // Part 3: Rating scale
+
   };
+
   
   return questionImages;
 };
@@ -168,108 +176,7 @@ export const surveyPages = [
     elements: demographicQuestions // Uses the demographic questions defined above
   },
   
-  // ========================================
-  // 📄 PAGE 2: STREET PERCEPTION QUESTIONS  
-  // ========================================
-  // This page contains 6 image-based perception questions
-  {
-    name: "street_perception", 
-    title: "Part 2: Street Perception", // 🔧 Change page title here
-    description: "Please evaluate different street environments based on various aspects.", // 🔧 Change page description
-    elements: [
-      // 🔧 PAGE INSTRUCTIONS - Displayed at the top of the page
-      {
-        type: "expression",
-        name: "perception_instruction",
-        title: "In this section, you will see different sets of street images. Please select the image(s) that best match each question.", // 🔧 Change instruction text
-        description: "Take your time to examine each image carefully." // 🔧 Change sub-instruction
-      },
-      
-      // 🔧 PERCEPTION QUESTION 1: Safety (2 choose 1)
-      // TO MODIFY: Change title, description, or perception type
-      {
-        type: "imagepicker",
-        name: "safety_perception", // 🔧 Must match the name in generateQuestionImages()
-        title: "Safety Perception", // 🔧 Change question title
-        description: "Which street environment do you perceive to be the SAFEST?", // 🔧 Change question description
-        isRequired: true, // 🔧 Set to false to make optional
-        choices: displayedImages.safety_perception, // Uses pre-generated images
-        imageFit: "cover", // Keep as "cover" for best display
-        multiSelect: false // Keep false for "choose 1", true for "choose multiple"
-      },
-      
-      // 🔧 PERCEPTION QUESTION 2: Attractiveness (2 choose 1)
-      // TO MODIFY: Replace "attractiveness" with your own perception (e.g., "beauty", "appeal")
-      {
-        type: "imagepicker",
-        name: "attractiveness_perception", // 🔧 Change name and update in generateQuestionImages()
-        title: "Visual Attractiveness", // 🔧 Change question title
-        description: "Which street environment do you find most VISUALLY ATTRACTIVE?", // 🔧 Change question description
-        isRequired: true,
-        choices: displayedImages.attractiveness_perception,
-        imageFit: "cover",
-        multiSelect: false
-      },
-      
-      // 🔧 PERCEPTION QUESTION 3: Walkability (2 choose 1)
-      {
-        type: "imagepicker", 
-        name: "walkability_perception", // 🔧 Change name and update in generateQuestionImages()
-        title: "Walkability", // 🔧 Change question title
-        description: "Which street environment would be most COMFORTABLE for walking?", // 🔧 Change question description
-        isRequired: true,
-        choices: displayedImages.walkability_perception,
-        imageFit: "cover",
-        multiSelect: false
-      },
-      
-      // 🔧 PERCEPTION QUESTION 4: Liveliness (4 choose 1)
-      {
-        type: "imagepicker",
-        name: "liveliness_perception", // 🔧 Change name and update in generateQuestionImages()
-        title: "Liveliness and Vitality", // 🔧 Change question title
-        description: "Which street environment appears most LIVELY and full of activity?", // 🔧 Change question description
-        isRequired: true,
-        choices: displayedImages.liveliness_perception,
-        imageFit: "cover",
-        multiSelect: false
-      },
-      
-      // 🔧 PERCEPTION QUESTION 5: Relaxation (4 choose 1)
-      {
-        type: "imagepicker",
-        name: "relaxation_perception", // 🔧 Change name and update in generateQuestionImages()
-        title: "Relaxation and Tranquility", // 🔧 Change question title
-        description: "Which street environment seems most RELAXING and peaceful?", // 🔧 Change question description
-        isRequired: true,
-        choices: displayedImages.relaxation_perception,
-        imageFit: "cover",
-        multiSelect: false
-      },
-      
-      // 🔧 PERCEPTION QUESTION 6: Cleanliness (4 choose 1)
-      {
-        type: "imagepicker",
-        name: "cleanliness_perception", // 🔧 Change name and update in generateQuestionImages()
-        title: "Cleanliness and Maintenance", // 🔧 Change question title
-        description: "Which street environment appears most CLEAN and well-maintained?", // 🔧 Change question description
-        isRequired: true,
-        choices: displayedImages.cleanliness_perception,
-        imageFit: "cover",
-        multiSelect: false
-      }
-      
-      // 🔧 TO ADD NEW PERCEPTION QUESTIONS:
-      // 1. Add the question name to generateQuestionImages() at the top
-      // 2. Copy one of the questions above and modify the name, title, and description
-      // 3. Don't forget the comma after the previous question!
-    ]
-  },
   
-  // ========================================
-  // 📄 PAGE 3: LIKERT SCALE RATING
-  // ========================================
-  // Shows 1 image with a rating scale question
   {
     name: "comfort_rating",
     title: "Part 3: Comfort Rating", // 🔧 Change page title
@@ -298,115 +205,6 @@ export const surveyPages = [
           { value: 5, text: "Very Comfortable" }
           // 🔧 TO ADD MORE SCALE POINTS: Add more choices with value 6, 7, etc.
         ]
-      }
-    ]
-  },
-  
-  // ========================================
-  // 📄 PAGE 4: CHECKBOX QUESTIONS (Select Multiple)
-  // ========================================
-  // Shows 1 image with checkbox options for element identification
-  {
-    name: "street_elements",
-    title: "Part 4: Street Elements", // 🔧 Change page title
-    description: "Identify the elements you notice in this street environment.", // 🔧 Change page description
-    elements: [
-      // 🔧 IMAGE DISPLAY - Shows 1 random image
-      {
-        type: "image", 
-        name: "elements_image",
-        imageLink: displayedImages.street_elements[0]?.imageLink, // Uses pre-generated image
-        imageFit: "cover",
-        imageHeight: "300px", // 🔧 Adjust image height
-        imageWidth: "100%"
-      },
-      // 🔧 CHECKBOX QUESTION - Select multiple options
-      {
-        type: "checkbox", // Keep as "checkbox" for multiple selection
-        name: "visible_elements", // 🔧 Change question name
-        title: "Which elements do you notice in this street? (Select all that apply)", // 🔧 Change question text
-        isRequired: true, // 🔧 Set to false to make optional
-        choices: [
-          // 🔧 MODIFY THESE OPTIONS - Add/remove/change street elements
-          "Trees and vegetation",
-          "Street furniture (benches, lights)",
-          "Bicycle lanes", 
-          "Pedestrian crossings",
-          "Public art or decorations",
-          "Commercial buildings",
-          "Residential buildings",
-          "Parking spaces",
-          "Public transportation stops",
-          "Outdoor dining areas"
-          // 🔧 TO ADD MORE OPTIONS: Add more strings to this array
-        ]
-      }
-    ]
-  },
-  
-  // ========================================
-  // 📄 PAGE 5: RANKING QUESTIONS (Drag & Drop)
-  // ========================================
-  // Shows 1 image with drag-and-drop ranking question
-  {
-    name: "feature_ranking",
-    title: "Part 5: Feature Importance Ranking", // 🔧 Change page title
-    description: "Look at this street environment and rank the features by importance for creating a pleasant walking experience.", // 🔧 Change page description
-    elements: [
-      // 🔧 IMAGE DISPLAY - Shows 1 random image
-      {
-        type: "image", 
-        name: "ranking_image",
-        imageLink: displayedImages.feature_ranking[0]?.imageLink, // Uses pre-generated image
-        imageFit: "cover",
-        imageHeight: "300px", // 🔧 Adjust image height
-        imageWidth: "100%"
-      },
-      // 🔧 RANKING QUESTION - Drag and drop to reorder
-      {
-        type: "ranking", // Keep as "ranking" for drag-and-drop functionality
-        name: "street_features", // 🔧 Change question name
-        title: "Based on the image above, drag to rank these features from most important (top) to least important (bottom):", // 🔧 Change question text
-        isRequired: true, // 🔧 Set to false to make optional
-        choices: [
-          // 🔧 MODIFY THESE RANKING OPTIONS - Each needs "value" and "text"
-          { value: "safety", text: "Safety and security" },
-          { value: "greenery", text: "Trees and greenery" },
-          { value: "walkability", text: "Wide sidewalks and walkability" },
-          { value: "aesthetics", text: "Visual appeal and aesthetics" },
-          { value: "amenities", text: "Street furniture and amenities" }
-          // 🔧 TO ADD MORE OPTIONS: Add more objects with value and text properties
-        ]
-      }
-    ]
-  },
-  
-  // ========================================
-  // 📄 PAGE 6: TEXT INPUT QUESTIONS (Open-ended)
-  // ========================================
-  // Shows 1 image with open-ended text response
-  {
-    name: "open_feedback",
-    title: "Part 6: Your Thoughts", // 🔧 Change page title
-    description: "Finally, share your thoughts about what makes a great street environment.", // 🔧 Change page description
-    elements: [
-      // 🔧 IMAGE DISPLAY - Shows 1 random image
-      {
-        type: "image", 
-        name: "feedback_image",
-        imageLink: displayedImages.open_feedback[0]?.imageLink, // Uses pre-generated image
-        imageFit: "cover",
-        imageHeight: "300px", // 🔧 Adjust image height
-        imageWidth: "100%"
-      },
-      // 🔧 TEXT INPUT QUESTION - Open-ended response
-      {
-        type: "comment", // Use "comment" for multi-line text, "text" for single line
-        name: "general_feedback", // 🔧 Change question name
-        title: "Looking at this street, what makes a street environment appealing to you? (Optional)", // 🔧 Change question text
-        description: "Please share your thoughts about streetscape design, walkability, or any other aspects that matter to you.", // 🔧 Change question description
-        isRequired: false, // 🔧 Set to true to make required
-        maxLength: 500 // 🔧 Adjust character limit (or remove for unlimited)
       }
     ]
   }
