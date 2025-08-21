@@ -909,7 +909,7 @@ const imageFilenames = [
 ];
 
 // 🔧 STEP 3: Automatically generate full URLs (no need to edit this part)
-export const streetImages = imageFilenames.map(filename => `${SUPABASE_STORAGE_URL}//${filename}`);
+export const streetImages = imageFilenames.map(filename => `${SUPABASE_STORAGE_URL}${filename}`);
 
 
 // Function to get random images for questions
