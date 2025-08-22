@@ -47,6 +47,74 @@
 }
 
 
+.sd-root-modern .sd-header {
+  margin-bottom: 0 !important;
+}
+
+
+.sd-root-modern .sd-body__page {
+  padding-top: 4px !important;
+}
+
+
+.sd-root-modern .sd-header__content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/* Target the actual <h3> title element */
+.sd-root-modern h3.sd-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 5.2em !important; /* Optional: adjust to taste */
+}
+
+
+/* Target the actual <h3> title element */
+.sd-root-modern h3.sd-title {
+  margin: 2px 0 !important;
+  padding: 0 !important;
+  line-height: 1.2 !important;
+  font-size: 5.2em !important; /* Optional: adjust to taste */
+}
+
+/* Target the container around the title text */
+.sd-root-modern .sd-header__text {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important; /* Optional: override inline style */
+}
+
+/* Target the outer title container */
+.sd-root-modern .sd-container-modern__title {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+/* Target the container around the title text */
+.sd-root-modern .sd-header__text {
+  margin: 0 !important;
+  padding: 0 !important;
+  max-width: 100% !important; /* Optional: override inline style */
+}
+
+/* Target the outer title container */
+.sd-root-modern .sd-container-modern__title {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+
+
 html { scroll-behavior: auto; }
 
 

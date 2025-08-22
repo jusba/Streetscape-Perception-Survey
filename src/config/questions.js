@@ -48,7 +48,7 @@ const generateQuestionImages = () => {
 
   const questionImages = {
 
-    comfort_rating: getRandomImages("comfort_rating", 5)     // Part 3: Rating scale
+    comfort_rating: getRandomImages("comfort_rating", 50)     // Part 3: Rating scale
 
   };
 
@@ -174,8 +174,8 @@ export const surveyPages = [
       elements: [
         {
         "type": "html",
-        "name": "infoText",
-        "html": "<h2>Welcome to This Very Serious Survey™</h2>\
+        "name": "instructions",
+        "html": "<h2>Welcome to the greenery survey</h2>\
                 <p>Before you begin, please observe the following highly official rules:</p>\
                 <ol>\
                   <li>No speed-running the survey. We have hidden Easter eggs, but only for those who take their time.</li>\
@@ -184,11 +184,29 @@ export const surveyPages = [
                   <li>The 'Back' button works, but it will silently judge you for being indecisive.</li>\
                   <li>If at any point you hear circus music, that’s normal. Please continue.</li>\
                 </ol>\
+                "
+      }
+      ]
+    },
+  
+  {
+      name: "instructionsPage",
+      elements: [
+        {
+        "type": "html",
+        "name": "infoText",
+        "html": "<h2>Instructions</h2>\
+                <p>Please do this</p>\
+                <ol>\
+                  <li>Do this.</li>\
+                </ol>\
                 <p>Thank you for your cooperation.</p>\
                 <p>Click <strong>Start Survey</strong> when you’re ready to begin your epic journey of multiple-choice destiny.</p>"
       }
       ]
     },
+
+    
   
   {
     name: "demographics",
@@ -207,13 +225,13 @@ export const surveyPages = [
         type: "paneldynamic",
         name: "comfort_loop",
         title: "Rate images",
+        titleLocation: "hidden",
         panelCount: 1,                  // we seed the first one; more get added in code
         minPanelCount: 0,
         maxPanelCount: 10000,           // effectively unlimited
         allowAddPanel: false,
         allowRemovePanel: false,
         renderMode: "progressTop",
-        templateTitle: "Image {panelIndex}",
         templateElements: [
           {
             // 👇 0–7 scale
@@ -248,6 +266,16 @@ export const surveyPages = [
             imageWidth: "auto"
           },
           {
+            type: "html",
+            name: "n",
+            title: "<p>Image {panelIndex}.</p>",
+            imageLink: "",              // you set this in code
+            imageFit: "contain",
+            imageHeight: "auto",
+            imageWidth: "auto"
+          },
+
+          {
             // 👇 stores the URL/ID of the image currently shown
             type: "text",
             name: "imageUrl",
@@ -270,7 +298,7 @@ export const surveyJson = {
   // 🔧 SURVEY TITLE AND DESCRIPTION
   title: "Urban Streetscape Perception Survey", // 🔧 Change main survey title
   description: "This survey helps us understand how people perceive different street environments. Your responses will help improve urban design.", // 🔧 Change survey description
-  firstPageIsStarted : true,
+  firstPageIsStarted : false,
   startSurveyText : "Start Survey",
   // 🔧 SURVEY STRUCTURE
   pages: surveyPages, // Uses the pages defined above

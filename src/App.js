@@ -23,6 +23,24 @@ export default function App() {
     );
     m.focusFirstQuestionAutomatic = false;
 
+
+    // Per-page "Next" button labeling
+    const defaultNext = m.pageNextText || "Next";
+
+    const setNextLabel = () => {
+      const name = m.currentPage?.name;
+      if (name === "introPage") {
+        m.pageNextText = "Next";
+      } else if (name === "instructionsPage") {
+        m.pageNextText = "Start survey";
+      } else {
+        m.pageNextText = defaultNext; // e.g. "Next"
+      }
+    };
+
+    setNextLabel();
+    m.onCurrentPageChanged.add(setNextLabel);
+
     // === Build image queue from displayedImages ===
     const pool = (displayedImages?.comfort_rating ?? [])
       .map((x, i) => {
