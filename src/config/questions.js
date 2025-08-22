@@ -170,6 +170,27 @@ export const surveyPages = [
   // 📄 PAGE 1: DEMOGRAPHIC QUESTIONS
   // ========================================
   {
+      name: "introPage",
+      elements: [
+        {
+        "type": "html",
+        "name": "infoText",
+        "html": "<h2>Welcome to This Very Serious Survey™</h2>\
+                <p>Before you begin, please observe the following highly official rules:</p>\
+                <ol>\
+                  <li>No speed-running the survey. We have hidden Easter eggs, but only for those who take their time.</li>\
+                  <li>If you don’t know an answer, make one up. Confidence is 90% of survey-taking.</li>\
+                  <li>Please don’t feed the survey gremlins. They’re on a strict diet of checkboxes.</li>\
+                  <li>The 'Back' button works, but it will silently judge you for being indecisive.</li>\
+                  <li>If at any point you hear circus music, that’s normal. Please continue.</li>\
+                </ol>\
+                <p>Thank you for your cooperation.</p>\
+                <p>Click <strong>Start Survey</strong> when you’re ready to begin your epic journey of multiple-choice destiny.</p>"
+      }
+      ]
+    },
+  
+  {
     name: "demographics",
     title: "Part 1: Background Information (Optional)", // 🔧 Change page title here
     description: "Please tell us a bit about yourself. All questions are optional and can be skipped.", // 🔧 Change page description
@@ -179,7 +200,7 @@ export const surveyPages = [
   
   {
     name: "comfort_loop_page",
-    title: "Comfort Rating",
+    title: "Greenery rating",
     description: "Rate as many images as you like. Press Finish whenever you want to stop.",
     elements: [
       {
@@ -192,15 +213,27 @@ export const surveyPages = [
         allowAddPanel: false,
         allowRemovePanel: false,
         renderMode: "progressTop",
-        templateTitle: "Image {panelIndex} of {panelCount}",
+        templateTitle: "Image {panelIndex}",
         templateElements: [
+          {
+            // 👇 0–7 scale
+            type: "rating",
+            name: "rating",
+            title: "How naturally green do you see this image?",
+            isRequired: false,
+            rateMin: 0,
+            rateMax: 7,
+            rateStep: 1,
+            minRateDescription: "0 = No greenery",
+            maxRateDescription: "7 = Fully green"
+          },
           {
             type: "image",
             name: "image",
             imageLink: "",              // you set this in code
-            imageFit: "cover",
-            imageHeight: "300px",
-            imageWidth: "100%"
+            imageFit: "contain",
+            imageHeight: "auto",
+            imageWidth: "auto"
           },
           {
             // 👇 stores the URL/ID of the image currently shown
@@ -208,19 +241,8 @@ export const surveyPages = [
             name: "imageUrl",
             visible: false,
             clearIfInvisible: "none"
-          },
-          {
-            // 👇 0–7 scale
-            type: "rating",
-            name: "rating",
-            title: "How comfortable would you feel walking in this street?",
-            isRequired: false,
-            rateMin: 0,
-            rateMax: 7,
-            rateStep: 1,
-            minRateDescription: "0 = Very uncomfortable",
-            maxRateDescription: "7 = Very comfortable"
           }
+          
         ]
     }
   ]
@@ -236,7 +258,8 @@ export const surveyJson = {
   // 🔧 SURVEY TITLE AND DESCRIPTION
   title: "Urban Streetscape Perception Survey", // 🔧 Change main survey title
   description: "This survey helps us understand how people perceive different street environments. Your responses will help improve urban design.", // 🔧 Change survey description
-  
+  firstPageIsStarted : true,
+  startSurveyText : "Start Survey",
   // 🔧 SURVEY STRUCTURE
   pages: surveyPages, // Uses the pages defined above
   

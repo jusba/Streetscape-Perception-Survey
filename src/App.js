@@ -6,6 +6,7 @@ import { saveSurveyResponse } from "./lib/supabase";
 import { surveyJson, displayedImages } from "./config/questions";
 import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
+import "./App.css";  
 
 export default function App() {
   const model = React.useMemo(() => {
@@ -20,6 +21,8 @@ export default function App() {
     Object.keys(surveyConfig.settings).forEach(
       (key) => (m[key] = surveyConfig.settings[key])
     );
+    m.focusFirstQuestionAutomatic = false;
+    console.log('lol')
 
     // === Build image queue from displayedImages ===
     const pool = (displayedImages?.comfort_rating ?? [])
@@ -73,8 +76,7 @@ export default function App() {
       if (hidden) hidden.value = url;
     });
 
-    // 3) Add next panel when the current panel gets a rating
-    // 3) Add next panel when the current panel's rating changes
+
     // 3) Add next panel when the current panel's rating changes
     const hookDynamic = (handlerName) => {
       m[handlerName].add((sender, opt) => {
@@ -96,17 +98,21 @@ export default function App() {
         // Delay navigation slightly to allow SurveyJS to process the change
         setTimeout(() => {
           if (imageQueue.length > 0) {
-            dp.addPanel(); // triggers onDynamicPanelAdded
+            const snap = takeScrollSnapshot(); // capture BEFORE addPanel()
+
+            dp.addPanel();
+
             setTimeout(() => {
-              dp.currentIndex = dp.currentIndex + 1; // skips validation
-            }, 100); // slight delay to ensure panel is ready
+              dp.currentIndex = dp.currentIndex + 1;
+
+              restoreScroll(snap); // restore AFTER index change
+            }, 100);
           } else {
-            
             setTimeout(() => m.completeLastPage(), 100);
-
           }
-
         }, 100);
+
+
         
       });
     };
@@ -117,10 +123,7 @@ export default function App() {
 
 
     // === Save completion handler ===
-    m.onComplete.add(async (survey,options) => {
-      
-      options.allowComplete = true;
-
+    m.onComplete.add(async (survey) => {
       const responses = survey.data;
       console.log(responses)
       const completeData = {
@@ -141,6 +144,52 @@ export default function App() {
         alert("There was an error saving your responses. Please try again.");
       }
     });
+
+
+    const getActiveScroller = () => {
+      const candidates = [
+        document.querySelector(".sd-body__page"),
+        document.querySelector(".sd-page"),
+        document.querySelector(".sd-body"),
+        document.scrollingElement,
+        document.documentElement,
+        document.body,
+      ].filter(Boolean);
+
+      for (const el of candidates) {
+        const style = getComputedStyle(el);
+        const scrollable =
+          (style.overflowY === "auto" || style.overflowY === "scroll") &&
+          el.scrollHeight > el.clientHeight + 1;
+        if (scrollable) return el;
+      }
+      return window; // fallback
+    };
+
+    const takeScrollSnapshot = () => {
+      const scroller = getActiveScroller();
+      return scroller === window
+        ? { scroller, y: window.scrollY }
+        : { scroller, y: scroller.scrollTop };
+    };
+
+    const restoreScroll = ({ scroller, y }) => {
+      // If y is 0 and we're not actually below the top, don't force a jump
+      const currentY = scroller === window ? window.scrollY : scroller.scrollTop;
+      if (y === 0 && currentY === 0) return;
+
+      const doScroll = () => {
+        if (scroller === window) window.scrollTo({ top: y, behavior: "auto" });
+        else scroller.scrollTo({ top: y, behavior: "auto" });
+      };
+
+      // Restore over two frames to beat late reflows/focus
+      requestAnimationFrame(() => {
+        doScroll();
+        requestAnimationFrame(doScroll);
+      });
+    };
+
 
     return m;
   }, []);

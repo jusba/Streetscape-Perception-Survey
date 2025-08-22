@@ -24,6 +24,32 @@
   color: white;
 }
 
+/* Trim banner/header padding */
+.sd-root-modern .sd-header {
+  padding: 6px 10px !important;
+  margin: 0 !important;
+}
+
+/* Title & description spacing */
+.sd-root-modern .sd-header__text { margin: 0 !important; }
+.sd-root-modern .sd-title { margin: 2px 0 4px !important; line-height: 1.2 !important; }
+.sd-root-modern .sd-description { margin: 0 !important; line-height: 1.25 !important; }
+
+/* If you use a logo, it can force the header taller—cap it */
+.sd-root-modern .sd-header__logo { margin-right: 8px !important; }
+.sd-root-modern .sd-header__logo img { max-height: 28px !important; width: auto !important; }
+
+/* Reduce padding at top of the first page under the header */
+.sd-root-modern .sd-body,
+.sd-root-modern .sd-body__page,
+.sd-root-modern .sd-page {
+  padding-top: 6px !important;
+}
+
+
+html { scroll-behavior: auto; }
+
+
 .App-link {
   color: #61dafb;
 }
@@ -36,3 +62,4 @@
     transform: rotate(360deg);
   }
 }
+
