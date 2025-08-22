@@ -6,7 +6,7 @@ import { saveSurveyResponse } from "./lib/supabase";
 import { surveyJson, displayedImages } from "./config/questions";
 import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
-import "./App.css";  
+import "./App.css";
 
 export default function App() {
   const model = React.useMemo(() => {
@@ -22,7 +22,6 @@ export default function App() {
       (key) => (m[key] = surveyConfig.settings[key])
     );
     m.focusFirstQuestionAutomatic = false;
-    console.log('lol')
 
     // === Build image queue from displayedImages ===
     const pool = (displayedImages?.comfort_rating ?? [])
@@ -33,17 +32,14 @@ export default function App() {
       })
       .filter(Boolean);
 
-    console.log("[images] initial pool size:", pool.length);
     const imageQueue = [...pool];
-    console.log(imageQueue)
 
     const nextImage = () => {
       const url = imageQueue.length ? imageQueue.shift() : "";
-      console.log("[images] nextImage() ->", url, "| remaining:", imageQueue.length);
       return url;
     };
 
-    // 1) Seed first panel once
+    // === Seed first panel once ===
     m.onAfterRenderSurvey.add((sender) => {
       const dp = sender.getQuestionByName("comfort_loop");
       if (!dp || !dp.panels.length) return;
@@ -62,7 +58,7 @@ export default function App() {
       if (hidden) hidden.value = url;
     });
 
-    // 2) Seed every newly added panel
+    // === Seed every newly added panel ===
     m.onDynamicPanelAdded.add((sender, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       const panel = opt.panel;
@@ -76,76 +72,7 @@ export default function App() {
       if (hidden) hidden.value = url;
     });
 
-
-    // 3) Add next panel when the current panel's rating changes
-    const hookDynamic = (handlerName) => {
-      m[handlerName].add((sender, opt) => {
-        if (opt.question.name !== "comfort_loop") return;
-        if (opt.name !== "rating") return;
-
-        const dp = opt.question;     // QuestionPanelDynamicModel
-        const panel = opt.panel;     // PanelModel that changed
-        const v = opt.value;
-        if (v === undefined || v === null || v === "") return;
-
-        const ratingQ = panel.getQuestionByName("rating");
-        if (ratingQ?.readOnly) return;
-
-        // Commit the value and mark as read-only
-        ratingQ.value = v;
-        ratingQ.readOnly = true;
-
-        // Delay navigation slightly to allow SurveyJS to process the change
-        setTimeout(() => {
-          if (imageQueue.length > 0) {
-            const snap = takeScrollSnapshot(); // capture BEFORE addPanel()
-
-            dp.addPanel();
-
-            setTimeout(() => {
-              dp.currentIndex = dp.currentIndex + 1;
-
-              restoreScroll(snap); // restore AFTER index change
-            }, 100);
-          } else {
-            setTimeout(() => m.completeLastPage(), 100);
-          }
-        }, 100);
-
-
-        
-      });
-    };
-
-
-    if (m.onDynamicPanelValueChanged) hookDynamic("onDynamicPanelValueChanged");
-    else hookDynamic("onDynamicPanelItemValueChanged");
-
-
-    // === Save completion handler ===
-    m.onComplete.add(async (survey) => {
-      const responses = survey.data;
-      console.log(responses)
-      const completeData = {
-        responses,
-        displayed_images: displayedImages,
-        survey_metadata: {
-          completion_time: new Date().toISOString(),
-          user_agent: navigator.userAgent,
-          screen_resolution: `${window.screen.width}x${window.screen.height}`,
-          survey_version: "1.0",
-        },
-      };
-      const result = await saveSurveyResponse(completeData);
-      if (result.success) {
-        alert("Thank you for completing the survey! Your responses have been saved.");
-      } else {
-        console.error("Failed to save survey response:", result.error);
-        alert("There was an error saving your responses. Please try again.");
-      }
-    });
-
-
+    // === Scroll helpers ===
     const getActiveScroller = () => {
       const candidates = [
         document.querySelector(".sd-body__page"),
@@ -174,22 +101,93 @@ export default function App() {
     };
 
     const restoreScroll = ({ scroller, y }) => {
-      // If y is 0 and we're not actually below the top, don't force a jump
       const currentY = scroller === window ? window.scrollY : scroller.scrollTop;
       if (y === 0 && currentY === 0) return;
-
       const doScroll = () => {
         if (scroller === window) window.scrollTo({ top: y, behavior: "auto" });
         else scroller.scrollTo({ top: y, behavior: "auto" });
       };
-
-      // Restore over two frames to beat late reflows/focus
       requestAnimationFrame(() => {
         doScroll();
         requestAnimationFrame(doScroll);
       });
     };
 
+    // === Advance only after BOTH ratings are answered ===
+    const hookDynamic = (m, { imageQueue, takeScrollSnapshot, restoreScroll }) => {
+      const RATING_KEYS = ["green", "pleasant"];
+
+      const bothAnswered = (panel) => {
+        const g = panel.getQuestionByName("green");
+        const p = panel.getQuestionByName("pleasant");
+        const has = (q) =>
+          q && q.value !== undefined && q.value !== null && q.value !== "";
+        return { g, p, ok: has(g) && has(p) };
+      };
+
+      const handler = (sender, opt) => {
+        if (opt?.question?.name !== "comfort_loop") return;
+        if (!RATING_KEYS.includes(opt?.name)) return;
+
+        const dp = opt.question; // QuestionPanelDynamicModel
+        const panel = opt.panel; // PanelModel
+        if (!panel) return;
+
+        const { g, p, ok } = bothAnswered(panel);
+        if (!ok) return;
+
+        // Prevent double-advance if user tweaks after lock
+        if (g.readOnly && p.readOnly) return;
+
+        // Lock both answers
+        g.readOnly = true;
+        p.readOnly = true;
+
+        setTimeout(() => {
+          if (imageQueue.length > 0) {
+            const snap = takeScrollSnapshot(); // BEFORE addPanel
+            dp.addPanel();
+            setTimeout(() => {
+              dp.currentIndex = dp.currentIndex + 1;
+              restoreScroll(snap); // AFTER index change
+            }, 100);
+          } else {
+            setTimeout(() => m.completeLastPage(), 100);
+          }
+        }, 100);
+      };
+
+      // Support both event names across SurveyJS versions
+      if (m.onDynamicPanelValueChanged) {
+        m.onDynamicPanelValueChanged.add(handler);
+      } else {
+        m.onDynamicPanelItemValueChanged.add(handler);
+      }
+    };
+
+    hookDynamic(m, { imageQueue, takeScrollSnapshot, restoreScroll });
+
+    // === Save completion handler ===
+    m.onComplete.add(async (survey) => {
+      const responses = survey.data;
+      const completeData = {
+        responses,
+        displayed_images: displayedImages,
+        survey_metadata: {
+          completion_time: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          screen_resolution: `${window.screen.width}x${window.screen.height}`,
+          survey_version: "1.0",
+        },
+      };
+      const result = await saveSurveyResponse(completeData);
+      if (result.success) {
+        alert("Thank you for completing the survey! Your responses have been saved.");
+      } else {
+        console.error("Failed to save survey response:", result.error);
+        alert("There was an error saving your responses. Please try again.");
+      }
+    });
 
     return m;
   }, []);

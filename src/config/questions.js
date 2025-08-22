@@ -218,14 +218,26 @@ export const surveyPages = [
           {
             // 👇 0–7 scale
             type: "rating",
-            name: "rating",
-            title: "How naturally green do you see this image?",
+            name: "green",
+            title: "How naturally GREEN do you see this image?",
             isRequired: false,
             rateMin: 0,
             rateMax: 7,
             rateStep: 1,
             minRateDescription: "0 = No greenery",
             maxRateDescription: "7 = Fully green"
+          },
+          {
+            // 👇 0–7 scale
+            type: "rating",
+            name: "pleasant",
+            title: "How PLEASANT do you see this image?",
+            isRequired: false,
+            rateMin: 0,
+            rateMax: 7,
+            rateStep: 1,
+            minRateDescription: "0 = Not pleasant",
+            maxRateDescription: "7 = Very pleasant"
           },
           {
             type: "image",
