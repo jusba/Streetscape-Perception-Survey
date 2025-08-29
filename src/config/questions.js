@@ -188,6 +188,22 @@ export const surveyPages = [
       }
       ]
     },
+
+  {
+      name: "consentPage",
+      elements: [
+        {
+        "type": "html",
+        "name": "consent",
+        "html": "<h2>Consent</h2>\
+                <p>Before you begin, please read the following information:</p>\
+                \
+                <p>Lirum larum lorum, farum tarum tirum. Barum birum borum, carum cirum corum. Darum dirum dorum, harum hirum horum — sarum sirum sorum!\
+                Lirum larum latum, mirum marum motum. Virum varum votum, quirum quarum quotum. Tirum torum turum, narum nirum norum; lirum larum lusum.\
+                </p>"
+      }
+      ]
+    },
   
   {
       name: "instructionsPage",

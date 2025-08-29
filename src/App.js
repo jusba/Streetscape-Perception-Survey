@@ -22,6 +22,8 @@ export default function App() {
       (key) => (m[key] = surveyConfig.settings[key])
     );
     m.focusFirstQuestionAutomatic = false;
+    m.previewText = "Finish rating";
+
 
 
     // Per-page "Next" button labeling
@@ -30,7 +32,9 @@ export default function App() {
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") {
-        m.pageNextText = "Next";
+        m.pageNextText = "Next"
+      } else if (name === "consentPage") {
+        m.pageNextText = "Accept";
       } else if (name === "instructionsPage") {
         m.pageNextText = "Start survey";
       } else {

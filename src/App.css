@@ -24,102 +24,37 @@
   color: white;
 }
 
-/* Trim banner/header padding */
-.sd-root-modern .sd-header {
-  padding: 6px 10px !important;
-  margin: 0 !important;
-}
-
-/* Title & description spacing */
-.sd-root-modern .sd-header__text { margin: 0 !important; }
-.sd-root-modern .sd-title { margin: 2px 0 4px !important; line-height: 1.2 !important; }
-.sd-root-modern .sd-description { margin: 0 !important; line-height: 1.25 !important; }
-
-/* If you use a logo, it can force the header taller—cap it */
-.sd-root-modern .sd-header__logo { margin-right: 8px !important; }
-.sd-root-modern .sd-header__logo img { max-height: 28px !important; width: auto !important; }
-
-/* Reduce padding at top of the first page under the header */
-.sd-root-modern .sd-body,
-.sd-root-modern .sd-body__page,
-.sd-root-modern .sd-page {
-  padding-top: 6px !important;
-}
-
-
-.sd-root-modern .sd-header {
-  margin-bottom: 0 !important;
-}
-
-
-.sd-root-modern .sd-body__page {
-  padding-top: 4px !important;
-}
-
-
-.sd-root-modern .sd-header__content {
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-
-/* Target the actual <h3> title element */
-.sd-root-modern h3.sd-title {
-  margin: 0 !important;
-  padding: 0 !important;
-  line-height: 1.2 !important;
-  font-size: 5.2em !important; /* Optional: adjust to taste */
-}
-
-
-/* Target the actual <h3> title element */
-.sd-root-modern h3.sd-title {
-  margin: 2px 0 !important;
-  padding: 0 !important;
-  line-height: 1.2 !important;
-  font-size: 5.2em !important; /* Optional: adjust to taste */
-}
-
-/* Target the container around the title text */
-.sd-root-modern .sd-header__text {
-  margin: 0 !important;
-  padding: 0 !important;
-  max-width: 100% !important; /* Optional: override inline style */
-}
-
-/* Target the outer title container */
-.sd-root-modern .sd-container-modern__title {
-  margin: 0 !important;
-  padding: 4px 8px !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-
-/* Target the container around the title text */
-.sd-root-modern .sd-header__text {
-  margin: 0 !important;
-  padding: 0 !important;
-  max-width: 100% !important; /* Optional: override inline style */
-}
-
-/* Target the outer title container */
-.sd-root-modern .sd-container-modern__title {
-  margin: 0 !important;
-  padding: 4px 8px !important;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-
-
-html { scroll-behavior: auto; }
-
-
 .App-link {
   color: #61dafb;
+}
+.sd-title.sd-container-modern__title {
+  font-size: 20px;   /* make text smaller */
+  line-height: 1.2;  /* tighter vertical spacing */
+  margin: 0 0;  /* shrink top/bottom spacing */
+}
+
+.sd-logo {
+  margin-top: 0rem;   /* shrink top margin */
+  margin-bottom: 0rem; /* shrink bottom margin */
+  padding: 0;            /* remove extra padding */
+}
+
+.sd-logo__image {
+  max-height: 80px;   /* cap vertical size */
+  width: auto;        /* keep aspect ratio */
+  height: auto;
+}
+
+.sd-btn.sd-navigation__next-btn {
+  background: #111827;
+  color: #fff;
+  border-radius: 8px;
+}
+
+.sd-btn.sd-navigation__preview-btn {
+  background: #111827;
+  color: #fff;
+  border-radius: 8px;
 }
 
 @keyframes App-logo-spin {
@@ -130,4 +65,3 @@ html { scroll-behavior: auto; }
     transform: rotate(360deg);
   }
 }
-
