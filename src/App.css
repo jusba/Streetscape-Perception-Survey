@@ -57,32 +57,67 @@
   border-radius: 8px;
 }
 
+/* Overlay shell */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  display: grid;
+  place-items: center;
   padding: 2rem;
+  z-index: 9999;
+}
+
+.lightbox-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  max-width: 1000px;
+  width: min(1000px, 95vw);
+  max-height: 90vh;
+  overflow: auto;
 }
 
 .lightbox-img {
-  max-width: 90vw;
-  max-height: 90vh;
+  display: block;
+  margin: 0 auto 1rem;
+  max-width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-.lightbox-close {
-  position: fixed;
-  top: 12px;
-  right: 16px;
-  font-size: 32px;
-  background: transparent;
-  border: none;
+/* Ratings UI */
+.rating-group { display: grid; gap: 12px; }
+.rating-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.rating-label { font-weight: 600; }
+.rating-buttons button {
+  margin-right: 8px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.rating-buttons button.active {
+  background: #111827;
   color: #fff;
+  border-color: #111827;
+}
+
+/* Close */
+.lightbox-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  border: 0;
+  font-size: 28px;
   cursor: pointer;
 }
 

@@ -8,17 +8,91 @@ import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
 
+
+function PopupRatings({ panel }) {
+  const [, force] = React.useState(0); // re-render when values change
+
+  const qGreen = panel?.getQuestionByName("green");
+  const qPleasant = panel?.getQuestionByName("pleasant");
+  const choices = [1, 2, 3, 4, 5,6,7]; // adjust to your scale
+
+  // Re-render this component when either value changes in the model
+  React.useEffect(() => {
+    if (!panel) return;
+    const s = panel.survey;
+    const handler = (sender, opt) => {
+      if (opt.name === qGreen?.name || opt.name === qPleasant?.name) {
+        force((x) => x + 1);
+      }
+    };
+    s.onValueChanged.add(handler);
+    return () => s.onValueChanged.remove(handler);
+  }, [panel, qGreen?.name, qPleasant?.name]);
+
+  const setVal = (q, val) => {
+    if (q && !q.readOnly) q.value = val; // writes directly to SurveyJS model
+  };
+
+  return (
+    <div className="rating-group">
+      <div className="rating-row">
+        <div className="rating-label">Green</div>
+        <div className="rating-buttons">
+          {choices.map((n) => (
+            <button
+              key={`g-${n}`}
+              type="button"
+              className={qGreen?.value === n ? "active" : ""}
+              onClick={() => setVal(qGreen, n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rating-row">
+        <div className="rating-label">Pleasant</div>
+        <div className="rating-buttons">
+          {choices.map((n) => (
+            <button
+              key={`p-${n}`}
+              type="button"
+              className={qPleasant?.value === n ? "active" : ""}
+              onClick={() => setVal(qPleasant, n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function App() {
 
-  const [lightboxSrc, setLightboxSrc] = React.useState(null);
-
-  // close overlay on Escape key
+  const [lightbox, setLightbox] = React.useState(null); 
+// shape: { src: string, panel: PanelModel }
+  const lightboxRef = React.useRef(null);
   React.useEffect(() => {
-    if (!lightboxSrc) return;
-    const onKey = (e) => e.key === "Escape" && setLightboxSrc(null);
+    lightboxRef.current = lightbox;
+  }, [lightbox]);
+
+  const openLightboxForPanel = React.useCallback((panel) => {
+    if (!panel) return;
+    const imgQ = panel.getQuestionByName("image");
+    const src = imgQ?.imageLink || "";
+    if (src) setLightbox({ src, panel });
+  }, []);
+
+  React.useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e) => e.key === "Escape" && setLightbox(null);
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lightboxSrc]);
+  }, [lightbox]);
 
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
@@ -73,11 +147,16 @@ export default function App() {
     };
 
     m.onAfterRenderQuestion.add((sender, options) => {
+      // only the image inside your dynamic panel
       if (options.question.name !== "image") return;
+
       const img = options.htmlElement.querySelector("img");
       if (!img) return;
+
       img.style.cursor = "zoom-in";
-      img.onclick = () => setLightboxSrc(img.src);
+      const panel = options.question.parent; // PanelModel for this item
+      img.onclick = () => openLightboxForPanel(panel);
+
     });
 
     // === Seed first panel once ===
@@ -161,8 +240,7 @@ export default function App() {
       const bothAnswered = (panel) => {
         const g = panel.getQuestionByName("green");
         const p = panel.getQuestionByName("pleasant");
-        const has = (q) =>
-          q && q.value !== undefined && q.value !== null && q.value !== "";
+        const has = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
         return { g, p, ok: has(g) && has(p) };
       };
 
@@ -170,41 +248,52 @@ export default function App() {
         if (opt?.question?.name !== "comfort_loop") return;
         if (!RATING_KEYS.includes(opt?.name)) return;
 
-        const dp = opt.question; // QuestionPanelDynamicModel
-        const panel = opt.panel; // PanelModel
+        const dp = opt.question;
+        const panel = opt.panel;
         if (!panel) return;
 
-        const { g, p, ok } = bothAnswered(panel);
+        const { ok } = bothAnswered(panel);
         if (!ok) return;
 
-        // Prevent double-advance if user tweaks after lock
-        if (g.readOnly && p.readOnly) return;
+        // remember if the lightbox was open
+        const wasOpen = !!lightboxRef.current; 
 
-        // Lock both answers
-        //g.readOnly = true;
-        //p.readOnly = true;
+        // close it now
+        setLightbox(null);
 
         setTimeout(() => {
           if (imageQueue.length > 0) {
-            const snap = takeScrollSnapshot(); // BEFORE addPanel
+            const snap = takeScrollSnapshot();
             dp.addPanel();
             setTimeout(() => {
               dp.currentIndex = dp.currentIndex + 1;
-              restoreScroll(snap); // AFTER index change
+              const nextPanel = dp.panels[dp.currentIndex];
+
+              // ✅ only reopen if it was open before
+              if (wasOpen) {
+                openLightboxForPanel(nextPanel);
+              }
+
+              restoreScroll(snap);
             }, 100);
           } else {
-            setTimeout(() => m.completeLastPage(), 100);
+            // last panel
+            setTimeout(() => {
+              setLightbox(null);
+              m.completeLastPage();
+            }, 100);
           }
         }, 100);
       };
 
-      // Support both event names across SurveyJS versions
+
       if (m.onDynamicPanelValueChanged) {
         m.onDynamicPanelValueChanged.add(handler);
       } else {
         m.onDynamicPanelItemValueChanged.add(handler);
       }
     };
+
 
     hookDynamic(m, { imageQueue, takeScrollSnapshot, restoreScroll });
 
@@ -238,23 +327,26 @@ export default function App() {
     
     <Survey model={model} />
     
-    {lightboxSrc && (
+    {lightbox && (
       <div
         className="lightbox-overlay"
-        onClick={() => setLightboxSrc(null)}
+        role="dialog"
+        aria-modal="true"
+        onClick={() => setLightbox(null)}
       >
-        <img
-          className="lightbox-img"
-          src={lightboxSrc}
-          alt=""
-          onClick={(e) => e.stopPropagation()}
-        />
-        <button
-          className="lightbox-close"
-          onClick={() => setLightboxSrc(null)}
-        >
-          ×
-        </button>
+        <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+          <img className="lightbox-img" src={lightbox.src} alt="" />
+
+          <PopupRatings panel={lightbox.panel} />
+
+          <button
+            className="lightbox-close"
+            onClick={() => setLightbox(null)}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
       </div>
     )}
 
