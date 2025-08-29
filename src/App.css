@@ -57,6 +57,37 @@
   border-radius: 8px;
 }
 
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  font-size: 32px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

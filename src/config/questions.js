@@ -235,7 +235,8 @@ export const surveyPages = [
   {
     name: "comfort_loop_page",
     title: "Greenery rating",
-    description: "Rate as many images as you like. Press Finish whenever you want to stop.",
+    description: "Rate as many images as you like. Click the image to enlarge it\
+    Press Finish whenever you want to stop.",
     elements: [
       {
         type: "paneldynamic",

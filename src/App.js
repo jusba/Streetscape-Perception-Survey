@@ -9,6 +9,17 @@ import { themeJson } from "./theme";
 import "./App.css";
 
 export default function App() {
+
+  const [lightboxSrc, setLightboxSrc] = React.useState(null);
+
+  // close overlay on Escape key
+  React.useEffect(() => {
+    if (!lightboxSrc) return;
+    const onKey = (e) => e.key === "Escape" && setLightboxSrc(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxSrc]);
+
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
 
@@ -60,6 +71,14 @@ export default function App() {
       const url = imageQueue.length ? imageQueue.shift() : "";
       return url;
     };
+
+    m.onAfterRenderQuestion.add((sender, options) => {
+      if (options.question.name !== "image") return;
+      const img = options.htmlElement.querySelector("img");
+      if (!img) return;
+      img.style.cursor = "zoom-in";
+      img.onclick = () => setLightboxSrc(img.src);
+    });
 
     // === Seed first panel once ===
     m.onAfterRenderSurvey.add((sender) => {
@@ -162,8 +181,8 @@ export default function App() {
         if (g.readOnly && p.readOnly) return;
 
         // Lock both answers
-        g.readOnly = true;
-        p.readOnly = true;
+        //g.readOnly = true;
+        //p.readOnly = true;
 
         setTimeout(() => {
           if (imageQueue.length > 0) {
@@ -214,5 +233,32 @@ export default function App() {
     return m;
   }, []);
 
-  return <Survey model={model} />;
+  return (
+    <>
+    
+    <Survey model={model} />
+    
+    {lightboxSrc && (
+      <div
+        className="lightbox-overlay"
+        onClick={() => setLightboxSrc(null)}
+      >
+        <img
+          className="lightbox-img"
+          src={lightboxSrc}
+          alt=""
+          onClick={(e) => e.stopPropagation()}
+        />
+        <button
+          className="lightbox-close"
+          onClick={() => setLightboxSrc(null)}
+        >
+          ×
+        </button>
+      </div>
+    )}
+
+
+    </>
+  );
 }
