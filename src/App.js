@@ -129,7 +129,19 @@ function PopupRatings({ panel }) {
 }
 
 
-
+const preloaded = new Set();
+const MAX_TRACKED = 64;
+const preload = (url) => {
+  if (!url || preloaded.has(url)) return;
+  const img = new Image();
+  img.decoding = "async";
+  img.src = url;
+  preloaded.add(url);
+  if (preloaded.size > MAX_TRACKED) {
+    const first = preloaded.values().next().value;
+    preloaded.delete(first);
+  }
+};
 
 
 
@@ -204,6 +216,39 @@ export default function App() {
 
     const imageQueue = [...pool];
 
+    /* --- PRELOADER --- */
+      const preloaded = new Set();
+      const preload = (url) => {
+        if (!url || preloaded.has(url)) return;
+        const img = new Image();
+        img.decoding = "async";      // hint: decode off main thread
+        img.src = url;               // start fetching
+        preloaded.add(url);
+
+        // optional: also add a <link rel="preload"> hint
+        try {
+          if (!document.querySelector(`link[rel="preload"][as="image"][href="${url}"]`)) {
+            const link = document.createElement("link");
+            link.rel = "preload";
+            link.as = "image";
+            link.href = url;
+            document.head.appendChild(link);
+          }
+        } catch (_) {}
+      };
+
+      const preloadNext = (n = 2) => {
+        // peek the next n images in the queue without shifting
+        for (let i = 0; i < n && i < imageQueue.length; i++) {
+          preload(imageQueue[i]);
+        }
+      };
+      m.__preloadNext = preloadNext;
+
+      preloadNext(2);
+
+      /* --- /PRELOADER --- */
+
     const nextImage = () => {
       const url = imageQueue.length ? imageQueue.shift() : "";
       return url;
@@ -239,6 +284,7 @@ export default function App() {
         imgQ.locImageLink?.onChanged?.();
       }
       if (hidden) hidden.value = url;
+      preloadNext(2);
     });
 
     // === Seed every newly added panel ===
@@ -253,6 +299,7 @@ export default function App() {
       }
       const hidden = panel.getQuestionByName("imageUrl");
       if (hidden) hidden.value = url;
+      preloadNext(2);
     });
 
     // === Scroll helpers ===
@@ -345,6 +392,7 @@ export default function App() {
 
           // Otherwise, original behavior: create next only if more images remain.
           if (imageQueue.length > 0) {
+            preloadNext(2);
             const snap = takeScrollSnapshot();
             dp.addPanel();
             setTimeout(() => {
@@ -404,6 +452,7 @@ export default function App() {
     cameFromPrevRef.current = true; // mark that we went back
     dp.currentIndex = dp.currentIndex - 1;
     openLightboxForPanel(dp.panels[dp.currentIndex]);
+    model.__preloadNext?.(2);
   }, [model, openLightboxForPanel]);
 
   // NEXT: prefer existing next; if none, let the rating handler create it
@@ -414,7 +463,8 @@ export default function App() {
     if (hasNext) {
       dp.currentIndex = dp.currentIndex + 1;
       openLightboxForPanel(dp.panels[dp.currentIndex]);
-      cameFromPrevRef.current = false; // reset
+      cameFromPrevRef.current = false;
+      model.__preloadNext?.(2); // reset
     } else {
       // No next yet — close; the rating handler will add the next panel on completion
       setLightbox(null);
@@ -440,7 +490,13 @@ export default function App() {
         onClick={() => setLightbox(null)}
       >
         <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-          <img className="lightbox-img" src={lightbox.src} alt="" />
+          <img
+            className="lightbox-img"
+            src={lightbox.src}
+            alt=""
+            decoding="async"
+            fetchPriority="high"   // optional but helpful on Chromium
+          />
 
           <PopupRatings panel={lightbox.panel} />
 
