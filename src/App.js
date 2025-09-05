@@ -80,6 +80,9 @@ export default function App() {
     lightboxRef.current = lightbox;
   }, [lightbox]);
 
+  const cameFromPrevRef = React.useRef(false);
+
+
   const openLightboxForPanel = React.useCallback((panel) => {
     if (!panel) return;
     const imgQ = panel.getQuestionByName("image");
@@ -108,8 +111,6 @@ export default function App() {
     );
     m.focusFirstQuestionAutomatic = false;
     m.previewText = "Finish rating";
-
-
 
     // Per-page "Next" button labeling
     const defaultNext = m.pageNextText || "Next";
@@ -262,18 +263,32 @@ export default function App() {
         setLightbox(null);
 
         setTimeout(() => {
+          const hasExistingNext = dp.currentIndex < dp.panels.length - 1;
+
+          // If user came from Prev and there is an existing next panel,
+          // DON'T add a new one — just move forward into it.
+          if (cameFromPrevRef.current && hasExistingNext) {
+            const snap = takeScrollSnapshot();
+            dp.currentIndex = dp.currentIndex + 1;
+
+            if (wasOpen) {
+              const nextPanel = dp.panels[dp.currentIndex];
+              openLightboxForPanel(nextPanel);
+            }
+
+            restoreScroll(snap);
+            cameFromPrevRef.current = false; // reset the flag
+            return;
+          }
+
+          // Otherwise, original behavior: create next only if more images remain.
           if (imageQueue.length > 0) {
             const snap = takeScrollSnapshot();
             dp.addPanel();
             setTimeout(() => {
               dp.currentIndex = dp.currentIndex + 1;
               const nextPanel = dp.panels[dp.currentIndex];
-
-              // ✅ only reopen if it was open before
-              if (wasOpen) {
-                openLightboxForPanel(nextPanel);
-              }
-
+              if (wasOpen) openLightboxForPanel(nextPanel);
               restoreScroll(snap);
             }, 100);
           } else {
@@ -285,7 +300,6 @@ export default function App() {
           }
         }, 100);
       };
-
 
       if (m.onDynamicPanelValueChanged) {
         m.onDynamicPanelValueChanged.add(handler);
@@ -322,6 +336,35 @@ export default function App() {
     return m;
   }, []);
 
+  const goPrev = React.useCallback(() => {
+    const dp = model.getQuestionByName("comfort_loop");
+    if (!dp || dp.currentIndex <= 0) return;
+    cameFromPrevRef.current = true; // mark that we went back
+    dp.currentIndex = dp.currentIndex - 1;
+    openLightboxForPanel(dp.panels[dp.currentIndex]);
+  }, [model, openLightboxForPanel]);
+
+  // NEXT: prefer existing next; if none, let the rating handler create it
+  const goNext = React.useCallback(() => {
+    const dp = model.getQuestionByName("comfort_loop");
+    if (!dp) return;
+    const hasNext = dp.currentIndex < dp.panels.length - 1;
+    if (hasNext) {
+      dp.currentIndex = dp.currentIndex + 1;
+      openLightboxForPanel(dp.panels[dp.currentIndex]);
+      cameFromPrevRef.current = false; // reset
+    } else {
+      // No next yet — close; the rating handler will add the next panel on completion
+      setLightbox(null);
+    }
+  }, [model, openLightboxForPanel]);
+
+    const canGoPrev = (() => {
+      const dp = model.getQuestionByName("comfort_loop");
+      return !!dp && dp.currentIndex > 0;
+    })();
+
+
   return (
     <>
     
@@ -339,18 +382,44 @@ export default function App() {
 
           <PopupRatings panel={lightbox.panel} />
 
-          <button
-            className="lightbox-close"
-            onClick={() => setLightbox(null)}
-            aria-label="Close"
-          >
-            ×
-          </button>
+          <div className="lightbox-actions">
+            <button
+              className="lightbox-prev"
+              onClick={goPrev}
+              disabled={(() => {
+                const dp = model.getQuestionByName("comfort_loop");
+                return !dp || dp.currentIndex <= 0;
+              })()}
+              aria-label="Previous image"
+            >
+              ← Previous
+            </button>
+
+            <button
+              className="lightbox-next"
+              onClick={goNext}
+              aria-label="Next image"
+            >
+              Next →
+            </button>
+
+            <button
+              className="lightbox-close"
+              onClick={() => setLightbox(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+
         </div>
       </div>
     )}
 
 
+
     </>
   );
 }
+
+

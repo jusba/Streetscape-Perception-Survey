@@ -256,10 +256,10 @@ export const surveyPages = [
             name: "green",
             title: "How naturally GREEN do you see this image?",
             isRequired: false,
-            rateMin: 0,
+            rateMin: 1,
             rateMax: 7,
             rateStep: 1,
-            minRateDescription: "0 = No greenery",
+            minRateDescription: "1 = No greenery",
             maxRateDescription: "7 = Fully green"
           },
           {
@@ -268,10 +268,10 @@ export const surveyPages = [
             name: "pleasant",
             title: "How PLEASANT do you see this image?",
             isRequired: false,
-            rateMin: 0,
+            rateMin: 1,
             rateMax: 7,
             rateStep: 1,
-            minRateDescription: "0 = Not pleasant",
+            minRateDescription: "1 = Not pleasant",
             maxRateDescription: "7 = Very pleasant"
           },
           {
