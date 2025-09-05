@@ -8,42 +8,90 @@ import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
 
-
 function PopupRatings({ panel }) {
-  const [, force] = React.useState(0); // re-render when values change
+  const [, force] = React.useState(0);
 
   const qGreen = panel?.getQuestionByName("green");
   const qPleasant = panel?.getQuestionByName("pleasant");
-  const choices = [1, 2, 3, 4, 5,6,7]; // adjust to your scale
+  const choices = [1, 2, 3, 4, 5, 6, 7];
 
-  // Re-render this component when either value changes in the model
   React.useEffect(() => {
     if (!panel) return;
     const s = panel.survey;
-    const handler = (sender, opt) => {
-      if (opt.name === qGreen?.name || opt.name === qPleasant?.name) {
-        force((x) => x + 1);
+    const RATING_KEYS = new Set(["green", "pleasant"]);
+
+    // Fires for non-dynamic cases (name = question name)
+    const onValueChanged = (sender, opt) => {
+      if (RATING_KEYS.has(opt?.name)) force(x => x + 1);
+    };
+
+    // Fires for dynamic panels (name = inner question name, question.name = panel question)
+    const onDP = (sender, opt) => {
+      // SurveyJS uses one of these depending on version
+      const isDP = opt?.question?.name === "comfort_loop";
+      const isThisPanel = opt?.panel === panel;
+      if (!isDP || !isThisPanel) return;
+      if (RATING_KEYS.has(opt?.name)) force(x => x + 1);
+    };
+
+    s.onValueChanged.add(onValueChanged);
+
+    if (s.onDynamicPanelValueChanged) {
+      s.onDynamicPanelValueChanged.add(onDP);
+    } else if (s.onDynamicPanelItemValueChanged) {
+      s.onDynamicPanelItemValueChanged.add(onDP);
+    }
+
+    return () => {
+      s.onValueChanged.remove(onValueChanged);
+      if (s.onDynamicPanelValueChanged) {
+        s.onDynamicPanelValueChanged.remove(onDP);
+      } else if (s.onDynamicPanelItemValueChanged) {
+        s.onDynamicPanelItemValueChanged.remove(onDP);
       }
     };
-    s.onValueChanged.add(handler);
-    return () => s.onValueChanged.remove(handler);
-  }, [panel, qGreen?.name, qPleasant?.name]);
+  }, [panel]);
 
   const setVal = (q, val) => {
-    if (q && !q.readOnly) q.value = val; // writes directly to SurveyJS model
+    if (q && !q.readOnly) q.value = val;
   };
 
+  // normalize comparison (string vs number)
+  const isSelected = (q, n) => String(q?.value) === String(n);
+
+  const hasGreen = qGreen?.value !== undefined && qGreen?.value !== null && qGreen?.value !== "";
+  const hasPleasant = qPleasant?.value !== undefined && qPleasant?.value !== null && qPleasant?.value !== "";
+
+  const awaitingPleasant = hasGreen && !hasPleasant; // picked Green first
+  const awaitingGreen    = hasPleasant && !hasGreen; // picked Pleasant first
+
   return (
-    <div className="rating-group">
-      <div className="rating-row">
+    <div
+      className={[
+        "rating-group",
+        awaitingPleasant ? "awaiting-pleasant" : "",
+        awaitingGreen ? "awaiting-green" : "",
+      ].join(" ").trim()}
+    >
+      {/* GREEN */}
+      <div className="rating-row rating-row--green">
         <div className="rating-label">Green</div>
         <div className="rating-buttons">
           {choices.map((n) => (
             <button
               key={`g-${n}`}
               type="button"
-              className={qGreen?.value === n ? "active" : ""}
-              onClick={() => setVal(qGreen, n)}
+              className={isSelected(qGreen, n) ? "active" : ""}
+              aria-pressed={isSelected(qGreen, n)}
+              onClick={() => {
+                // ✅ fires immediately on click
+                console.log("[Click] Green pressed", {
+                  chosen: n,
+                  prev: qGreen?.value,
+                  panelId: panel?.id ?? null,
+                });
+                setVal(qGreen, n);
+              }}
             >
               {n}
             </button>
@@ -51,15 +99,25 @@ function PopupRatings({ panel }) {
         </div>
       </div>
 
-      <div className="rating-row">
+      {/* PLEASANT */}
+      <div className="rating-row rating-row--pleasant">
         <div className="rating-label">Pleasant</div>
         <div className="rating-buttons">
           {choices.map((n) => (
             <button
               key={`p-${n}`}
               type="button"
-              className={qPleasant?.value === n ? "active" : ""}
-              onClick={() => setVal(qPleasant, n)}
+              className={isSelected(qPleasant, n) ? "active" : ""}
+              aria-pressed={isSelected(qPleasant, n)}
+              onClick={() => {
+                // ✅ fires immediately on click
+                console.log("[Click] Pleasant pressed", {
+                  chosen: n,
+                  prev: qPleasant?.value,
+                  panelId: panel?.id ?? null,
+                });
+                setVal(qPleasant, n);
+              }}
             >
               {n}
             </button>
@@ -69,6 +127,10 @@ function PopupRatings({ panel }) {
     </div>
   );
 }
+
+
+
+
 
 
 export default function App() {

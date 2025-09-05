@@ -104,11 +104,6 @@
   border-radius: 8px;
   cursor: pointer;
 }
-.rating-buttons button.active {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
-}
 
 /* Close */
 .lightbox-close {
@@ -121,6 +116,84 @@
   cursor: pointer;
 }
 
+/* Base buttons */
+.rating-buttons {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.rating-buttons button {
+  min-width: 2.2rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 8px;
+  background: #fff;
+  color: #111827; /* gray-900 */
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 60ms ease;
+}
+.rating-buttons button:hover {
+  border-color: #9ca3af; /* gray-400 */
+}
+.rating-buttons button:active {
+  transform: translateY(1px);
+}
+.rating-buttons button:focus-visible {
+  outline: 2px solid #2563eb; /* blue-600 */
+  outline-offset: 2px;
+}
+
+/* ACTIVE states by row (these persist after selection) */
+.rating-row--green .rating-buttons button.active {
+  background: #22c55e;      /* green-500 */
+  border-color: #16a34a;    /* green-600 */
+  color: #fff;
+}
+.rating-row--pleasant .rating-buttons button.active {
+  background: #2563eb;      /* blue-600 */
+  border-color: #1d4ed8;    /* blue-700 */
+  color: #fff;
+}
+
+/* Optional: subtle states for unselected when a selection exists */
+.rating-row--green .rating-buttons button:not(.active)[aria-pressed="false"] {
+  background: #f9fafb;      /* gray-50 */
+}
+.rating-row--pleasant .rating-buttons button:not(.active)[aria-pressed="false"] {
+  background: #f9fafb;      /* gray-50 */
+}
+
+/* Normal active colors (keep yours or adjust) */
+.rating-row--green .rating-buttons button.active {
+  background: #22c55e;       /* green-500 */
+  border-color: #16a34a;     /* green-600 */
+  color: #fff;
+}
+.rating-row--pleasant .rating-buttons button.active {
+  background: #2563eb;       /* blue-600 */
+  border-color: #1d4ed8;     /* blue-700 */
+  color: #fff;
+}
+
+/* While waiting for the other answer, boost the selected one */
+.awaiting-pleasant .rating-row--green .rating-buttons button.active {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+  filter: saturate(1.2);
+}
+.awaiting-green .rating-row--pleasant .rating-buttons button.active {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
+  filter: saturate(1.2);
+}
+
+/* Optional: gently de-emphasize the other row until it’s picked */
+.awaiting-pleasant .rating-row--pleasant .rating-buttons button,
+.awaiting-green .rating-row--green .rating-buttons button {
+  opacity: 0.9;
+}
+.awaiting-pleasant .rating-row--pleasant .rating-buttons button:hover,
+.awaiting-green .rating-row--green .rating-buttons button:hover {
+  opacity: 1;
+}
 
 
 @keyframes App-logo-spin {
