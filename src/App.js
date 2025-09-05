@@ -365,12 +365,8 @@ export default function App() {
         const { ok } = bothAnswered(panel);
         if (!ok) return;
 
-        // remember if the lightbox was open
         const wasOpen = !!lightboxRef.current; 
-
-        // close it now
-        setLightbox(null);
-
+       // don't close; we'll just swap to the next panel's image
         setTimeout(() => {
           const hasExistingNext = dp.currentIndex < dp.panels.length - 1;
 
@@ -382,7 +378,9 @@ export default function App() {
 
             if (wasOpen) {
               const nextPanel = dp.panels[dp.currentIndex];
-              openLightboxForPanel(nextPanel);
+              const imgQ = nextPanel.getQuestionByName("image");
+              const src = imgQ?.imageLink || "";
+              if (src) setLightbox({ src, panel: nextPanel });
             }
 
             restoreScroll(snap);
@@ -398,17 +396,21 @@ export default function App() {
             setTimeout(() => {
               dp.currentIndex = dp.currentIndex + 1;
               const nextPanel = dp.panels[dp.currentIndex];
-              if (wasOpen) openLightboxForPanel(nextPanel);
+              if (wasOpen) {
+                const imgQ = nextPanel.getQuestionByName("image");
+                const src = imgQ?.imageLink || "";
+                if (src) setLightbox({ src, panel: nextPanel });
+              }
               restoreScroll(snap);
             }, 100);
           } else {
             // last panel
             setTimeout(() => {
-              setLightbox(null);
               m.completeLastPage();
+              setLightbox(null);
             }, 100);
           }
-        }, 100);
+        }, 0);
       };
 
       if (m.onDynamicPanelValueChanged) {
