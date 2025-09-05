@@ -148,6 +148,12 @@ const preload = (url) => {
 export default function App() {
 
   const [lightbox, setLightbox] = React.useState(null); 
+
+  const [lightboxLoaded, setLightboxLoaded] = React.useState(false);
+  React.useEffect(() => {
+    // reset fade-in whenever the image src changes
+    setLightboxLoaded(false);
+  }, [lightbox?.src]);
 // shape: { src: string, panel: PanelModel }
   const lightboxRef = React.useRef(null);
   React.useEffect(() => {
@@ -492,13 +498,16 @@ export default function App() {
         onClick={() => setLightbox(null)}
       >
         <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-          <img
-            className="lightbox-img"
-            src={lightbox.src}
-            alt=""
-            decoding="async"
-            fetchPriority="high"   // optional but helpful on Chromium
-          />
+          <div className={`lightbox-media ${lightboxLoaded ? "is-loaded" : ""}`}>
+            <img
+              className="lightbox-img"
+              src={lightbox.src}
+              alt=""
+              decoding="async"
+              fetchPriority="high"
+              onLoad={() => setLightboxLoaded(true)}
+            />
+          </div>
 
           <PopupRatings panel={lightbox.panel} />
 

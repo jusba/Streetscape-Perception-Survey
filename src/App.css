@@ -1,8 +1,10 @@
 .App { text-align: center; }
+
 .App-logo { height: 40vmin; pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) {
   .App-logo { animation: App-logo-spin infinite 20s linear; }
 }
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -13,6 +15,7 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
 .App-link { color: #61dafb; }
 
 .sd-title.sd-container-modern__title {
@@ -20,8 +23,10 @@
   line-height: 1.2;
   margin: 0 0;
 }
+
 .sd-logo { margin-top: 0; margin-bottom: 0; padding: 0; }
 .sd-logo__image { max-height: 80px; width: auto; height: auto; }
+
 .sd-btn.sd-navigation__next-btn,
 .sd-btn.sd-navigation__preview-btn {
   background: #111827;
@@ -29,7 +34,9 @@
   border-radius: 8px;
 }
 
-/* Overlay shell */
+/* =========================
+   Lightbox overlay & panel
+   ========================= */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -38,7 +45,7 @@
   place-items: center;
   padding: clamp(8px, 4vw, 32px);
   z-index: 9999;
-  overscroll-behavior: contain;
+  overscroll-behavior: contain; /* prevent background scroll on mobile */
 }
 
 .lightbox-content {
@@ -47,20 +54,38 @@
   border-radius: 12px;
   padding: clamp(12px, 2vw, 20px);
   width: clamp(320px, 92vw, 1100px);
-  max-height: 90vh;   /* fallback */
-  max-height: 92dvh;  /* modern mobile */
+  max-height: 90vh;  /* fallback */
+  max-height: 92dvh; /* modern mobile */
   overflow: auto;
+
+  /* Keep a predictable vertical structure */
+  display: flex;
+  flex-direction: column;
 }
 
-.lightbox-img {
-  display: block;
-  margin: 0 auto 1rem;
-  max-width: 100%;
-  height: auto;
-  max-height: 70vh;   /* fallback */
-  max-height: 70dvh;  /* respect mobile browser UI chrome */
-  object-fit: contain; /* no crop */
+/* Reserve a consistent area for the image so buttons don't move */
+.lightbox-media {
+  height: clamp(240px, 70dvh, 800px); /* same height every image */
+  display: grid;
+  place-items: center;
+  background: #f8fafc;               /* subtle placeholder */
   border-radius: 8px;
+  overflow: hidden;
+  /* no opacity/transition here */
+}
+
+/* Make the image fit the reserved area without cropping */
+.lightbox-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Optional: slightly shorter reserved area on small screens */
+@media (max-width: 640px) {
+  .lightbox-media {
+    height: 60dvh;
+  }
 }
 
 .lightbox-close {
@@ -74,7 +99,12 @@
   cursor: pointer;
 }
 
-/* Ratings UI */
+/* Optional: keep action row at bottom of dialog */
+.lightbox-actions { margin-top: 1rem; }
+
+/* =========================
+   Ratings UI
+   ========================= */
 .rating-group { display: grid; gap: 12px; }
 
 .rating-row {
@@ -83,6 +113,7 @@
   gap: 8px;
   align-items: center;
 }
+
 .rating-label { font-weight: 600; }
 
 /* Base buttons */
@@ -132,17 +163,21 @@
   filter: saturate(1.2);
 }
 
+/* =========================
+   Responsive tweaks
+   ========================= */
+
 /* Phones / narrow screens */
 @media (max-width: 640px) {
   .lightbox-content {
     width: 96vw;
-    max-height: 94vh;   /* fallback */
+    max-height: 94vh;  /* fallback */
     max-height: 94dvh;
     padding: 12px;
   }
-  .lightbox-img {
-    max-height: 60vh;   /* fallback */
-    max-height: 60dvh;
+  .lightbox-media {
+    height: 60vh;      /* fallback */
+    height: 60dvh;
   }
   .rating-row {
     grid-template-columns: 1fr; /* stack label above buttons */
@@ -154,18 +189,24 @@
 
 /* Very short viewports (landscape phones / tiny laptops) */
 @media (max-height: 600px) {
-  .lightbox-img {
-    max-height: 55vh;   /* fallback */
-    max-height: 55dvh;
+  .lightbox-media {
+    height: 55vh;      /* fallback */
+    height: 55dvh;
   }
 }
 
 /* Large monitors */
 @media (min-width: 1280px) {
   .lightbox-content { width: min(1200px, 90vw); }
-  .lightbox-img { max-height: 80vh; max-height: 80dvh; }
+  .lightbox-media {
+    height: 80vh;      /* fallback */
+    height: 80dvh;
+  }
 }
 
+/* =========================
+   Misc
+   ========================= */
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
