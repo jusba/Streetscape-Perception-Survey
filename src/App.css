@@ -1,18 +1,8 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
+.App { text-align: center; }
+.App-logo { height: 40vmin; pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  .App-logo { animation: App-logo-spin infinite 20s linear; }
 }
-
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -23,34 +13,16 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+.App-link { color: #61dafb; }
 
-.App-link {
-  color: #61dafb;
-}
 .sd-title.sd-container-modern__title {
-  font-size: 20px;   /* make text smaller */
-  line-height: 1.2;  /* tighter vertical spacing */
-  margin: 0 0;  /* shrink top/bottom spacing */
+  font-size: 20px;
+  line-height: 1.2;
+  margin: 0 0;
 }
-
-.sd-logo {
-  margin-top: 0rem;   /* shrink top margin */
-  margin-bottom: 0rem; /* shrink bottom margin */
-  padding: 0;            /* remove extra padding */
-}
-
-.sd-logo__image {
-  max-height: 80px;   /* cap vertical size */
-  width: auto;        /* keep aspect ratio */
-  height: auto;
-}
-
-.sd-btn.sd-navigation__next-btn {
-  background: #111827;
-  color: #fff;
-  border-radius: 8px;
-}
-
+.sd-logo { margin-top: 0; margin-bottom: 0; padding: 0; }
+.sd-logo__image { max-height: 80px; width: auto; height: auto; }
+.sd-btn.sd-navigation__next-btn,
 .sd-btn.sd-navigation__preview-btn {
   background: #111827;
   color: #fff;
@@ -64,17 +36,19 @@
   background: rgba(0,0,0,0.7);
   display: grid;
   place-items: center;
-  padding: 2rem;
+  padding: clamp(8px, 4vw, 32px);
   z-index: 9999;
+  overscroll-behavior: contain;
 }
 
 .lightbox-content {
+  position: relative;
   background: #fff;
   border-radius: 12px;
-  padding: 1rem;
-  max-width: 1000px;
-  width: min(1000px, 95vw);
-  max-height: 90vh;
+  padding: clamp(12px, 2vw, 20px);
+  width: clamp(320px, 92vw, 1100px);
+  max-height: 90vh;   /* fallback */
+  max-height: 92dvh;  /* modern mobile */
   overflow: auto;
 }
 
@@ -82,30 +56,13 @@
   display: block;
   margin: 0 auto 1rem;
   max-width: 100%;
-  max-height: 65vh;
-  object-fit: contain;
+  height: auto;
+  max-height: 70vh;   /* fallback */
+  max-height: 70dvh;  /* respect mobile browser UI chrome */
+  object-fit: contain; /* no crop */
   border-radius: 8px;
 }
 
-/* Ratings UI */
-.rating-group { display: grid; gap: 12px; }
-.rating-row {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 8px;
-  align-items: center;
-}
-.rating-label { font-weight: 600; }
-.rating-buttons button {
-  margin-right: 8px;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* Close */
 .lightbox-close {
   position: absolute;
   top: 8px;
@@ -113,8 +70,20 @@
   background: transparent;
   border: 0;
   font-size: 28px;
+  line-height: 1;
   cursor: pointer;
 }
+
+/* Ratings UI */
+.rating-group { display: grid; gap: 12px; }
+
+.rating-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.rating-label { font-weight: 600; }
 
 /* Base buttons */
 .rating-buttons {
@@ -123,59 +92,37 @@
   flex-wrap: wrap;
 }
 .rating-buttons button {
-  min-width: 2.2rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;          /* bigger tap targets */
   padding: 0.4rem 0.6rem;
-  border: 1px solid #d1d5db; /* gray-300 */
+  border: 1px solid #d1d5db;   /* gray-300 */
   border-radius: 8px;
   background: #fff;
-  color: #111827; /* gray-900 */
+  color: #111827;              /* gray-900 */
   cursor: pointer;
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease, transform 60ms ease;
+  transition: background 120ms ease, color 120ms ease,
+              border-color 120ms ease, transform 60ms ease;
 }
-.rating-buttons button:hover {
-  border-color: #9ca3af; /* gray-400 */
-}
-.rating-buttons button:active {
-  transform: translateY(1px);
-}
+.rating-buttons button:hover { border-color: #9ca3af; } /* gray-400 */
+.rating-buttons button:active { transform: translateY(1px); }
 .rating-buttons button:focus-visible {
-  outline: 2px solid #2563eb; /* blue-600 */
+  outline: 2px solid #2563eb;  /* blue-600 */
   outline-offset: 2px;
 }
 
-/* ACTIVE states by row (these persist after selection) */
+/* Active states by row */
 .rating-row--green .rating-buttons button.active {
-  background: #22c55e;      /* green-500 */
-  border-color: #16a34a;    /* green-600 */
+  background: #22c55e;         /* green-500 */
+  border-color: #16a34a;       /* green-600 */
   color: #fff;
 }
 .rating-row--pleasant .rating-buttons button.active {
-  background: #2563eb;      /* blue-600 */
-  border-color: #1d4ed8;    /* blue-700 */
+  background: #2563eb;         /* blue-600 */
+  border-color: #1d4ed8;       /* blue-700 */
   color: #fff;
 }
 
-/* Optional: subtle states for unselected when a selection exists */
-.rating-row--green .rating-buttons button:not(.active)[aria-pressed="false"] {
-  background: #f9fafb;      /* gray-50 */
-}
-.rating-row--pleasant .rating-buttons button:not(.active)[aria-pressed="false"] {
-  background: #f9fafb;      /* gray-50 */
-}
-
-/* Normal active colors (keep yours or adjust) */
-.rating-row--green .rating-buttons button.active {
-  background: #22c55e;       /* green-500 */
-  border-color: #16a34a;     /* green-600 */
-  color: #fff;
-}
-.rating-row--pleasant .rating-buttons button.active {
-  background: #2563eb;       /* blue-600 */
-  border-color: #1d4ed8;     /* blue-700 */
-  color: #fff;
-}
-
-/* While waiting for the other answer, boost the selected one */
+/* In-progress emphasis (optional) */
 .awaiting-pleasant .rating-row--green .rating-buttons button.active {
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
   filter: saturate(1.2);
@@ -185,22 +132,41 @@
   filter: saturate(1.2);
 }
 
-/* Optional: gently de-emphasize the other row until it’s picked */
-.awaiting-pleasant .rating-row--pleasant .rating-buttons button,
-.awaiting-green .rating-row--green .rating-buttons button {
-  opacity: 0.9;
-}
-.awaiting-pleasant .rating-row--pleasant .rating-buttons button:hover,
-.awaiting-green .rating-row--green .rating-buttons button:hover {
-  opacity: 1;
+/* Phones / narrow screens */
+@media (max-width: 640px) {
+  .lightbox-content {
+    width: 96vw;
+    max-height: 94vh;   /* fallback */
+    max-height: 94dvh;
+    padding: 12px;
+  }
+  .lightbox-img {
+    max-height: 60vh;   /* fallback */
+    max-height: 60dvh;
+  }
+  .rating-row {
+    grid-template-columns: 1fr; /* stack label above buttons */
+    gap: 6px;
+  }
+  .rating-label { justify-self: start; }
+  .lightbox-close { top: 6px; right: 8px; }
 }
 
+/* Very short viewports (landscape phones / tiny laptops) */
+@media (max-height: 600px) {
+  .lightbox-img {
+    max-height: 55vh;   /* fallback */
+    max-height: 55dvh;
+  }
+}
+
+/* Large monitors */
+@media (min-width: 1280px) {
+  .lightbox-content { width: min(1200px, 90vw); }
+  .lightbox-img { max-height: 80vh; max-height: 80dvh; }
+}
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
