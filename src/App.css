@@ -40,7 +40,7 @@
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.9);
   display: grid;
   place-items: center;
   padding: clamp(8px, 4vw, 32px);

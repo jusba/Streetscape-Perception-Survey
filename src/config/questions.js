@@ -69,6 +69,18 @@ export const demographicQuestions = [
   // 🔧 AGE QUESTION - Multiple choice
   // TO MODIFY: Change age ranges in the choices array
   {
+    name: "gender",
+    title: "What is your gender identity?",
+    type: "radiogroup",
+    choices: [
+      "Female",
+      "Male", 
+      "Other",
+      "Prefer not to say"
+    ],
+    isRequired: false // Keep false to make optional
+  },
+  {
     name: "age",
     title: "What is your age group?",
     type: "radiogroup",
@@ -88,7 +100,7 @@ export const demographicQuestions = [
   // TO MODIFY: Change the title text or make it more specific
   {
     name: "location",
-    title: "Where are you from? (City, Country)",
+    title: "Where are you living? (Country)",
     type: "text", // Use "text" for single line, "comment" for multi-line
     isRequired: false
   },
@@ -100,11 +112,11 @@ export const demographicQuestions = [
     title: "What is your household income level?",
     type: "radiogroup", 
     choices: [
-      "Under $25,000",
-      "$25,000 - $50,000",
-      "$50,000 - $75,000", 
-      "$75,000 - $100,000",
-      "Over $100,000",
+      "Under €25,000",
+      "€25,000 - €50,000",
+      "€50,000 - €75,000", 
+      "€75,000 - €100,000",
+      "Over €100,000",
       "Prefer not to say"
     ],
     isRequired: false
@@ -117,8 +129,9 @@ export const demographicQuestions = [
     title: "What is your highest level of education?",
     type: "radiogroup",
     choices: [
-      "High school or less",
-      "Some college",
+      "Secondary education",
+      "Upper secondary education",
+      "Trade/technical/vocational training",
       "Bachelor's degree", 
       "Master's degree",
       "Doctoral degree",
@@ -176,31 +189,25 @@ export const surveyPages = [
         "type": "html",
         "name": "instructions",
         "html": "<h2>Welcome to the greenery survey</h2>\
-                <p>Before you begin, please observe the following highly official rules:</p>\
-                <ol>\
-                  <li>No speed-running the survey. We have hidden Easter eggs, but only for those who take their time.</li>\
-                  <li>If you don’t know an answer, make one up. Confidence is 90% of survey-taking.</li>\
-                  <li>Please don’t feed the survey gremlins. They’re on a strict diet of checkboxes.</li>\
-                  <li>The 'Back' button works, but it will silently judge you for being indecisive.</li>\
-                  <li>If at any point you hear circus music, that’s normal. Please continue.</li>\
-                </ol>\
+                <b>Before you begin, please read the following information:</b>\
+                <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023-2027) funded by European Research Council. It explores the use of street view images, to capture people’s perception of street-level environments. The study is conducted with the principle of voluntary participation with prior and informed consent. The findings of the study are expected to produce useful information for urban analytics and planning. </p>\
+                <p>The study will take approximately 15 minutes</p>\
+                <b>You can read more information about the Lab and Project from the following sources:</b>\
+                <a href='https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel'>GREENTRAVEL</a>\
+                <p></p>\
+                <a href='https://www.helsinki.fi/en/researchgroups/digital-geography-lab'>Digital Geography Lab</a>\
+                <p></p>\
+                <a href='https://www.helsinki.fi/en'>University of Helsinki</a>\
+                <h4>Consent</h4>\
+                <p>You are invited to take part in this research study. Before you decide to do so, it is important you understand why the research is being done and what it will involve. Please take time to read the following information carefully. Take time to decide whether or not you wish to take part. For any additional questions, you can email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>\
+                <b>Possible benefits, disadvantages and risks associated with the research</b>\
+                <p>The study does not provide health or safety risks to participants. The data collected is anonymous and cannot be linked or traced back to the participants.</p>\
+                <p>Whilst there are no immediate benefits for those people participating in the project, this research will produce larger societal benefits. The results of the project will likely inform how to design and manage streetscapes to support health, well-being and pleasant travel experiences.   </p>\
+                <b>Processing of personal data and data privacy</b>\
+                <p>This study will collect personal data on your socio-demographic background. All the information that we collect about you during the research will be kept strictly confidential and will be processed according to European GDPR regulations. For sharing or publishing the data as open-source, only fully anonymized data will be used. Participation in the study is voluntary. There will be no negative consequences for you if you choose not to participate in the study or if you withdraw from the study at any point. The data controller is University of Helsinki.</p>\
+                <p>Results of the research will be published in international scientific journals and may be presented in international scientific conferences. You and your data will not be identified in any report or publication.</p>\
+                <h5>By clicking the button Next, you comfirm that you heave read the information and give your consent.</h5>\
                 "
-      }
-      ]
-    },
-
-  {
-      name: "consentPage",
-      elements: [
-        {
-        "type": "html",
-        "name": "consent",
-        "html": "<h2>Consent</h2>\
-                <p>Before you begin, please read the following information:</p>\
-                \
-                <p>Lirum larum lorum, farum tarum tirum. Barum birum borum, carum cirum corum. Darum dirum dorum, harum hirum horum — sarum sirum sorum!\
-                Lirum larum latum, mirum marum motum. Virum varum votum, quirum quarum quotum. Tirum torum turum, narum nirum norum; lirum larum lusum.\
-                </p>"
       }
       ]
     },
@@ -212,12 +219,18 @@ export const surveyPages = [
         "type": "html",
         "name": "infoText",
         "html": "<h2>Instructions</h2>\
-                <p>Please do this</p>\
-                <ol>\
-                  <li>Do this.</li>\
-                </ol>\
-                <p>Thank you for your cooperation.</p>\
-                <p>Click <strong>Start Survey</strong> when you’re ready to begin your epic journey of multiple-choice destiny.</p>"
+                <p>In the first part of the questionnaire, you will answer questions concerning your demographic characteristics. After that, you will proceed to rating images on given characteristics on a rating platform.</p>\
+                <p>On the platform, you will be shown a random street image for you to observe. Please spend some time looking at the image, as there is a small delay to pace the rating. You will be presented with <b>two criteria to rate:</b></p>\
+                <p><b>Greenery:</b>\
+                <i>How much natural vegetation you see in the image, based on your own estimation. On the scale <b>1 (No greenery)</b> means that you do not see any vegetation in the view, while <b>7 (Full greenery)</b> means that only vegetation is visible. </i>\</p>\
+                <p><b>Pleasantness:</b>\
+                <i>How pleasant do you see the scene as a whole? On the scale <b>1 (Not pleasant)</b> means that you do not find the scene pleasant at all, while <b>7 (Very pleasant)</b> means that you find the scene very pleasant. </i></p>\
+                <p>For each image, will select your ratings to the criteria. After rating both, there will automatically be a new image for you to rate. If you want to re-evaluate previously rated images, you can move back in the image queue by pressing the previous image button. After changing a rating, you will be automatically moved to the newest image.</p>\
+                <p>You can press any of the images to enter a more focused rating window. You can see the amount of images rated on the bottom right. Feel free to use your browser's zoom function to adjust the images for comfortable viewing and rating </p>\
+                <strong>To complete the survey, we ask you to rate at least 100 images. After rating the 100 images, you may end the survey and enter a raffle to win a gift card. You may also continue rating images after the initial 100, if you wish.</strong>\
+                <h5>Press Start Survey to proceed to the survey</h5>\
+                "
+
       }
       ]
     },
@@ -260,7 +273,7 @@ export const surveyPages = [
             rateMax: 7,
             rateStep: 1,
             minRateDescription: "1 = No greenery",
-            maxRateDescription: "7 = Fully green"
+            maxRateDescription: "7 = Fully greenery"
           },
           {
             // 👇 0–7 scale
@@ -313,7 +326,7 @@ export const surveyPages = [
 
 export const surveyJson = {
   // 🔧 SURVEY TITLE AND DESCRIPTION
-  title: "Urban Streetscape Perception Survey", // 🔧 Change main survey title
+  title: "Urban Greenery Survey", // 🔧 Change main survey title
   description: "This survey helps us understand how people perceive different street environments. Your responses will help improve urban design.", // 🔧 Change survey description
   firstPageIsStarted : false,
   startSurveyText : "Start Survey",

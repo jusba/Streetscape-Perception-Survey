@@ -193,7 +193,7 @@ export default function App() {
     m.previewText = "Finish rating";
 
     // Per-page "Next" button labeling
-    const defaultNext = m.pageNextText || "Next";
+    const defaultNext = m.pageNextText || "Next image";
 
     const setNextLabel = () => {
       const name = m.currentPage?.name;

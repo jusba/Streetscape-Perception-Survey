@@ -5,7 +5,7 @@ export const surveyConfig = {
   // Lab Information - Replace with your own
   logo: "https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/logo.png",
   logoPosition: "right",
-  labDescription: "This research is conducted by Urban Analytics Lab at the National University of Singapore.",
+  labDescription: "Digital Geography Lab.",
   
   // Survey Settings
   settings: {
@@ -18,8 +18,8 @@ export const surveyConfig = {
   
   // Contact Information - Replace with your own
   contact: {
-    email: "your-email@university.edu",
-    website: "https://your-lab-website.edu",
+    email: "jussi.torkko[at]helsinki.fi",
+    website: "https://www.helsinki.fi/en/researchgroups/digital-geography-lab",
   },
   
   // Privacy Policy
