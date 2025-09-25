@@ -193,6 +193,7 @@ export const surveyPages = [
                 <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023-2027) funded by European Research Council. It explores the use of street view images, to capture people’s perception of street-level environments. The study is conducted with the principle of voluntary participation with prior and informed consent. The findings of the study are expected to produce useful information for urban analytics and planning. </p>\
                 <p>The study will take approximately 15 minutes</p>\
                 <b>You can read more information about the Lab and Project from the following sources:</b>\
+                <p></p>\
                 <a href='https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel'>GREENTRAVEL</a>\
                 <p></p>\
                 <a href='https://www.helsinki.fi/en/researchgroups/digital-geography-lab'>Digital Geography Lab</a>\
@@ -272,8 +273,8 @@ export const surveyPages = [
             rateMin: 1,
             rateMax: 7,
             rateStep: 1,
-            minRateDescription: "1 = No greenery",
-            maxRateDescription: "7 = Fully greenery"
+            minRateDescription: "1 = Not green at all",
+            maxRateDescription: "7 = Completely green"
           },
           {
             // 👇 0–7 scale
@@ -284,7 +285,7 @@ export const surveyPages = [
             rateMin: 1,
             rateMax: 7,
             rateStep: 1,
-            minRateDescription: "1 = Not pleasant",
+            minRateDescription: "1 = Very unpleasant",
             maxRateDescription: "7 = Very pleasant"
           },
           {
