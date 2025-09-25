@@ -18,12 +18,84 @@
 
 .App-link { color: #61dafb; }
 
+/* =========================
+   SurveyJS Titles & Ratings
+   ========================= */
 .sd-title.sd-container-modern__title {
   font-size: 20px;
   line-height: 1.2;
-  margin: 0 0;
+  margin: 0;
 }
 
+/* Two-column layout: [fixed title] [content] */
+.sd-question--left {
+  display: grid !important;
+  grid-template-columns: 140px 1fr; /* adjust width for longest title */
+  column-gap: 12px;
+  align-items: center;
+}
+
+/* Title cell */
+.sd-question--left .sd-question__header {
+  grid-column: 1;
+  justify-self: end;
+  text-align: right;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Content cell (rating control) */
+.sd-question--left .sd-question__content {
+  grid-column: 2;
+}
+
+/* Rating inner layout: [min label | buttons | max label] */
+.sd-question--left .sd-rating {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
+/* Min label fixed width so buttons align */
+.sd-question--left .sd-rating__min-text {
+  flex: 0 0 200px; /* tweak until both questions line up */
+  text-align: right;
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+/* Max label tight to buttons */
+.sd-question--left .sd-rating__max-text {
+  white-space: nowrap;
+  margin-left: 8px;
+  opacity: 0.75;
+}
+
+/* Normalize button spacing */
+.sd-question--left .sd-rating .sd-rating__item {
+  margin: 0 6px;
+}
+
+/* Responsive stacking */
+@media (max-width: 640px) {
+  .sd-question--left {
+    grid-template-columns: 1fr;
+  }
+  .sd-question--left .sd-question__header {
+    justify-self: start;
+    text-align: left;
+    margin-bottom: 6px;
+  }
+  .sd-question--left .sd-rating__min-text {
+    flex: 0 1 auto;
+    text-align: left;
+  }
+}
+
+/* =========================
+   Buttons, logo, etc.
+   ========================= */
 .sd-logo { margin-top: 0; margin-bottom: 0; padding: 0; }
 .sd-logo__image { max-height: 80px; width: auto; height: auto; }
 
@@ -45,7 +117,7 @@
   place-items: center;
   padding: clamp(8px, 4vw, 32px);
   z-index: 9999;
-  overscroll-behavior: contain; /* prevent background scroll on mobile */
+  overscroll-behavior: contain;
 }
 
 .lightbox-content {
@@ -54,38 +126,29 @@
   border-radius: 12px;
   padding: clamp(12px, 2vw, 20px);
   width: clamp(320px, 92vw, 1100px);
-  max-height: 90vh;  /* fallback */
-  max-height: 92dvh; /* modern mobile */
+  max-height: 92dvh;
   overflow: auto;
-
-  /* Keep a predictable vertical structure */
   display: flex;
   flex-direction: column;
 }
 
-/* Reserve a consistent area for the image so buttons don't move */
 .lightbox-media {
-  height: clamp(240px, 70dvh, 800px); /* same height every image */
+  height: clamp(240px, 70dvh, 800px);
   display: grid;
   place-items: center;
-  background: #f8fafc;               /* subtle placeholder */
+  background: #f8fafc;
   border-radius: 8px;
   overflow: hidden;
-  /* no opacity/transition here */
 }
 
-/* Make the image fit the reserved area without cropping */
 .lightbox-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-/* Optional: slightly shorter reserved area on small screens */
 @media (max-width: 640px) {
-  .lightbox-media {
-    height: 60dvh;
-  }
+  .lightbox-media { height: 60dvh; }
 }
 
 .lightbox-close {
@@ -99,61 +162,74 @@
   cursor: pointer;
 }
 
-/* Optional: keep action row at bottom of dialog */
 .lightbox-actions { margin-top: 1rem; }
 
 /* =========================
-   Ratings UI
+   Popup ratings (custom UI)
    ========================= */
 .rating-group { display: grid; gap: 12px; }
 
 .rating-row {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 8px;
+  grid-template-columns: 120px max-content auto;
+  column-gap: 12px;
   align-items: center;
+  text-align: left;
 }
 
 .rating-label { font-weight: 600; }
 
-/* Base buttons */
+.rating-buttons-and-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .rating-buttons {
   display: flex;
   gap: 0.4rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
+
+.rating-left-label,
+.rating-right-label {
+  font-size: 0.9rem;
+  color: #555;
+  white-space: nowrap;
+}
+
 .rating-buttons button {
   min-width: 2.5rem;
-  min-height: 2.5rem;          /* bigger tap targets */
+  min-height: 2.5rem;
   padding: 0.4rem 0.6rem;
-  border: 1px solid #d1d5db;   /* gray-300 */
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #fff;
-  color: #111827;              /* gray-900 */
+  color: #111827;
   cursor: pointer;
   transition: background 120ms ease, color 120ms ease,
               border-color 120ms ease, transform 60ms ease;
 }
-.rating-buttons button:hover { border-color: #9ca3af; } /* gray-400 */
+.rating-buttons button:hover { border-color: #9ca3af; }
 .rating-buttons button:active { transform: translateY(1px); }
 .rating-buttons button:focus-visible {
-  outline: 2px solid #2563eb;  /* blue-600 */
+  outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
-/* Active states by row */
 .rating-row--green .rating-buttons button.active {
-  background: #22c55e;         /* green-500 */
-  border-color: #16a34a;       /* green-600 */
+  background: #22c55e;
+  border-color: #16a34a;
   color: #fff;
 }
 .rating-row--pleasant .rating-buttons button.active {
-  background: #2563eb;         /* blue-600 */
-  border-color: #1d4ed8;       /* blue-700 */
+  background: #2563eb;
+  border-color: #1d4ed8;
   color: #fff;
 }
 
-/* In-progress emphasis (optional) */
 .awaiting-pleasant .rating-row--green .rating-buttons button.active {
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
   filter: saturate(1.2);
@@ -163,45 +239,31 @@
   filter: saturate(1.2);
 }
 
-/* =========================
-   Responsive tweaks
-   ========================= */
-
-/* Phones / narrow screens */
 @media (max-width: 640px) {
   .lightbox-content {
     width: 96vw;
-    max-height: 94vh;  /* fallback */
     max-height: 94dvh;
     padding: 12px;
   }
-  .lightbox-media {
-    height: 60vh;      /* fallback */
-    height: 60dvh;
-  }
+  .lightbox-media { height: 60dvh; }
   .rating-row {
-    grid-template-columns: 1fr; /* stack label above buttons */
-    gap: 6px;
+    grid-template-columns: 1fr;
+    row-gap: 6px;
   }
-  .rating-label { justify-self: start; }
+  .rating-label { order: 1; }
+  .rating-left-label { order: 2; }
+  .rating-buttons-and-right { order: 3; }
+  .rating-right-label { order: 4; }
   .lightbox-close { top: 6px; right: 8px; }
 }
 
-/* Very short viewports (landscape phones / tiny laptops) */
 @media (max-height: 600px) {
-  .lightbox-media {
-    height: 55vh;      /* fallback */
-    height: 55dvh;
-  }
+  .lightbox-media { height: 55dvh; }
 }
 
-/* Large monitors */
 @media (min-width: 1280px) {
   .lightbox-content { width: min(1200px, 90vw); }
-  .lightbox-media {
-    height: 80vh;      /* fallback */
-    height: 80dvh;
-  }
+  .lightbox-media { height: 80dvh; }
 }
 
 /* =========================

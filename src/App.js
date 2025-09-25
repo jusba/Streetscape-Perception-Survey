@@ -75,7 +75,9 @@ function PopupRatings({ panel }) {
     >
       {/* GREEN */}
       <div className="rating-row rating-row--green">
-        <div className="rating-label">Green</div>
+      <div className="rating-label">Green</div>
+      <div className="rating-left-label">1 = Not green at all</div>
+      <div className="rating-buttons-and-right">
         <div className="rating-buttons">
           {choices.map((n) => (
             <button
@@ -83,25 +85,20 @@ function PopupRatings({ panel }) {
               type="button"
               className={isSelected(qGreen, n) ? "active" : ""}
               aria-pressed={isSelected(qGreen, n)}
-              onClick={() => {
-                // ✅ fires immediately on click
-                console.log("[Click] Green pressed", {
-                  chosen: n,
-                  prev: qGreen?.value,
-                  panelId: panel?.id ?? null,
-                });
-                setVal(qGreen, n);
-              }}
+              onClick={() => setVal(qGreen, n)}
             >
               {n}
             </button>
           ))}
         </div>
+        <div className="rating-right-label">7 = Completely green</div>
       </div>
+    </div>
 
-      {/* PLEASANT */}
-      <div className="rating-row rating-row--pleasant">
-        <div className="rating-label">Pleasant</div>
+    <div className="rating-row rating-row--pleasant">
+      <div className="rating-label">Pleasant</div>
+      <div className="rating-left-label">1 = Very unpleasant</div>
+      <div className="rating-buttons-and-right">
         <div className="rating-buttons">
           {choices.map((n) => (
             <button
@@ -109,21 +106,16 @@ function PopupRatings({ panel }) {
               type="button"
               className={isSelected(qPleasant, n) ? "active" : ""}
               aria-pressed={isSelected(qPleasant, n)}
-              onClick={() => {
-                // ✅ fires immediately on click
-                console.log("[Click] Pleasant pressed", {
-                  chosen: n,
-                  prev: qPleasant?.value,
-                  panelId: panel?.id ?? null,
-                });
-                setVal(qPleasant, n);
-              }}
+              onClick={() => setVal(qPleasant, n)}
             >
               {n}
             </button>
           ))}
         </div>
+        <div className="rating-right-label">7 = Very pleasant</div>
       </div>
+    </div>
+      
     </div>
   );
 }
@@ -450,6 +442,7 @@ export default function App() {
         alert("There was an error saving your responses. Please try again.");
       }
     });
+    
 
     return m;
   }, []);

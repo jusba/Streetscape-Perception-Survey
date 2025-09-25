@@ -10,6 +10,8 @@ import { getRandomImages } from './streetImages.js';
 //
 // If you use this platform in your research, please consider citing the above paper.
 
+// Extensive modifications were done by Jussi Torkko for the greenery survey
+
 // ========================================
 // 🔧 SURVEY CONFIGURATION GUIDE
 // ========================================
@@ -249,7 +251,7 @@ export const surveyPages = [
   {
     name: "comfort_loop_page",
     title: "Greenery rating",
-    description: "Rate as many images as you like. Click the image to enlarge it.\
+    description: "Rate as many images as you like. Click the image to enlarge it. Feel free to adjust the browser zoom for more comfort.\
     Press Finish whenever you want to stop.",
     elements: [
       {
@@ -268,7 +270,8 @@ export const surveyPages = [
             // 👇 0–7 scale
             type: "rating",
             name: "green",
-            title: "How naturally GREEN do you see this image?",
+            title: "Green       ",
+            titleLocation: "left",
             isRequired: false,
             rateMin: 1,
             rateMax: 7,
@@ -280,7 +283,8 @@ export const surveyPages = [
             // 👇 0–7 scale
             type: "rating",
             name: "pleasant",
-            title: "How PLEASANT do you see this image?",
+            title: "Pleasant",
+            titleLocation: "left",
             isRequired: false,
             rateMin: 1,
             rateMax: 7,
@@ -339,10 +343,10 @@ export const surveyJson = {
   showProgressBar: "aboveheader", // "top", "bottom", "aboveheader", "belowheader", or "off"
   progressBarType: "questions", // "pages" or "questions" - Progress calculation method
   autoGrowComment: true, // Auto-expand text areas as user types
-  showPreviewBeforeComplete: "showAllQuestions" // "showAllQuestions", "showAnsweredQuestions", or "noPreview"
+  showPreviewBeforeComplete: "showAllQuestions", // "showAllQuestions", "showAnsweredQuestions", or "noPreview"
   
   // 🔧 ADDITIONAL SETTINGS YOU CAN ADD:
-  // completedHtml: "<h3>Thank you for your participation!</h3>", // Custom completion message
+  completedHtml: "<h3>Thank you for your participation!</h3>", // Custom completion message
   // requiredText: "*", // Symbol for required questions
   // questionErrorLocation: "bottom", // "top" or "bottom" - Where to show validation errors
   // showCompletedPage: false, // Skip the completion page
