@@ -182,7 +182,7 @@ export default function App() {
       (key) => (m[key] = surveyConfig.settings[key])
     );
     m.focusFirstQuestionAutomatic = false;
-    m.previewText = "Finish rating";
+    m.previewText = "Finish survey";
 
     // Per-page "Next" button labeling
     const defaultNext = m.pageNextText || "Next";
@@ -195,6 +195,10 @@ export default function App() {
         m.pageNextText = "Accept";
       } else if (name === "instructionsPage") {
         m.pageNextText = "Start survey";
+      } else if (name === "demographics") {
+        m.pageNextText = "Continue to rating";
+      } else if (name === "comfort_loop_page") {
+        m.pageNextText = "Finish rating";
       } else {
         m.pageNextText = defaultNext; // e.g. "Next"
       }

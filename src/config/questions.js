@@ -173,6 +173,108 @@ export const demographicQuestions = [
   // }
 ];
 
+export const feedbackQuestions = [
+  // 🔧 AGE QUESTION - Multiple choice
+  // TO MODIFY: Change age ranges in the choices array
+
+  {
+    name: "background",
+    title: "How clear was the background of the survey and the description of consent given?",
+    type: "radiogroup", 
+    choices: [
+      "Very unclear",
+      "Somewhat unclear",
+      "Neither clear nor unclear", 
+      "Somewhat clear",
+      "Very clear",
+      "Prefer not to say"
+    ],
+    isRequired: false
+  },
+  
+  
+  {
+    name: "instructions",
+    title: "How clear were the instructions of the survey?",
+    type: "radiogroup", 
+    choices: [
+      "Very unclear",
+      "Somewhat unclear",
+      "Neither clear nor unclear", 
+      "Somewhat clear",
+      "Very clear",
+      "Prefer not to say"
+    ],
+    isRequired: false
+  },
+
+  {
+    name: "rating",
+    title: "How easy was the rating platform to use?",
+    type: "radiogroup", 
+    choices: [
+      "Very difficult",
+      "Somewhat difficult",
+      "Neither diffucult nor easy", 
+      "Somewhat easy",
+      "Very easy",
+      "Prefer not to say"
+    ],
+    isRequired: false
+  },
+
+  {
+    name: "rating",
+    title: "How did I feel about the lenght of the survey?",
+    type: "radiogroup", 
+    choices: [
+      "Too long",
+      "Somewhat long",
+      "Neither long nor short", 
+      "Somewhat short",
+      "Too short",
+      "Prefer not to say"
+    ],
+    isRequired: false
+  },
+
+
+  {
+    name: "benefits",
+    title: "Is it clear to me what the benefits of the survey are?",
+    type: "radiogroup", 
+    choices: [
+      "Very unclear",
+      "Somewhat unclear",
+      "Neither clear nor unclear", 
+      "Somewhat clear",
+      "Very clear",
+      "Prefer not to say"
+    ],
+    isRequired: false
+  },
+
+  {
+    name: "location",
+    title: "Open feedback or any additional comments and remarks regarding the previous questions?",
+    type: "comment", // Use "text" for single line, "comment" for multi-line
+    isRequired: false
+  },
+  
+  // 🔧 TO ADD NEW DEMOGRAPHIC QUESTIONS:
+  // Copy the format above and add new questions here.
+  // Remember to add a comma after the previous question!
+  
+  // Example of adding a new question:
+  // {
+  //   name: "your_question_name",
+  //   title: "Your question text?",
+  //   type: "radiogroup", // or "text", "comment", "checkbox"
+  //   choices: ["Option 1", "Option 2", "Option 3"], // only for radiogroup/checkbox
+  //   isRequired: false
+  // }
+];
+
 // ========================================
 // 📋 MAIN SURVEY STRUCTURE
 // ========================================
@@ -190,10 +292,13 @@ export const surveyPages = [
         {
         "type": "html",
         "name": "instructions",
-        "html": "<h2>Welcome to the greenery survey</h2>\
+        //<p>The study will take approximately 15 minutes</p>\
+
+        "html": "<img src=into_image.png alt='banner image'>\
+                <h2>Welcome to the greenery survey</h2>\
                 <b>Before you begin, please read the following information:</b>\
                 <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023-2027) funded by European Research Council. It explores the use of street view images, to capture people’s perception of street-level environments. The study is conducted with the principle of voluntary participation with prior and informed consent. The findings of the study are expected to produce useful information for urban analytics and planning. </p>\
-                <p>The study will take approximately 15 minutes</p>\
+                \
                 <b>You can read more information about the Lab and Project from the following sources:</b>\
                 <p></p>\
                 <a href='https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel'>GREENTRAVEL</a>\
@@ -211,7 +316,7 @@ export const surveyPages = [
                 <p>Results of the research will be published in international scientific journals and may be presented in international scientific conferences. You and your data will not be identified in any report or publication.</p>\
                 <h5>By clicking the button Next, you comfirm that you heave read the information and give your consent.</h5>\
                 "
-      }
+      },
       ]
     },
   
@@ -230,9 +335,13 @@ export const surveyPages = [
                 <i>How pleasant do you see the scene as a whole? On the scale <b>1 (Not pleasant)</b> means that you do not find the scene pleasant at all, while <b>7 (Very pleasant)</b> means that you find the scene very pleasant. </i></p>\
                 <p>For each image, will select your ratings to the criteria. After rating both, there will automatically be a new image for you to rate. If you want to re-evaluate previously rated images, you can move back in the image queue by pressing the previous image button. After changing a rating, you will be automatically moved to the newest image.</p>\
                 <p>You can press any of the images to enter a more focused rating window. You can see the amount of images rated on the bottom right. Feel free to use your browser's zoom function to adjust the images for comfortable viewing and rating </p>\
-                <strong>To complete the survey, we ask you to rate at least 100 images. After rating the 100 images, you may end the survey and enter a raffle to win a gift card. You may also continue rating images after the initial 100, if you wish.</strong>\
+                <img src=rating_instructions.png alt='instruction image'>\
+                <p></p>\
+                <strong>To complete the survey, we ask you to rate as many images as you want. After rating the images, you will answer some feedback concerning the survey and may then end the survey </strong>\
                 <h5>Press Start Survey to proceed to the survey</h5>\
                 "
+                // <strong>To complete the survey, we ask you to rate at least 100 images. After rating the 100 images, you may end the survey and enter a raffle to win a gift card. You may also continue rating images after the initial 100, if you wish.</strong>\
+
 
       }
       ]
@@ -243,7 +352,7 @@ export const surveyPages = [
   {
     name: "demographics",
     title: "Part 1: Background Information (Optional)", // 🔧 Change page title here
-    description: "Please tell us a bit about yourself. All questions are optional and can be skipped.", // 🔧 Change page description
+    description: "Please tell us a bit about yourself.", // 🔧 Change page description
     elements: demographicQuestions // Uses the demographic questions defined above
   },
   
@@ -321,9 +430,18 @@ export const surveyPages = [
         ]
     }
   ]
-}
+},
+
+{
+    name: "feedback",
+    title: "Survey feedback", // 🔧 Change page title here
+    description: "Please tell us briefly how you felt while completing the survey. All questions are optional and can be skipped", // 🔧 Change page description
+    elements: feedbackQuestions // Uses the demographic questions defined above
+  },
 
 ];
+
+
 // ========================================
 // 🔧 SURVEY CONFIGURATION
 // ========================================
@@ -346,7 +464,8 @@ export const surveyJson = {
   showPreviewBeforeComplete: "showAllQuestions", // "showAllQuestions", "showAnsweredQuestions", or "noPreview"
   
   // 🔧 ADDITIONAL SETTINGS YOU CAN ADD:
-  completedHtml: "<h3>Thank you for your participation!</h3>", // Custom completion message
+  completedHtml: "<h3>Thank you for your participation!</h3><p>If you have any questions or wish to withdraw your participation, you can contact the responsible researcher at <b>jussi.torkko[at]helsinki.fi</b>.</p>"
+                 // Custom completion message
   // requiredText: "*", // Symbol for required questions
   // questionErrorLocation: "bottom", // "top" or "bottom" - Where to show validation errors
   // showCompletedPage: false, // Skip the completion page
