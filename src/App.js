@@ -183,9 +183,11 @@ export default function App() {
     );
     m.focusFirstQuestionAutomatic = false;
     m.previewText = "Finish survey";
+    m.showPreviewBeforeComplete = false; 
 
     // Per-page "Next" button labeling
     const defaultNext = m.pageNextText || "Next";
+    m.completeText = "Finish survey";  
 
     const setNextLabel = () => {
       const name = m.currentPage?.name;

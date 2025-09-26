@@ -1,3 +1,4 @@
+import { type } from '@testing-library/user-event/dist/type/index.js';
 import { getRandomImages } from './streetImages.js';
 
 // ========================================
@@ -330,9 +331,9 @@ export const surveyPages = [
                 <p>In the first part of the questionnaire, you will answer questions concerning your demographic characteristics. After that, you will proceed to rating images on given characteristics on a rating platform.</p>\
                 <p>On the platform, you will be shown a random street image for you to observe. Please spend some time looking at the image, as there is a small delay to pace the rating. You will be presented with <b>two criteria to rate:</b></p>\
                 <p><b>Greenery:</b>\
-                <i>How much natural vegetation you see in the image, based on your own estimation. On the scale <b>1 (No greenery)</b> means that you do not see any vegetation in the view, while <b>7 (Full greenery)</b> means that only vegetation is visible. </i>\</p>\
+                <i>Greenery:</b> How much natural vegetation you see in the image, based on your own estimation. On the scale, 1 (Not green at all) means you do not see any vegetation at all, while 7 (Completely green) means only vegetation is visible.</i>\</p>\
                 <p><b>Pleasantness:</b>\
-                <i>How pleasant do you see the scene as a whole? On the scale <b>1 (Not pleasant)</b> means that you do not find the scene pleasant at all, while <b>7 (Very pleasant)</b> means that you find the scene very pleasant. </i></p>\
+                <i>How pleasant you find the scene as a whole? On the scale, 1 (Very unpleasant) means that you find the scene very unpleasant, while 7 (Very pleasant) means you find the scene very pleasant. </i></p>\
                 <p>For each image, will select your ratings to the criteria. After rating both, there will automatically be a new image for you to rate. If you want to re-evaluate previously rated images, you can move back in the image queue by pressing the previous image button. After changing a rating, you will be automatically moved to the newest image.</p>\
                 <p>You can press any of the images to enter a more focused rating window. You can see the amount of images rated on the bottom right. Feel free to use your browser's zoom function to adjust the images for comfortable viewing and rating </p>\
                 <img src=rating_instructions.png alt='instruction image'>\
@@ -360,15 +361,25 @@ export const surveyPages = [
   {
     name: "comfort_loop_page",
     title: "Greenery rating",
-    description: "Rate as many images as you like. Click the image to enlarge it. Feel free to adjust the browser zoom for more comfort.\
-    Press Finish whenever you want to stop.",
     elements: [
+    {
+        "type": "html",
+        "name": "while_rating_instructions",
+        "html": "<p>Rate as many images as you like. Click the image to enlarge it. Feel free to adjust the browser zoom for more comfort. Press Finish whenever you want to stop</p>\
+                <ul style='list-style: none; padding-left: 0;'>\
+                  <li><b>Greenery:</b> How much natural vegetation you see in the image, based on your own estimation.</li>\
+                  <li><b>Pleasantness:</b> How pleasant you find the scene as a whole? </li>\
+                </ul>"
+
+      },
+
       {
         type: "paneldynamic",
         name: "comfort_loop",
-        title: "Rate images",
+        title: "rating",
         titleLocation: "hidden",
         panelCount: 1,                  // we seed the first one; more get added in code
+
         minPanelCount: 0,
         maxPanelCount: 10000,           // effectively unlimited
         allowAddPanel: false,
@@ -379,7 +390,7 @@ export const surveyPages = [
             // 👇 0–7 scale
             type: "rating",
             name: "green",
-            title: "Green       ",
+            title: "Greenery",
             titleLocation: "left",
             isRequired: false,
             rateMin: 1,
@@ -392,7 +403,7 @@ export const surveyPages = [
             // 👇 0–7 scale
             type: "rating",
             name: "pleasant",
-            title: "Pleasant",
+            title: "Pleasantness",
             titleLocation: "left",
             isRequired: false,
             rateMin: 1,
@@ -461,11 +472,22 @@ export const surveyJson = {
   showProgressBar: "aboveheader", // "top", "bottom", "aboveheader", "belowheader", or "off"
   progressBarType: "questions", // "pages" or "questions" - Progress calculation method
   autoGrowComment: true, // Auto-expand text areas as user types
-  showPreviewBeforeComplete: "showAllQuestions", // "showAllQuestions", "showAnsweredQuestions", or "noPreview"
+  //showPreviewBeforeComplete: "false", // "showAllQuestions", "showAnsweredQuestions", or "noPreview"
   
   // 🔧 ADDITIONAL SETTINGS YOU CAN ADD:
-  completedHtml: "<h3>Thank you for your participation!</h3><p>If you have any questions or wish to withdraw your participation, you can contact the responsible researcher at <b>jussi.torkko[at]helsinki.fi</b>.</p>"
-                 // Custom completion message
+completedHtml: `
+    <h3>Thank you for your participation!</h3>
+    <h4>
+      If you have any questions or wish to withdraw your participation, you can contact the responsible researcher at
+      <b>jussi.torkko[at]helsinki.fi</b>.
+    </h4>
+    <h4>
+      <a href="https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel"
+        style="color:#16a34a;">
+        Click here to be redirected to the GREENTRAVEL project website.
+      </a>
+    </h4>
+  `                 // Custom completion message
   // requiredText: "*", // Symbol for required questions
   // questionErrorLocation: "bottom", // "top" or "bottom" - Where to show validation errors
   // showCompletedPage: false, // Skip the completion page

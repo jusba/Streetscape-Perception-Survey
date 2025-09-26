@@ -44,6 +44,53 @@
   min-width: 0;
 }
 
+/* Targets the HTML instruction block just under the page title */
+.sd-page h4.sd-title.sd-page__title + .sd-page__row .sd-html {
+  opacity: 0.5;   /* 0 = fully transparent, 1 = fully solid */
+}
+
+/* More specific, covers both classes shown in your DOM */
+.sd-page h4.sd-title.sd-page__title {
+  margin-block-end: 0 !important;       /* equivalent to margin-bottom */
+}
+
+/* 1) Tighten the page title (you already have something like this) */
+.sd-page h4.sd-title.sd-page__title {
+  margin: 0 !important;            /* removes h4 default margins */
+  padding: 0 !important;
+}
+
+/* 2) Remove the row gap immediately after the title */
+.sd-page h4.sd-page__title + .sd-page__row {
+  margin-top: 0 !important;
+}
+
+/* 3) Kill default margins inside the first instructions HTML block */
+.sd-page h4.sd-page__title + .sd-page__row .sd-html p,
+.sd-page h4.sd-page__title + .sd-page__row .sd-html ul {
+  margin-top: 0 !important;
+  margin-bottom: 6px !important;   /* tweak: small consistent spacing */
+}
+
+/* 4) No extra gap at the end of that HTML block */
+.sd-page h4.sd-page__title + .sd-page__row .sd-html > :last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Optional: tighten list item spacing too */
+.sd-page h4.sd-page__title + .sd-page__row .sd-html li {
+  margin: 0 0 4px 0;               /* small vertical rhythm */
+}
+
+
+/* Neutralize the built-in row spacing just once after the title */
+.sd-page h4.sd-page__title + .sd-page__row {
+  margin-top: 0 !important;
+}
+
+.sd-question--left { grid-template-columns: 220px 1fr; } /* 200–240px usually enough */
+
+
 /* Content cell (rating control) */
 .sd-question--left .sd-question__content {
   grid-column: 2;
@@ -239,6 +286,8 @@
   filter: saturate(1.2);
 }
 
+
+
 @media (max-width: 640px) {
   .lightbox-content {
     width: 96vw;
@@ -265,6 +314,8 @@
   .lightbox-content { width: min(1200px, 90vw); }
   .lightbox-media { height: 80dvh; }
 }
+
+
 
 /* =========================
    Misc
