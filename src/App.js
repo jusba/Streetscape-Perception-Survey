@@ -8,62 +8,120 @@ import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
 
+function KeyboardRatings({ model, lightbox }) {
+  React.useEffect(() => {
+    if (!model) return;
+
+    const getActivePanel = () => {
+      if (lightbox?.panel) return lightbox.panel; // popup open → use it
+      const dp = model.getQuestionByName("comfort_loop");
+      if (!dp) return null;
+      return dp.panels?.[dp.currentIndex] ?? null; // page mode → current panel
+    };
+
+    const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
+    const setVal = (q, val) => {
+      if (!q || q.readOnly) return;
+      q.value = val; // SurveyJS will emit value change
+    };
+
+    const onKeyDown = (e) => {
+      // Ignore typing in inputs/areas/contenteditables and with modifiers
+      const t = e.target;
+      const tag = (t?.tagName || "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || t?.isContentEditable) return;
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+
+      const panel = getActivePanel();
+      if (!panel) return;
+
+      const qG = panel.getQuestionByName("green");
+      const qP = panel.getQuestionByName("pleasant");
+
+      // Undo: Backspace clears Pleasantness first, then Greenery
+      if (e.key === "Backspace") {
+        if (hasVal(qP)) qP.value = null;
+        else if (hasVal(qG)) qG.value = null;
+        e.preventDefault();
+        return;
+      }
+
+      // Map number keys 1..7 (top row & numpad)
+      let val = null;
+      if (e.key >= "1" && e.key <= "7") val = parseInt(e.key, 10);
+      else if (/^Numpad[1-7]$/.test(e.code)) val = parseInt(e.code.replace("Numpad", ""), 10);
+      if (val == null) return;
+
+      // First number press → Greenery, second → Pleasantness
+      const target = !hasVal(qG) ? qG : !hasVal(qP) ? qP : null;
+      if (!target) return;
+
+      setVal(target, val);
+      e.preventDefault();
+    };
+
+    // capture phase so nothing upstream can swallow it
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [model, lightbox]);
+
+  return null; // no UI
+}
+
+
 function PopupRatings({ panel }) {
   const [, force] = React.useState(0);
 
-  const qGreen = panel?.getQuestionByName("green");
-  const qPleasant = panel?.getQuestionByName("pleasant");
+  const getQ = React.useCallback(
+    (name) => panel?.getQuestionByName(name),
+    [panel]
+  );
+
+  const qGreen = getQ("green");
+  const qPleasant = getQ("pleasant");
   const choices = [1, 2, 3, 4, 5, 6, 7];
 
+  const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
+  const isSelected = (q, n) => String(q?.value) === String(n);
+
+  const setVal = (q, val) => {
+    if (!q || q.readOnly) return;
+    q.value = val;         // update SurveyJS value
+    force((x) => x + 1);   // ensure our UI reflects it immediately
+  };
+
+  // Re-render when SurveyJS tells us values changed (mouse clicks / programmatic)
   React.useEffect(() => {
     if (!panel) return;
     const s = panel.survey;
     const RATING_KEYS = new Set(["green", "pleasant"]);
 
-    // Fires for non-dynamic cases (name = question name)
-    const onValueChanged = (sender, opt) => {
-      if (RATING_KEYS.has(opt?.name)) force(x => x + 1);
+    const onValueChanged = (_sender, opt) => {
+      if (RATING_KEYS.has(opt?.name)) force((x) => x + 1);
     };
 
-    // Fires for dynamic panels (name = inner question name, question.name = panel question)
-    const onDP = (sender, opt) => {
-      // SurveyJS uses one of these depending on version
+    const onDP = (_sender, opt) => {
       const isDP = opt?.question?.name === "comfort_loop";
       const isThisPanel = opt?.panel === panel;
       if (!isDP || !isThisPanel) return;
-      if (RATING_KEYS.has(opt?.name)) force(x => x + 1);
+      if (RATING_KEYS.has(opt?.name)) force((x) => x + 1);
     };
 
     s.onValueChanged.add(onValueChanged);
-
-    if (s.onDynamicPanelValueChanged) {
-      s.onDynamicPanelValueChanged.add(onDP);
-    } else if (s.onDynamicPanelItemValueChanged) {
-      s.onDynamicPanelItemValueChanged.add(onDP);
-    }
+    if (s.onDynamicPanelValueChanged) s.onDynamicPanelValueChanged.add(onDP);
+    else if (s.onDynamicPanelItemValueChanged) s.onDynamicPanelItemValueChanged.add(onDP);
 
     return () => {
       s.onValueChanged.remove(onValueChanged);
-      if (s.onDynamicPanelValueChanged) {
-        s.onDynamicPanelValueChanged.remove(onDP);
-      } else if (s.onDynamicPanelItemValueChanged) {
-        s.onDynamicPanelItemValueChanged.remove(onDP);
-      }
+      if (s.onDynamicPanelValueChanged) s.onDynamicPanelValueChanged.remove(onDP);
+      else if (s.onDynamicPanelItemValueChanged) s.onDynamicPanelItemValueChanged.remove(onDP);
     };
   }, [panel]);
 
-  const setVal = (q, val) => {
-    if (q && !q.readOnly) q.value = val;
-  };
-
-  // normalize comparison (string vs number)
-  const isSelected = (q, n) => String(q?.value) === String(n);
-
-  const hasGreen = qGreen?.value !== undefined && qGreen?.value !== null && qGreen?.value !== "";
-  const hasPleasant = qPleasant?.value !== undefined && qPleasant?.value !== null && qPleasant?.value !== "";
-
-  const awaitingPleasant = hasGreen && !hasPleasant; // picked Green first
-  const awaitingGreen    = hasPleasant && !hasGreen; // picked Pleasant first
+  const hasGreen = hasVal(qGreen);
+  const hasPleasant = hasVal(qPleasant);
+  const awaitingPleasant = hasGreen && !hasPleasant;
+  const awaitingGreen = hasPleasant && !hasGreen;
 
   return (
     <div
@@ -75,50 +133,52 @@ function PopupRatings({ panel }) {
     >
       {/* GREEN */}
       <div className="rating-row rating-row--green">
-      <div className="rating-label">Green</div>
-      <div className="rating-left-label">1 = Not green at all</div>
-      <div className="rating-buttons-and-right">
-        <div className="rating-buttons">
-          {choices.map((n) => (
-            <button
-              key={`g-${n}`}
-              type="button"
-              className={isSelected(qGreen, n) ? "active" : ""}
-              aria-pressed={isSelected(qGreen, n)}
-              onClick={() => setVal(qGreen, n)}
-            >
-              {n}
-            </button>
-          ))}
+        <div className="rating-label">Green</div>
+        <div className="rating-left-label">1 = Not green at all</div>
+        <div className="rating-buttons-and-right">
+          <div className="rating-buttons">
+            {choices.map((n) => (
+              <button
+                key={`g-${n}`}
+                type="button"
+                className={isSelected(qGreen, n) ? "active" : ""}
+                aria-pressed={isSelected(qGreen, n)}
+                onClick={() => setVal(qGreen, n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <div className="rating-right-label">7 = Completely green</div>
         </div>
-        <div className="rating-right-label">7 = Completely green</div>
       </div>
-    </div>
 
-    <div className="rating-row rating-row--pleasant">
-      <div className="rating-label">Pleasant</div>
-      <div className="rating-left-label">1 = Very unpleasant</div>
-      <div className="rating-buttons-and-right">
-        <div className="rating-buttons">
-          {choices.map((n) => (
-            <button
-              key={`p-${n}`}
-              type="button"
-              className={isSelected(qPleasant, n) ? "active" : ""}
-              aria-pressed={isSelected(qPleasant, n)}
-              onClick={() => setVal(qPleasant, n)}
-            >
-              {n}
-            </button>
-          ))}
+      {/* PLEASANT */}
+      <div className="rating-row rating-row--pleasant">
+        <div className="rating-label">Pleasant</div>
+        <div className="rating-left-label">1 = Very unpleasant</div>
+        <div className="rating-buttons-and-right">
+          <div className="rating-buttons">
+            {choices.map((n) => (
+              <button
+                key={`p-${n}`}
+                type="button"
+                className={isSelected(qPleasant, n) ? "active" : ""}
+                aria-pressed={isSelected(qPleasant, n)}
+                onClick={() => setVal(qPleasant, n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <div className="rating-right-label">7 = Very pleasant</div>
         </div>
-        <div className="rating-right-label">7 = Very pleasant</div>
       </div>
-    </div>
-      
     </div>
   );
 }
+
+
 
 
 const preloaded = new Set();
@@ -488,7 +548,8 @@ export default function App() {
     <>
     
     <Survey model={model} />
-    
+    <KeyboardRatings model={model} lightbox={lightbox} />
+
     {lightbox && (
       <div
         className="lightbox-overlay"

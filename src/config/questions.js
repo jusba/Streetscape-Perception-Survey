@@ -103,7 +103,13 @@ export const demographicQuestions = [
   // TO MODIFY: Change the title text or make it more specific
   {
     name: "location",
-    title: "Where are you living? (Country)",
+    title: "Where are you from? (Country)",
+    type: "text", // Use "text" for single line, "comment" for multi-line
+    isRequired: false
+  },
+  {
+    name: "location",
+    title: "Where are you currently living? (Country)",
     type: "text", // Use "text" for single line, "comment" for multi-line
     isRequired: false
   },
