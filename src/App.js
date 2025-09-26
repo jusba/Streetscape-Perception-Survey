@@ -199,6 +199,19 @@ const preload = (url) => {
 
 export default function App() {
 
+
+    // --- dwell-time control (2s after image load) ---
+  const MIN_DWELL_MS = 2000;
+
+  // when each panel's <img> actually finished loading
+  const imageLoadedAtRef = React.useRef(new WeakMap());
+
+  // if we already queued an auto-advance for the current panel
+  const pendingAdvanceRef = React.useRef(null);
+
+  // whether the current panel is waiting to auto-advance as soon as dwell is satisfied
+  const waitingForDwellAdvanceRef = React.useRef(new WeakMap());
+
   const [lightbox, setLightbox] = React.useState(null); 
 
   const [lightboxLoaded, setLightboxLoaded] = React.useState(false);
@@ -319,17 +332,42 @@ export default function App() {
     };
 
     m.onAfterRenderQuestion.add((sender, options) => {
-      // only the image inside your dynamic panel
       if (options.question.name !== "image") return;
 
       const img = options.htmlElement.querySelector("img");
       if (!img) return;
 
-      img.style.cursor = "zoom-in";
       const panel = options.question.parent; // PanelModel for this item
+      img.style.cursor = "zoom-in";
       img.onclick = () => openLightboxForPanel(panel);
 
+      // --- Dwell: stamp "loaded at" for this panel, once the <img> actually loads ---
+      const markLoaded = () => {
+        // record load time (once)
+        if (!imageLoadedAtRef.current.get(panel)) {
+          imageLoadedAtRef.current.set(panel, performance.now());
+        }
+
+        // If user already finished both ratings and we're waiting to auto-advance,
+        // reschedule the auto-advance to fire 2s after *now* (the true load time).
+        if (waitingForDwellAdvanceRef.current.get(panel)) {
+          if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
+          pendingAdvanceRef.current = setTimeout(() => {
+            const dpNow = sender.getQuestionByName("comfort_loop");
+            const cur = dpNow?.panels[dpNow.currentIndex];
+            if (cur === panel && waitingForDwellAdvanceRef.current.get(panel)) {
+              waitingForDwellAdvanceRef.current.delete(panel);
+              // do the same move-forward logic you already have (we call a helper below)
+              doAdvanceFromPanel(panel);
+            }
+          }, MIN_DWELL_MS);
+        }
+      };
+
+      if (img.complete) markLoaded();
+      else img.addEventListener("load", markLoaded, { once: true });
     });
+
 
     // === Seed first panel once ===
     m.onAfterRenderSurvey.add((sender) => {
@@ -407,6 +445,51 @@ export default function App() {
       });
     };
 
+    const doAdvanceFromPanel = (panel) => {
+      const dp = m.getQuestionByName("comfort_loop");
+      const wasOpen = !!lightboxRef.current;
+      const hasExistingNext = dp.currentIndex < dp.panels.length - 1;
+
+      if (cameFromPrevRef.current && hasExistingNext) {
+        const snap = takeScrollSnapshot();
+        dp.currentIndex = dp.currentIndex + 1;
+
+        if (wasOpen) {
+          const nextPanel = dp.panels[dp.currentIndex];
+          const imgQ = nextPanel.getQuestionByName("image");
+          const src = imgQ?.imageLink || "";
+          if (src) setLightbox({ src, panel: nextPanel });
+        }
+
+        restoreScroll(snap);
+        cameFromPrevRef.current = false;
+        return;
+      }
+
+      if (imageQueue.length > 0) {
+        m.__preloadNext?.(2);
+        const snap = takeScrollSnapshot();
+        dp.addPanel();
+        setTimeout(() => {
+          dp.currentIndex = dp.currentIndex + 1;
+          const nextPanel = dp.panels[dp.currentIndex];
+          if (wasOpen) {
+            const imgQ = nextPanel.getQuestionByName("image");
+            const src = imgQ?.imageLink || "";
+            if (src) setLightbox({ src, panel: nextPanel });
+          }
+          restoreScroll(snap);
+        }, 100);
+      } else {
+        setTimeout(() => {
+          m.completeLastPage();
+          setLightbox(null);
+        }, 100);
+      }
+    };
+
+
+
     // === Advance only after BOTH ratings are answered ===
     const hookDynamic = (m, { imageQueue, takeScrollSnapshot, restoreScroll }) => {
       const RATING_KEYS = ["green", "pleasant"];
@@ -427,55 +510,39 @@ export default function App() {
         if (!panel) return;
 
         const { ok } = bothAnswered(panel);
-        if (!ok) return;
+        if (!ok) {
+          // user cleared/edited → cancel pending move
+          waitingForDwellAdvanceRef.current.delete(panel);
+          if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
+          return;
+        }
 
-        const wasOpen = !!lightboxRef.current; 
-       // don't close; we'll just swap to the next panel's image
-        setTimeout(() => {
-          const hasExistingNext = dp.currentIndex < dp.panels.length - 1;
+        // both answered → check how long since this panel's image loaded
+        const loadedAt = imageLoadedAtRef.current.get(panel);
 
-          // If user came from Prev and there is an existing next panel,
-          // DON'T add a new one — just move forward into it.
-          if (cameFromPrevRef.current && hasExistingNext) {
-            const snap = takeScrollSnapshot();
-            dp.currentIndex = dp.currentIndex + 1;
+        // If we don't yet know the load time, wait for the true <img> load (step 2 sets it)
+        if (!loadedAt) {
+          waitingForDwellAdvanceRef.current.set(panel, true);
+          // If something had been queued for an earlier panel, cancel it
+          if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
+          return;
+        }
 
-            if (wasOpen) {
-              const nextPanel = dp.panels[dp.currentIndex];
-              const imgQ = nextPanel.getQuestionByName("image");
-              const src = imgQ?.imageLink || "";
-              if (src) setLightbox({ src, panel: nextPanel });
-            }
+        const elapsed = performance.now() - loadedAt;
+        const remaining = Math.max(0, MIN_DWELL_MS - elapsed);
 
-            restoreScroll(snap);
-            cameFromPrevRef.current = false; // reset the flag
-            return;
+        waitingForDwellAdvanceRef.current.set(panel, true);
+        if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
+
+        pendingAdvanceRef.current = setTimeout(() => {
+          const cur = dp.panels[dp.currentIndex];
+          if (cur === panel && waitingForDwellAdvanceRef.current.get(panel)) {
+            waitingForDwellAdvanceRef.current.delete(panel);
+            doAdvanceFromPanel(panel);
           }
-
-          // Otherwise, original behavior: create next only if more images remain.
-          if (imageQueue.length > 0) {
-            preloadNext(2);
-            const snap = takeScrollSnapshot();
-            dp.addPanel();
-            setTimeout(() => {
-              dp.currentIndex = dp.currentIndex + 1;
-              const nextPanel = dp.panels[dp.currentIndex];
-              if (wasOpen) {
-                const imgQ = nextPanel.getQuestionByName("image");
-                const src = imgQ?.imageLink || "";
-                if (src) setLightbox({ src, panel: nextPanel });
-              }
-              restoreScroll(snap);
-            }, 100);
-          } else {
-            // last panel
-            setTimeout(() => {
-              m.completeLastPage();
-              setLightbox(null);
-            }, 100);
-          }
-        }, 0);
+        }, remaining);
       };
+
 
       if (m.onDynamicPanelValueChanged) {
         m.onDynamicPanelValueChanged.add(handler);
@@ -542,6 +609,12 @@ export default function App() {
       const dp = model.getQuestionByName("comfort_loop");
       return !!dp && dp.currentIndex > 0;
     })();
+
+    React.useEffect(() => {
+      return () => {
+        if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
+      };
+    }, []);
 
 
   return (

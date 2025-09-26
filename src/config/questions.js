@@ -341,7 +341,7 @@ export const surveyPages = [
                 <p><b>Pleasantness:</b>\
                 <i>How pleasant you find the scene as a whole? On the scale, 1 (Very unpleasant) means that you find the scene very unpleasant, while 7 (Very pleasant) means you find the scene very pleasant. </i></p>\
                 <p>For each image, will select your ratings to the criteria. After rating both, there will automatically be a new image for you to rate. If you want to re-evaluate previously rated images, you can move back in the image queue by pressing the previous image button. After changing a rating, you will be automatically moved to the newest image.</p>\
-                <p>You can press any of the images to enter a more focused rating window. You can see the amount of images rated on the bottom right. Feel free to use your browser's zoom function to adjust the images for comfortable viewing and rating </p>\
+                <p>You can press any of the images to enter a more focused rating window. You can see the amount of images rated on the bottom right. Feel free to use your browser's zoom function to adjust the images for comfortable viewing and rating. You may also use the keyboard for rating, pressing backspace corrects previous rating</p>\
                 <img src=rating_instructions.png alt='instruction image'>\
                 <p></p>\
                 <strong>To complete the survey, we ask you to rate as many images as you want. After rating the images, you will answer some feedback concerning the survey and may then end the survey </strong>\
@@ -371,7 +371,7 @@ export const surveyPages = [
     {
         "type": "html",
         "name": "while_rating_instructions",
-        "html": "<p>Rate as many images as you like. Click the image to enlarge it. Feel free to adjust the browser zoom for more comfort. Press Finish whenever you want to stop</p>\
+        "html": "<p>Rate as many images as you like. Click the image to enlarge it. You may also use the keyboard for rating, pressing backspace corrects previous rating. Feel free to adjust the browser zoom for more comfort. Press Finish whenever you want to stop</p>\
                 <ul style='list-style: none; padding-left: 0;'>\
                   <li><b>Greenery:</b> How much natural vegetation you see in the image, based on your own estimation.</li>\
                   <li><b>Pleasantness:</b> How pleasant you find the scene as a whole? </li>\
