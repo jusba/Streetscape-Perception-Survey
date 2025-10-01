@@ -1,3 +1,14 @@
+/* =========================================================
+   Global
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Optional: if you ever toggle this via JS, it also locks scroll */
+.body--modal-open { overflow: hidden; touch-action: none; }
+
+/* =========================================================
+   CRA demo bits
+   ========================================================= */
 .App { text-align: center; }
 
 .App-logo { height: 40vmin; pointer-events: none; }
@@ -18,9 +29,9 @@
 
 .App-link { color: #61dafb; }
 
-/* =========================
+/* =========================================================
    SurveyJS Titles & Ratings
-   ========================= */
+   ========================================================= */
 .sd-title.sd-container-modern__title {
   font-size: 20px;
   line-height: 1.2;
@@ -30,7 +41,7 @@
 /* Two-column layout: [fixed title] [content] */
 .sd-question--left {
   display: grid !important;
-  grid-template-columns: 140px 1fr; /* adjust width for longest title */
+  grid-template-columns: 220px 1fr; /* 200–240px usually enough */
   column-gap: 12px;
   align-items: center;
 }
@@ -44,57 +55,24 @@
   min-width: 0;
 }
 
-/* Targets the HTML instruction block just under the page title */
-.sd-page h4.sd-title.sd-page__title + .sd-page__row .sd-html {
-  opacity: 0.5;   /* 0 = fully transparent, 1 = fully solid */
-}
+/* Instruction block under page title */
+.sd-page h4.sd-title.sd-page__title + .sd-page__row .sd-html { opacity: 0.5; }
 
-/* More specific, covers both classes shown in your DOM */
-.sd-page h4.sd-title.sd-page__title {
-  margin-block-end: 0 !important;       /* equivalent to margin-bottom */
-}
+/* Tighten the page title + remove gap after it */
+.sd-page h4.sd-title.sd-page__title { margin: 0 !important; padding: 0 !important; }
+.sd-page h4.sd-page__title + .sd-page__row { margin-top: 0 !important; }
 
-/* 1) Tighten the page title (you already have something like this) */
-.sd-page h4.sd-title.sd-page__title {
-  margin: 0 !important;            /* removes h4 default margins */
-  padding: 0 !important;
-}
-
-/* 2) Remove the row gap immediately after the title */
-.sd-page h4.sd-page__title + .sd-page__row {
-  margin-top: 0 !important;
-}
-
-/* 3) Kill default margins inside the first instructions HTML block */
+/* Trim default margins in first instructions HTML block */
 .sd-page h4.sd-page__title + .sd-page__row .sd-html p,
 .sd-page h4.sd-page__title + .sd-page__row .sd-html ul {
   margin-top: 0 !important;
-  margin-bottom: 6px !important;   /* tweak: small consistent spacing */
+  margin-bottom: 6px !important;
 }
-
-/* 4) No extra gap at the end of that HTML block */
-.sd-page h4.sd-page__title + .sd-page__row .sd-html > :last-child {
-  margin-bottom: 0 !important;
-}
-
-/* Optional: tighten list item spacing too */
-.sd-page h4.sd-page__title + .sd-page__row .sd-html li {
-  margin: 0 0 4px 0;               /* small vertical rhythm */
-}
-
-
-/* Neutralize the built-in row spacing just once after the title */
-.sd-page h4.sd-page__title + .sd-page__row {
-  margin-top: 0 !important;
-}
-
-.sd-question--left { grid-template-columns: 220px 1fr; } /* 200–240px usually enough */
-
+.sd-page h4.sd-page__title + .sd-page__row .sd-html > :last-child { margin-bottom: 0 !important; }
+.sd-page h4.sd-page__title + .sd-page__row .sd-html li { margin: 0 0 4px 0; }
 
 /* Content cell (rating control) */
-.sd-question--left .sd-question__content {
-  grid-column: 2;
-}
+.sd-question--left .sd-question__content { grid-column: 2; }
 
 /* Rating inner layout: [min label | buttons | max label] */
 .sd-question--left .sd-rating {
@@ -106,7 +84,7 @@
 
 /* Min label fixed width so buttons align */
 .sd-question--left .sd-rating__min-text {
-  flex: 0 0 200px; /* tweak until both questions line up */
+  flex: 0 0 200px;
   text-align: right;
   white-space: nowrap;
   opacity: 0.75;
@@ -120,15 +98,11 @@
 }
 
 /* Normalize button spacing */
-.sd-question--left .sd-rating .sd-rating__item {
-  margin: 0 6px;
-}
+.sd-question--left .sd-rating .sd-rating__item { margin: 0 6px; }
 
-/* Responsive stacking */
+/* Responsive stacking for SurveyJS block */
 @media (max-width: 640px) {
-  .sd-question--left {
-    grid-template-columns: 1fr;
-  }
+  .sd-question--left { grid-template-columns: 1fr; }
   .sd-question--left .sd-question__header {
     justify-self: start;
     text-align: left;
@@ -140,10 +114,10 @@
   }
 }
 
-/* =========================
+/* =========================================================
    Buttons, logo, etc.
-   ========================= */
-.sd-logo { margin-top: 0; margin-bottom: 0; padding: 0; }
+   ========================================================= */
+.sd-logo { margin: 0; padding: 0; }
 .sd-logo__image { max-height: 80px; width: auto; height: auto; }
 
 .sd-btn.sd-navigation__next-btn,
@@ -153,52 +127,90 @@
   border-radius: 8px;
 }
 
-/* =========================
-   Lightbox overlay & panel
-   ========================= */
+/* =========================================================
+   Lightbox overlay & panel (zoom-proof)
+   ========================================================= */
 .lightbox-overlay {
+  --pad: clamp(8px, 4vw, 32px);
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.9);
   display: grid;
   place-items: center;
-  padding: clamp(8px, 4vw, 32px);
+  padding: var(--pad);
   z-index: 9999;
   overscroll-behavior: contain;
 }
 
+.lightbox-overlay { padding: 0; }
+
+/* CSS-only scroll lock while overlay exists */
+body:has(.lightbox-overlay),
+html:has(.lightbox-overlay) {
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Dialog frame */
 .lightbox-content {
   position: relative;
   background: #fff;
   border-radius: 12px;
   padding: clamp(12px, 2vw, 20px);
-  width: clamp(320px, 92vw, 1100px);
-  max-height: 92dvh;
-  overflow: auto;
+  width: min(1100px, 100%);
+  max-height: min(92svh, 100%);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  padding-right: clamp(36px, 3.5vw, 48px);
+}
+@supports not (height: 100svh) {
+  .lightbox-content { max-height: min(92dvh, 100%); }
 }
 
+/* Media area flexes to fill remaining space */
 .lightbox-media {
-  height: clamp(240px, 70dvh, 800px);
+  flex: 1 1 auto;
+  min-height: 240px;
+  height: auto;
+  max-height: 80svh;
   display: grid;
   place-items: center;
   background: #f8fafc;
   border-radius: 8px;
   overflow: hidden;
 }
+@supports not (height: 100svh) {
+  .lightbox-media { max-height: 80dvh; }
+}
 
+/* Image should fill all vertical space of .lightbox-media, preserving aspect ratio */
 .lightbox-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  max-height: 100% !important;  /* occupy all the leftover vertical space */
+  max-width: 100% !important;   /* don’t overflow horizontally */
+  width: auto !important;       /* scale naturally */
+  height: auto !important;      /* scale naturally */
+  object-fit: contain !important;
+  display: block !important;    /* remove inline baseline gap */
 }
 
-@media (max-width: 640px) {
-  .lightbox-media { height: 60dvh; }
+
+/* Actions row pinned at the bottom */
+.lightbox-actions {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  padding-block: 12px;
+  padding-right: clamp(36px, 3.5vw, 48px);
+  border-top: 1px solid #e5e7eb;
 }
 
-.lightbox-close {
+/* Close button repositioned */
+.lightbox-actions .lightbox-close {
   position: absolute;
   top: 8px;
   right: 12px;
@@ -209,12 +221,42 @@
   cursor: pointer;
 }
 
-.lightbox-actions { margin-top: 1rem; }
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .lightbox-content {
+    width: 96vw;
+    max-height: min(94svh, 100%);
+    padding: 12px;
+  }
+  .lightbox-media { max-height: 60svh; }
+  .rating-row {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+  .rating-label { order: 1; }
+  .rating-left-label { order: 2; }
+  .rating-buttons-and-right { order: 3; }
+  .rating-right-label { order: 4; }
+}
 
-/* =========================
+/* Short screens */
+@media (max-height: 600px) {
+  .lightbox-media { max-height: 55svh; }
+}
+
+/* Very wide screens */
+@media (min-width: 1280px) {
+  .lightbox-content { width: min(1200px, 100%); }
+  .lightbox-media { max-height: 80svh; }
+}
+
+/* =========================================================
    Popup ratings (custom UI)
-   ========================= */
-.rating-group { display: grid; gap: 12px; }
+   ========================================================= */
+.rating-group {
+  display: grid;
+  gap: 4px !important;   /* reduced spacing between rating objects */
+}
 
 .rating-row {
   display: grid;
@@ -222,6 +264,7 @@
   column-gap: 12px;
   align-items: center;
   text-align: left;
+  margin-bottom: 0 !important;  /* no extra gap between rows */
 }
 
 .rating-label { font-weight: 600; }
@@ -277,6 +320,7 @@
   color: #fff;
 }
 
+/* Delight glow */
 .awaiting-pleasant .rating-row--green .rating-buttons button.active {
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
   filter: saturate(1.2);
@@ -286,40 +330,158 @@
   filter: saturate(1.2);
 }
 
-
-
-@media (max-width: 640px) {
-  .lightbox-content {
-    width: 96vw;
-    max-height: 94dvh;
-    padding: 12px;
-  }
-  .lightbox-media { height: 60dvh; }
-  .rating-row {
-    grid-template-columns: 1fr;
-    row-gap: 6px;
-  }
-  .rating-label { order: 1; }
-  .rating-left-label { order: 2; }
-  .rating-buttons-and-right { order: 3; }
-  .rating-right-label { order: 4; }
-  .lightbox-close { top: 6px; right: 8px; }
-}
-
-@media (max-height: 600px) {
-  .lightbox-media { height: 55dvh; }
-}
-
-@media (min-width: 1280px) {
-  .lightbox-content { width: min(1200px, 90vw); }
-  .lightbox-media { height: 80dvh; }
+/* === Force image to fit full vertical space === */
+.lightbox-media {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
 }
 
 
+.lightbox-overlay {
+  padding: 20px !important;   /* tiny outer gap from viewport (was 0 or more) */
+  align-items: stretch !important;
+  justify-items: stretch !important;
+}
 
-/* =========================
+.lightbox-content {
+  width: 100vw !important;       /* stretch full width */
+  height: 100svh !important;     /* stretch full height of safe viewport */
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 4px !important; /* keep a tiny radius, or set to 0 if you want flush */
+  padding: 4px !important;       /* small inner padding inside the box */
+}
+/* Make the lightbox a flex column that fills the overlay */
+.lightbox-content {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;         /* full height inside overlay */
+  padding-bottom: 0 !important;    /* no inner bottom padding */
+}
+
+/* Push actions row to the bottom */
+.lightbox-actions {
+  margin-top: auto !important;     /* pushes it down */
+  padding-top: 8px !important;     /* small breathing space above */
+  padding-bottom: 0 !important;    /* flush with bottom edge */
+  border-top: 1px solid #e5e7eb;
+}
+
+/* === Stack layout: media (1fr), ratings (auto), actions (auto) === */
+.lightbox-content {
+  display: grid !important;
+  grid-template-rows: 1fr auto auto !important; /* actions will sit under ratings, at bottom */
+  row-gap: 8px !important;                      /* tighten vertical spacing between blocks */
+  height: 100% !important;                      /* fill overlay height */
+  padding-bottom: 0 !important;                 /* avoid extra space below */
+}
+
+/* Make sure the media block is the stretchy one */
+.lightbox-media {
+  min-height: 0 !important;   /* allow shrinking when space is tight */
+  overflow: hidden !important;
+}
+
+/* Ratings right above actions with minimal gap */
+.lightbox-content > .rating-group {
+  margin: 0 !important;
+}
+
+/* Actions: remove the flex hack & extra spacing */
+.lightbox-actions {
+  margin-top: 0 !important;         /* cancel earlier margin-top:auto */
+  padding-top: 6px !important;      /* tiny breathing room above */
+  padding-bottom: 0 !important;     /* no extra space below */
+  border-top: 1px solid #e5e7eb;    /* keep the divider, optional */
+}
+
+.lightbox-media {
+  margin-bottom: 0 !important;   /* no extra spacing */
+}
+
+.rating-group {
+  justify-content: center;
+  align-items: center;
+  margin-top: 0 !important;      /* cancel default spacing */
+  padding-top: 4px !important;   /* optional: tiny breathing room */
+}
+
+
+
+@supports not (height: 100svh) {
+  .lightbox-content { height: 100dvh !important; }
+}
+
+/* 1) Kill the grid gap between media and ratings */
+.lightbox-content {
+  row-gap: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* 2) Ensure neither block contributes margins/padding at the seam */
+.lightbox-media { margin-bottom: 0 !important; }
+.rating-group   { margin-top: 0 !important; padding-top: 0 !important; }
+
+.lightbox-media {
+  flex: 1 1 auto !important;    /* grow/shrink as needed */
+  min-height: 0 !important;     /* allow shrinking */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+/* Make the dialog fill the overlay and use a 3-row grid:
+   [media grows] [ratings auto] [actions auto] */
+.lightbox-content {
+  height: 100svh !important;     /* full available height */
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) auto auto !important; /* <-- key */
+  row-gap: 4px !important;       /* tiny space between blocks */
+  padding: 8px !important;       /* small inner padding */
+}
+
+/* Let the media row use ALL remaining height (remove old caps) */
+.lightbox-media {
+  max-height: none !important;   /* override old 60/80svh caps */
+  height: auto !important;
+  min-height: 0 !important;      /* allow shrinking in grid */
+  align-self: stretch !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+/* Image scales to fill the media row vertically, no cropping */
+.lightbox-img {
+  max-height: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  width: auto !important;
+  object-fit: contain !important;
+  display: block !important;     /* removes inline baseline gap */
+}
+
+/* Kill any extra spacing at the seams */
+.lightbox-media { margin: 0 !important; }
+.rating-group   { margin: 0 !important; padding-top: 0 !important; }
+.lightbox-actions { margin: 0 !important; padding-top: 6px !important; }
+
+/* (If you want the overlay nearly edge-to-edge) */
+.lightbox-overlay { padding: 8px !important; }
+
+
+
+
+
+/* =========================================================
    Misc
-   ========================= */
+   ========================================================= */
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }

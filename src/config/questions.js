@@ -302,9 +302,9 @@ export const surveyPages = [
         //<p>The study will take approximately 15 minutes</p>\
 
         "html": "<img src=into_image.png alt='banner image'>\
-                <h2>Welcome to the greenery survey</h2>\
+                <h2>Welcome to the Street Greenery Survey</h2>\
                 <b>Before you begin, please read the following information:</b>\
-                <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023-2027) funded by European Research Council. It explores the use of street view images, to capture people’s perception of street-level environments. The study is conducted with the principle of voluntary participation with prior and informed consent. The findings of the study are expected to produce useful information for urban analytics and planning. </p>\
+                <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023-2027) funded by European Research Council (ERC, 101044906). It explores the use of street view images to capture the importance of greenery in people’s perception of street environments. The findings of the study are expected to produce useful information for transportation and green infrastructure planning. </p>\
                 \
                 <b>You can read more information about the Lab and Project from the following sources:</b>\
                 <p></p>\
@@ -313,15 +313,10 @@ export const surveyPages = [
                 <a href='https://www.helsinki.fi/en/researchgroups/digital-geography-lab'>Digital Geography Lab</a>\
                 <p></p>\
                 <a href='https://www.helsinki.fi/en'>University of Helsinki</a>\
-                <h4>Consent</h4>\
-                <p>You are invited to take part in this research study. Before you decide to do so, it is important you understand why the research is being done and what it will involve. Please take time to read the following information carefully. Take time to decide whether or not you wish to take part. For any additional questions, you can email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>\
-                <b>Possible benefits, disadvantages and risks associated with the research</b>\
-                <p>The study does not provide health or safety risks to participants. The data collected is anonymous and cannot be linked or traced back to the participants.</p>\
-                <p>Whilst there are no immediate benefits for those people participating in the project, this research will produce larger societal benefits. The results of the project will likely inform how to design and manage streetscapes to support health, well-being and pleasant travel experiences.   </p>\
-                <b>Processing of personal data and data privacy</b>\
-                <p>This study will collect personal data on your socio-demographic background. All the information that we collect about you during the research will be kept strictly confidential and will be processed according to European GDPR regulations. For sharing or publishing the data as open-source, only fully anonymized data will be used. Participation in the study is voluntary. There will be no negative consequences for you if you choose not to participate in the study or if you withdraw from the study at any point. The data controller is University of Helsinki.</p>\
-                <p>Results of the research will be published in international scientific journals and may be presented in international scientific conferences. You and your data will not be identified in any report or publication.</p>\
-                <h5>By clicking the button Next, you comfirm that you heave read the information and give your consent.</h5>\
+                <p>The survey comprises of four parts, which include questions on your background, the rating platform, post-rating questionnaire and feedback. It should take approximately 10-15 minutes to complete.</p>\
+                <p>We will collect, analyze, publish and store your data confidentially and anonymously in accordance with the General Data Protection Regulation of the European Union. To see the full data and privacy notice, please click the following link: <a href='https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf''>Data and privacy notice</a></p>\
+                <p>If you have any questions regarding the survey, you can email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>\
+                <h5>By continuing with this survey, you are agreeing that: (1) you understand the purpose of this research, (2) your participation is voluntary and (3) you are at least 18 years of age.</h5>\
                 "
       },
       ]
@@ -362,7 +357,6 @@ export const surveyPages = [
     description: "Please tell us a bit about yourself.", // 🔧 Change page description
     elements: demographicQuestions // Uses the demographic questions defined above
   },
-  
   
   {
     name: "comfort_loop_page",
@@ -484,7 +478,7 @@ export const surveyJson = {
 completedHtml: `
     <h3>Thank you for your participation!</h3>
     <h4>
-      If you have any questions or wish to withdraw your participation, you can contact the responsible researcher at
+      If you have any questions, you can contact the responsible researcher at
       <b>jussi.torkko[at]helsinki.fi</b>.
     </h4>
     <h4>

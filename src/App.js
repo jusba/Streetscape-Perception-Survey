@@ -265,7 +265,7 @@ export default function App() {
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") {
-        m.pageNextText = "Next"
+        m.pageNextText = "I agree"
       } else if (name === "consentPage") {
         m.pageNextText = "Accept";
       } else if (name === "instructionsPage") {
