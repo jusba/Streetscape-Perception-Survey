@@ -142,6 +142,17 @@
   overscroll-behavior: contain;
 }
 
+.sd-image__image {
+  width: 100%;             /* fill available width */
+  height: auto;            /* keep aspect ratio */
+  max-height: 50vh;        /* don’t exceed viewport height */
+  max-width: 50vw;         /* don’t exceed viewport width */
+  object-fit: contain;     /* keep the whole image visible */
+  display: block;          /* remove inline spacing */
+  margin: 0 left;          /* center horizontally */
+}
+
+
 .lightbox-overlay { padding: 0; }
 
 /* CSS-only scroll lock while overlay exists */
@@ -330,6 +341,25 @@ html:has(.lightbox-overlay) {
   filter: saturate(1.2);
 }
 
+/* Big “tap to rate” banner shown under the image in normal view */
+.tap-to-rate-banner {
+  margin-top: 8px;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(18px, 3.2vw, 28px);
+  line-height: 1.2;
+  color: #111827;
+  opacity: 0.9;
+}
+
+.tap-to-rate-banner small {
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+  opacity: 0.7;
+  font-size: clamp(20px, 3vw, 20px);
+}
+
 /* === Force image to fit full vertical space === */
 .lightbox-media {
   display: flex !important;
@@ -340,7 +370,7 @@ html:has(.lightbox-overlay) {
 
 
 .lightbox-overlay {
-  padding: 20px !important;   /* tiny outer gap from viewport (was 0 or more) */
+  padding: 30px !important;   /* tiny outer gap from viewport (was 0 or more) */
   align-items: stretch !important;
   justify-items: stretch !important;
 }
@@ -441,7 +471,7 @@ html:has(.lightbox-overlay) {
   display: grid !important;
   grid-template-rows: minmax(0, 1fr) auto auto !important; /* <-- key */
   row-gap: 4px !important;       /* tiny space between blocks */
-  padding: 8px !important;       /* small inner padding */
+  padding: 20px !important;       /* small inner padding */
 }
 
 /* Let the media row use ALL remaining height (remove old caps) */
@@ -476,6 +506,37 @@ html:has(.lightbox-overlay) {
 .lightbox-overlay { padding: 8px !important; }
 
 
+/* Make the image question’s content area a flex box and center the image */
+.sd-question--image .sd-question__content {
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical (optional) */
+  text-align: center;        /* just in case */
+}
+
+/* Optional sizing guards */
+.sd-question--image .sd-image__image {
+  max-width: 90vw;
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.lightbox-overlay {
+  display: grid;
+  place-items: center;          /* center the box instead of stretching */
+  padding: 20px !important;     /* space around the lightbox window */
+}
+
+lightbox-content {
+  width: auto !important;
+  height: auto !important;
+  max-width: min(1200px, 95vw);
+  max-height: min(90svh, 95%);
+  border-radius: 12px;
+  padding: 10px;                /* inner padding for content */
+}.
 
 
 

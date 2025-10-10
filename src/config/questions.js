@@ -118,14 +118,14 @@ export const demographicQuestions = [
   // TO MODIFY: Adjust income ranges for your target population/currency
   {
     name: "income",
-    title: "What is your household income level?",
+    title: "What is your household monthly income level?",
     type: "radiogroup", 
     choices: [
-      "Under €25,000",
-      "€25,000 - €50,000",
-      "€50,000 - €75,000", 
-      "€75,000 - €100,000",
-      "Over €100,000",
+      "Less than €2500",
+      "€2501 - €3500",
+      "€3501 - €4500", 
+      "€4501 - €6000",
+      "Over €6000",
       "Prefer not to say"
     ],
     isRequired: false
@@ -151,17 +151,30 @@ export const demographicQuestions = [
   
   // 🔧 OUTDOOR ACTIVITY QUESTION - Multiple choice
   // TO MODIFY: Change to any frequency-based question relevant to your research
+
+  {
+    type: "image",
+    name: "image",
+    imageLink: "nature.png",              // you set this in code
+    imageFit: "contain",
+    imageHeight: "auto",
+    imageWidth: "auto"
+  },
   {
     name: "outdoor_activity",
-    title: "How often do you engage in outdoor activities?",
+    title: "Do you consider yourself part of nature? From the picture above, choose which corresponds best to your relationship with nature.",
     type: "radiogroup",
+    choicesLayout:"horizontal",
+    colCount:7,
     choices: [
-      "Daily",
-      "Several times a week",
-      "Once a week",
-      "Several times a month", 
-      "Rarely",
-      "Never"
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G"
+
     ],
     isRequired: false
   }
@@ -314,7 +327,7 @@ export const surveyPages = [
                 <p></p>\
                 <a href='https://www.helsinki.fi/en'>University of Helsinki</a>\
                 <p>The survey comprises of four parts, which include questions on your background, the rating platform, post-rating questionnaire and feedback. It should take approximately 10-15 minutes to complete.</p>\
-                <p>We will collect, analyze, publish and store your data confidentially and anonymously in accordance with the General Data Protection Regulation of the European Union. To see the full data and privacy notice, please click the following link: <a href='https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf''>Data and privacy notice</a></p>\
+                <p>We will collect, analyze, publish and store your data confidentially and anonymously in accordance with the General Data Protection Regulation of the European Union. To see the full data and privacy notice, please see the following link: <a href='https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf''>Data and privacy notice</a></p>\
                 <p>If you have any questions regarding the survey, you can email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>\
                 <h5>By continuing with this survey, you are agreeing that: (1) you understand the purpose of this research, (2) your participation is voluntary and (3) you are at least 18 years of age.</h5>\
                 "
@@ -329,18 +342,17 @@ export const surveyPages = [
         "type": "html",
         "name": "infoText",
         "html": "<h2>Instructions</h2>\
-                <p>In the first part of the questionnaire, you will answer questions concerning your demographic characteristics. After that, you will proceed to rating images on given characteristics on a rating platform.</p>\
-                <p>On the platform, you will be shown a random street image for you to observe. Please spend some time looking at the image, as there is a small delay to pace the rating. You will be presented with <b>two criteria to rate:</b></p>\
+                <p>In the first part of the questionnaire, you will answer a few questions about your background. After that, you will proceed to rating different street images.</p>\
+                <p>You will be shown different street images for you to observe and rate. <b>Consider the scene as it is currently in the image, do not consider how it would look like during an another period of time or conditions.</b> Please look at each image and answer the following questions:</p>\
                 <p><b>Greenery:</b>\
-                <i>Greenery:</b> How much natural vegetation you see in the image, based on your own estimation. On the scale, 1 (Not green at all) means you do not see any vegetation at all, while 7 (Completely green) means only vegetation is visible.</i>\</p>\
+                <i>How much natural vegetation you see in the image, based on your own estimation. Please rate on a the scale from <b>1 (Not green at all )</b> to  <b>7 (completely greenery)</b></i>\</p>\
                 <p><b>Pleasantness:</b>\
-                <i>How pleasant you find the scene as a whole? On the scale, 1 (Very unpleasant) means that you find the scene very unpleasant, while 7 (Very pleasant) means you find the scene very pleasant. </i></p>\
-                <p>For each image, will select your ratings to the criteria. After rating both, there will automatically be a new image for you to rate. If you want to re-evaluate previously rated images, you can move back in the image queue by pressing the previous image button. After changing a rating, you will be automatically moved to the newest image.</p>\
-                <p>You can press any of the images to enter a more focused rating window. You can see the amount of images rated on the bottom right. Feel free to use your browser's zoom function to adjust the images for comfortable viewing and rating. You may also use the keyboard for rating, pressing backspace corrects previous rating</p>\
+                <i>How pleasant is the image as a whole to you? Please answer on a scale from <b>1 (Very unpleasant)</b> to <b>7 (Very pleasant)</b>.  </i></p>\
+                <p>After answering both questions for each image, you will be automatically given another image to rate. </p>\
+                <p>Press the first image to enter a more focused rating window. Feel free to press f11 to enter and return from the full-screen mode. You may also use the keyboard for rating, pressing backspace corrects previous rating</p>\
                 <img src=rating_instructions.png alt='instruction image'>\
                 <p></p>\
-                <strong>To complete the survey, we ask you to rate as many images as you want. After rating the images, you will answer some feedback concerning the survey and may then end the survey </strong>\
-                <h5>Press Start Survey to proceed to the survey</h5>\
+                <strong>To complete the survey, we ask you to rate images for around 10 minutes. After rating the images, you will answer some feedback and may then end the survey. </strong>\
                 "
                 // <strong>To complete the survey, we ask you to rate at least 100 images. After rating the 100 images, you may end the survey and enter a raffle to win a gift card. You may also continue rating images after the initial 100, if you wish.</strong>\
 
@@ -365,7 +377,7 @@ export const surveyPages = [
     {
         "type": "html",
         "name": "while_rating_instructions",
-        "html": "<p>Rate as many images as you like. Click the image to enlarge it. You may also use the keyboard for rating, pressing backspace corrects previous rating. Feel free to adjust the browser zoom for more comfort. Press Finish whenever you want to stop</p>\
+        "html": "<p>We ask you to rate X amount of images. Click the image to start rating. You may also use the keyboard for rating, pressing backspace corrects previous rating. Feel free to press f11 to enter or exit the full-screen mode. Press Finish whenever you want to stop</p>\
                 <ul style='list-style: none; padding-left: 0;'>\
                   <li><b>Greenery:</b> How much natural vegetation you see in the image, based on your own estimation.</li>\
                   <li><b>Pleasantness:</b> How pleasant you find the scene as a whole? </li>\
