@@ -19,17 +19,21 @@ const hideNormalRatingsStyle = `
 `;
 
 function KeyboardRatings({ model, lightbox }) {
+  // Only allow 1→0 => 10 within this window
+  const TEN_MS = 800;
+  const stateRef = React.useRef({
+    lastField: null,           // "green" | "pleasant" | null
+    greenArm10Until: 0,        // timestamp until which 1→0 is valid
+  });
+
   React.useEffect(() => {
     if (!model) return;
 
-    // ✅ Only allow keyboard ratings while the LIGHTBOX is open
     const getActivePanel = () => lightbox?.panel ?? null;
-
     const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
-    const setVal = (q, val) => {
-      if (!q || q.readOnly) return;
-      q.value = val;
-    };
+    const setVal = (q, val) => { if (!q || q.readOnly) return; q.value = val; };
+
+    const clearArm = () => { stateRef.current.greenArm10Until = 0; };
 
     const onKeyDown = (e) => {
       const t = e.target;
@@ -38,28 +42,85 @@ function KeyboardRatings({ model, lightbox }) {
       if (e.altKey || e.ctrlKey || e.metaKey) return;
 
       const panel = getActivePanel();
-      if (!panel) return; // not in lightbox: ignore keys
+      if (!panel) return;
 
-      const qG = panel.getQuestionByName("green");
-      const qP = panel.getQuestionByName("pleasant");
+      const qG = panel.getQuestionByName("green");     // 0–10
+      const qP = panel.getQuestionByName("pleasant");  // 1–7
+      const now = performance.now();
 
+      // Backspace clears most-recent and disarms
       if (e.key === "Backspace") {
+        clearArm();
         if (hasVal(qP)) qP.value = null;
         else if (hasVal(qG)) qG.value = null;
         e.preventDefault();
         return;
       }
 
-      let val = null;
-      if (e.key >= "1" && e.key <= "7") val = parseInt(e.key, 10);
-      else if (/^Numpad[1-7]$/.test(e.code)) val = parseInt(e.code.replace("Numpad", ""), 10);
-      if (val == null) return;
+      // Only number keys
+      const isDigit = /^[0-9]$/.test(e.key) || /^Numpad[0-9]$/.test(e.code);
+      if (!isDigit) return;
+      const digit = /^[0-9]$/.test(e.key) ? e.key : e.code.replace("Numpad", "");
+      const n = parseInt(digit, 10);
 
-      const target = !hasVal(qG) ? qG : !hasVal(qP) ? qP : null;
-      if (!target) return;
+      // Is Greenery armed for 1→0 = 10 and still showing 1?
+      const greenArmed =
+        now <= stateRef.current.greenArm10Until &&
+        stateRef.current.lastField === "green" &&
+        String(qG?.value) === "1";
 
-      setVal(target, val);
-      e.preventDefault();
+      // --- ARMED CASE: Only accept second digit 0 for 10 ---
+      if (greenArmed) {
+        if (digit === "0") {
+          setVal(qG, 10);
+          clearArm();
+          stateRef.current.lastField = "green";
+          e.preventDefault();
+          return;
+        }
+        // Any other digit while armed goes to Pleasant (if empty) and does NOT change the 1
+        if (!hasVal(qP) && n >= 1 && n <= 7) {
+          setVal(qP, n);
+          stateRef.current.lastField = "pleasant";
+          e.preventDefault();
+        }
+        clearArm();
+        return;
+      }
+
+      // --- NORMAL ROUTING ---
+      // If Greenery empty, fill it first
+      if (!hasVal(qG)) {
+        if (digit === "1") {
+          // Set 1 and arm for possible 10
+          setVal(qG, 1);
+          stateRef.current.greenArm10Until = now + TEN_MS;
+          stateRef.current.lastField = "green";
+          e.preventDefault();
+          return;
+        }
+        // Single-digit 0–9 for greenery
+        if (n >= 0 && n <= 9) {
+          setVal(qG, n);
+          clearArm();
+          stateRef.current.lastField = "green";
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Otherwise, fill Pleasant next
+      if (!hasVal(qP)) {
+        if (n >= 1 && n <= 7) {
+          setVal(qP, n);
+          clearArm();
+          stateRef.current.lastField = "pleasant";
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Both filled → ignore
     };
 
     window.addEventListener("keydown", onKeyDown, true);
@@ -69,6 +130,8 @@ function KeyboardRatings({ model, lightbox }) {
   return null;
 }
 
+
+
 function PopupRatings({ panel }) {
   const [, force] = React.useState(0);
 
@@ -76,7 +139,9 @@ function PopupRatings({ panel }) {
 
   const qGreen = getQ("green");
   const qPleasant = getQ("pleasant");
-  const choices = [1, 2, 3, 4, 5, 6, 7];
+  const choices_green = [0,1, 2, 3, 4, 5, 6, 7,8,9,10];
+  const choices_pleasant = [1, 2, 3, 4, 5, 6, 7];
+
 
   const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
   const isSelected = (q, n) => String(q?.value) === String(n);
@@ -130,10 +195,23 @@ function PopupRatings({ panel }) {
       {/* GREEN */}
       <div className="rating-row rating-row--green">
         <div className="rating-label">Green</div>
-        <div className="rating-left-label">1 = Not green at all</div>
-        <div className="rating-buttons-and-right">
+        <div className="rating-scale">
+          {/* header labels row */}
+          <div className="scale-header">
+            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>
+              0 = Not green at all
+            </span>
+            <span className="scale-label scale-label--mid" style={{ gridColumn: '6' }}>
+              5 = Half of the view is green
+            </span>
+            <span className="scale-label scale-label--max" style={{ gridColumn: '11' }}>
+              10 = Completely green
+            </span>
+          </div>
+
+          {/* buttons row (11 columns) */}
           <div className="rating-buttons">
-            {choices.map((n) => (
+            {choices_green.map((n) => (
               <button
                 key={`g-${n}`}
                 type="button"
@@ -145,17 +223,30 @@ function PopupRatings({ panel }) {
               </button>
             ))}
           </div>
-        <div className="rating-right-label">7 = Completely green</div>
         </div>
       </div>
+
 
       {/* PLEASANT */}
       <div className="rating-row rating-row--pleasant">
         <div className="rating-label">Pleasant</div>
-        <div className="rating-left-label">1 = Very unpleasant</div>
-        <div className="rating-buttons-and-right">
+        <div className="rating-scale">
+          {/* header labels row */}
+          <div className="scale-header">
+            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>
+              1 = Very unpleasant
+            </span>
+            <span className="scale-label scale-label--mid" style={{ gridColumn: '4' }}>
+              4 = Neither pleasant or unpleasant
+            </span>
+            <span className="scale-label scale-label--max" style={{ gridColumn: '7' }}>
+              7 = Very pleasant
+            </span>
+          </div>
+
+          {/* buttons row (7 columns) */}
           <div className="rating-buttons">
-            {choices.map((n) => (
+            {choices_pleasant.map((n) => (
               <button
                 key={`p-${n}`}
                 type="button"
@@ -167,9 +258,9 @@ function PopupRatings({ panel }) {
               </button>
             ))}
           </div>
-          <div className="rating-right-label">7 = Very pleasant</div>
         </div>
       </div>
+
     </div>
   );
 }
@@ -316,14 +407,34 @@ export default function App() {
 
       // Put a big “Click the image to start rating” banner under the image (normal view)
       const host = options.htmlElement; // question root
-      const bannerId = `tap-to-rate-${panel.id}`;
-      if (!host.querySelector(`#${bannerId}`)) {
-        const banner = document.createElement("div");
-        banner.id = bannerId;
-        banner.className = "tap-to-rate-banner";
-        banner.innerHTML = `Click the image to start rating`;
-        host.appendChild(banner);
+      const bannerIdTop = `tap-to-rate-top-${panel.id}`;
+      const bannerIdBottom = `tap-to-rate-${panel.id}`;
+
+      // Prefer the actual SurveyJS image class, fall back to <img>
+      const imgEl = host.querySelector('.sd-image__image, img');
+      if (imgEl) {
+        const makeBanner = (id) => {
+          const el = document.createElement('div');
+          el.id = id;
+          el.className = 'tap-to-rate-banner';
+          el.textContent = 'Click the image to start rating';
+          return el;
+        };
+
+        // ---- TOP banner (before the image) ----
+        if (!host.querySelector(`#${bannerIdTop}`)) {
+          const topBanner = makeBanner(bannerIdTop);
+          // insert relative to the image’s own parent to avoid NotFoundError
+          imgEl.insertAdjacentElement('beforebegin', topBanner);
+        }
+
+        // ---- BOTTOM banner (after the image) ----
+        if (!host.querySelector(`#${bannerIdBottom}`)) {
+          const bottomBanner = makeBanner(bannerIdBottom);
+          imgEl.insertAdjacentElement('afterend', bottomBanner);
+        }
       }
+
 
       // Dwell stamp
       const markLoaded = () => {
@@ -609,27 +720,14 @@ export default function App() {
             {/* ✅ Ratings are ONLY rendered inside the lightbox */}
             <PopupRatings panel={lightbox.panel} />
 
-            <div className="lightbox-actions">
-              <button
-                className="lightbox-prev"
-                onClick={goPrev}
-                disabled={(() => {
-                  const dp = model.getQuestionByName("comfort_loop");
-                  return !dp || dp.currentIndex <= 0;
-                })()}
-                aria-label="Previous image"
-              >
-                ← Previous
-              </button>
-
-              <button className="lightbox-next" onClick={goNext} aria-label="Next image">
-                Next →
-              </button>
-
-              <button className="lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">
-                ×
-              </button>
-            </div>
+            {/* Top-right close button */}
+            <button
+              className="lightbox-close"
+              onClick={() => setLightbox(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

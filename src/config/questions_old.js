@@ -406,11 +406,11 @@ export const surveyPages = [
             title: "Greenery",
             titleLocation: "left",
             isRequired: false,
-            rateMin: 0,
-            rateMax: 10,
+            rateMin: 1,
+            rateMax: 7,
             rateStep: 1,
-            minRateDescription: "0 = Not green at all",
-            maxRateDescription: "10 = Completely green"
+            minRateDescription: "1 = Not green at all",
+            maxRateDescription: "7 = Completely green"
           },
           {
             // 👇 0–7 scale
