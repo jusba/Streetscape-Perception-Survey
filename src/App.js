@@ -326,6 +326,34 @@ export default function App() {
     const defaultNext = m.pageNextText || "Next";
     m.completeText = "Finish survey";
 
+    // right after new Model(surveyJson) + basic setup
+    const killPanelNav = () => {
+      const dp = m.getQuestionByName("comfort_loop");
+      if (!dp) return;
+
+      // Keep one-at-a-time behavior
+      dp.renderMode = "progressTop";     // <- keep progress mode
+
+      // Remove panel-level nav actions
+      dp.showNavigationButtons = false;  // hides Prev/Next inside the panel
+      dp.allowAddPanel = false;
+      dp.allowRemovePanel = false;
+    };
+    killPanelNav();
+    m.onCurrentPageChanged.add(killPanelNav);
+
+    m.onAfterRenderQuestion.add((_s, opt) => {
+      if (opt.question.name !== "comfort_loop") return;
+      opt.htmlElement
+        .querySelectorAll(`
+          .sd-paneldynamic__progress,
+          .sd-paneldynamic__footer,
+          .sd-paneldynamic__prev-btn,
+          .sd-paneldynamic__next-btn,
+          .sd-action-bar
+        `)
+        .forEach(el => (el.style.display = "none"));
+    });
 
 
     const setNextLabel = () => {
