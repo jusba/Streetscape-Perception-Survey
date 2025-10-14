@@ -3,12 +3,16 @@ import { Model } from "survey-core";
 import { Survey } from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 import { saveSurveyResponse } from "./lib/supabase";
-import { surveyJson, displayedImages } from "./config/questions";
+import { buildSurveyForLexicon, displayedImages } from "./config/questions";
 import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
 
-/* OPTIONAL safety net (you can move this into App.css later) */
+
+/* =========================================================
+   Safety-net CSS: hide normal-view ratings (we render our own
+   lightbox UI). This does NOT clear values—unlike visible=false.
+   ========================================================= */
 const hideNormalRatingsStyle = `
 .sd-question[data-name="green"],
 .sd-question[data-name="pleasant"] {
@@ -17,9 +21,8 @@ const hideNormalRatingsStyle = `
 `;
 
 /* =========================================================
-   Rating order resolver
+   RATING ORDER resolver (GP = green first, PG = pleasant first)
    precedence: URL > localStorage override > env default > persisted random
-   "GP" = green first, "PG" = pleasant first
    ========================================================= */
 const ORDER_KEY_PERSIST = "ratingOrder.persist.v1";
 const ORDER_KEY_OVERRIDE = "ratingOrder.override.v1";
@@ -33,31 +36,88 @@ function normalizeOrder(v) {
 }
 
 function resolveRatingOrder() {
+  // 1) ?order=gp | pg
   const urlParam = new URLSearchParams(window.location.search).get("order");
   const fromUrl = normalizeOrder(urlParam);
   if (fromUrl) return { value: fromUrl, source: "url" };
 
+  // 2) local override
   const fromOverride = normalizeOrder(localStorage.getItem(ORDER_KEY_OVERRIDE));
   if (fromOverride) return { value: fromOverride, source: "override" };
 
+  // 3) env default (to disable randomization later)
   const fromEnv = normalizeOrder(process.env.REACT_APP_RATING_DEFAULT_ORDER);
   if (fromEnv) return { value: fromEnv, source: "env" };
 
+  // 4) persisted random
   const saved = normalizeOrder(localStorage.getItem(ORDER_KEY_PERSIST));
-  if (saved) {
-    console.log("Persisted order:", saved);
-    return { value: saved, source: "persist" };
-  }
+  if (saved) return { value: saved, source: "persist" };
 
+  // 5) first-time random
   const assigned = Math.random() < 0.5 ? "GP" : "PG";
   localStorage.setItem(ORDER_KEY_PERSIST, assigned);
-  console.log("Randomly assigned order:", assigned);
   return { value: assigned, source: "random" };
 }
 
+/* =========================================================
+   LEXICON randomizer (GREEN vs VEG)
+   precedence: URL > local override > env default > persisted random
+   ========================================================= */
+const LEX_KEY_PERSIST = "lexicon.persist.v1";
+const LEX_KEY_OVERRIDE = "lexicon.override.v1";
+
+function normalizeLex(v) {
+  if (!v) return null;
+  const s = String(v).toLowerCase();
+  if (["green", "g", "greenery"].includes(s)) return "GREEN";
+  if (["veg", "vegetation", "v"].includes(s)) return "VEG";
+  return null;
+}
+
+function resolveLexicon() {
+  // 1) ?lex=veg | green
+  const urlParam = new URLSearchParams(window.location.search).get("lex");
+  const fromUrl = normalizeLex(urlParam);
+  if (fromUrl) return { value: fromUrl, source: "url" };
+
+  // 2) local override
+  const fromOverride = normalizeLex(localStorage.getItem(LEX_KEY_OVERRIDE));
+  if (fromOverride) return { value: fromOverride, source: "override" };
+
+  // 3) env default (disable randomization globally)
+  const fromEnv = normalizeLex(process.env.REACT_APP_LEXICON_DEFAULT);
+  if (fromEnv) return { value: fromEnv, source: "env" };
+
+  // 4) persisted random
+  const saved = normalizeLex(localStorage.getItem(LEX_KEY_PERSIST));
+  if (saved) return { value: saved, source: "persist" };
+
+  // 5) first-time random
+  const assigned = Math.random() < 0.5 ? "GREEN" : "VEG";
+  localStorage.setItem(LEX_KEY_PERSIST, assigned);
+  return { value: assigned, source: "random" };
+}
+
+// Wording map for each variant
+const LEXMAP = {
+  GREEN: {
+    greenLabel: "Greenery",
+    greenMin: "0 = Not green at all",
+    greenMid: "5 = Half of the view is green",
+    greenMax: "10 = Completely green",
+    tapToRate: "Click the image to start rating",
+  },
+  VEG: {
+    greenLabel: "Vegetation",
+    greenMin: "0 = No vegetation",
+    greenMid: "5 = Vegetation covers about half the view",
+    greenMax: "10 = Fully covered by vegetation",
+    tapToRate: "Click the image to start rating",
+  },
+};
 
 /* =========================================================
-   KeyboardRatings (respects rating order)
+   KeyboardRatings (honors rating order)
    ========================================================= */
 function KeyboardRatings({ model, lightbox, order }) {
   const TEN_MS = 800;
@@ -90,7 +150,7 @@ function KeyboardRatings({ model, lightbox, order }) {
       const qGreen  = panel.getQuestionByName("green");
       const now = performance.now();
 
-      // Backspace clears most recent field
+      // Backspace clears most-recent and disarms
       if (e.key === "Backspace") {
         clearArm();
         if (hasVal(qSecond)) qSecond.value = null;
@@ -99,13 +159,13 @@ function KeyboardRatings({ model, lightbox, order }) {
         return;
       }
 
-      // Digits only
+      // Only number keys
       const isDigit = /^[0-9]$/.test(e.key) || /^Numpad[0-9]$/.test(e.code);
       if (!isDigit) return;
       const digit = /^[0-9]$/.test(e.key) ? e.key : e.code.replace("Numpad", "");
       const n = parseInt(digit, 10);
 
-      // Armed 1→0 => 10 for greenery
+      // Is greenery armed for 1→0 => 10?
       const greenArmed =
         now <= stateRef.current.greenArm10Until &&
         stateRef.current.lastField === "green" &&
@@ -187,7 +247,6 @@ function KeyboardRatings({ model, lightbox, order }) {
           }
         }
       }
-      // Both filled → ignore
     };
 
     window.addEventListener("keydown", onKeyDown, true);
@@ -198,24 +257,25 @@ function KeyboardRatings({ model, lightbox, order }) {
 }
 
 /* =========================================================
-   PopupRatings (respects rating order)
+   PopupRatings (uses order + lexicon)
    ========================================================= */
-function PopupRatings({ panel, order }) {
+function PopupRatings({ panel, order, lex }) {
   const [, force] = React.useState(0);
+
   const scaleMeta = {
     green: {
-      min: "0 = Not green at all",
-      mid: "5 = Half of the view is green",
-      max: "10 = Completely green",
+      min: lex.greenMin,
+      mid: lex.greenMid,
+      max: lex.greenMax,
       choices: Array.from({ length: 11 }, (_, i) => i), // 0..10
       className: "rating-row rating-row--green",
-      label: "Green",
+      label: lex.greenLabel,
     },
     pleasant: {
       min: "1 = Very unpleasant",
       mid: "4 = Neither pleasant or unpleasant",
       max: "7 = Very pleasant",
-      choices: [1,2,3,4,5,6,7],
+      choices: [1, 2, 3, 4, 5, 6, 7],
       className: "rating-row rating-row--pleasant",
       label: "Pleasant",
     }
@@ -344,14 +404,17 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [lightbox]);
 
-  // ------------- rating order -------------
+  // ---------------- rating order + lexicon ----------------
   const { value: ratingOrderStr, source: ratingOrderSource } = React.useMemo(resolveRatingOrder, []);
   const ratingOrder = ratingOrderStr === "GP" ? ["green", "pleasant"] : ["pleasant", "green"];
 
+  const { value: lexVariant, source: lexSource } = React.useMemo(resolveLexicon, []);
+  const lex = LEXMAP[lexVariant];
+  const surveyJson = React.useMemo(() => buildSurveyForLexicon(lex), [lex]);
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
 
-    // Theme & base config
+    // Apply theme + survey config
     m.applyTheme(themeJson);
     m.title = surveyConfig.title;
     m.description = surveyConfig.description;
@@ -361,14 +424,15 @@ export default function App() {
     m.focusFirstQuestionAutomatic = false;
     m.previewText = "Finish survey";
     m.showPreviewBeforeComplete = false;
+
     const defaultNext = m.pageNextText || "Next";
     m.completeText = "Finish survey";
 
-    // Keep "progressTop" behavior but hide panel-level nav UI
+    // Keep one-at-a-time panel behavior, but hide panel-level nav UI
     const killPanelNav = () => {
       const dp = m.getQuestionByName("comfort_loop");
       if (!dp) return;
-      dp.renderMode = "progressTop";     // keep one-at-a-time advancing
+      dp.renderMode = "progressTop";     // ← keep auto-advance logic behavior
       dp.showNavigationButtons = false;  // hide Prev/Next inside the panel
       dp.allowAddPanel = false;
       dp.allowRemovePanel = false;
@@ -376,7 +440,7 @@ export default function App() {
     killPanelNav();
     m.onCurrentPageChanged.add(killPanelNav);
 
-    // Also remove any residual DOM buttons/progress from the panel
+    // Remove any stray panel footer/progress/action bars from DOM
     m.onAfterRenderQuestion.add((_s, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       opt.htmlElement
@@ -390,7 +454,7 @@ export default function App() {
         .forEach((el) => (el.style.display = "none"));
     });
 
-    // Next button labels per page
+    // Page next button labels
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") m.pageNextText = "I agree";
@@ -432,25 +496,44 @@ export default function App() {
       } catch (_) {}
     };
     const preloadNext = (n = 2) => {
-      for (let i = 0; i < n && i < imageQueue.length; i++) preloadLocal(imageQueue[i]);
+      for (let i = 0; i < n && i < imageQueue.length; i++) {
+        preloadLocal(imageQueue[i]);
+      }
     };
     m.__preloadNext = preloadNext;
     preloadNext(2);
 
     const nextImage = () => (imageQueue.length ? imageQueue.shift() : "");
 
-    // Hide normal-view ratings (we only use lightbox UI)
-    const hidePanelRatings = (panel) => {
-      const qG = panel.getQuestionByName("green");
-      const qP = panel.getQuestionByName("pleasant");
-      if (qG) qG.visible = false;
-      if (qP) qP.visible = false;
-    };
+    // Update the wording on the SurveyJS rating question ("green")
+    const applyLexiconToSurvey = (mm, lexArg) => {
+      const dp = mm.getQuestionByName("comfort_loop");
+      if (!dp) return;
 
-    // Normal-image question: click to open lightbox + dwell tracking
+      // Update template so new panels inherit wording
+      const tmplGreen = dp.template?.elements?.find(e => e.name === "green");
+      if (tmplGreen) {
+        tmplGreen.title = lexArg.greenLabel;
+        tmplGreen.minRateDescription = lexArg.greenMin;
+        tmplGreen.maxRateDescription = lexArg.greenMax;
+      }
+
+      // Update any existing panels (e.g., first panel)
+      dp.panels?.forEach(p => {
+        const qG = p.getQuestionByName("green");
+        if (qG) {
+          qG.title = lexArg.greenLabel;
+          qG.minRateDescription = lexArg.greenMin;
+          qG.maxRateDescription = lexArg.greenMax;
+        }
+      });
+    };
+    applyLexiconToSurvey(m, lex);
+
+    // Normal view: attach click-to-open + dwell timing + banners
     m.onAfterRenderQuestion.add((sender, options) => {
       if (options.question.name === "green" || options.question.name === "pleasant") {
-        options.htmlElement.style.display = "none";
+        // keep hidden via CSS, do nothing here
         return;
       }
       if (options.question.name !== "image") return;
@@ -459,12 +542,15 @@ export default function App() {
       if (!img) return;
 
       const panel = options.question.parent;
-      hidePanelRatings(panel);
 
+      // Click to open lightbox
       img.style.cursor = "zoom-in";
-      img.onclick = () => openLightboxForPanel(panel);
+      img.onclick = () => {
+        const src = img.getAttribute("src") || options.question.imageLink || "";
+        if (src) setLightbox({ src, panel });
+      };
 
-      // Tap-to-rate banners (optional)
+      // “Tap to rate” banners (use lex text)
       const host = options.htmlElement;
       const bannerIdTop = `tap-to-rate-top-${panel.id}`;
       const bannerIdBottom = `tap-to-rate-${panel.id}`;
@@ -474,7 +560,7 @@ export default function App() {
           const el = document.createElement("div");
           el.id = id;
           el.className = "tap-to-rate-banner";
-          el.textContent = "Click the image to start rating";
+          el.textContent = lex.tapToRate;
           return el;
         };
         if (!host.querySelector(`#${bannerIdTop}`)) {
@@ -492,19 +578,7 @@ export default function App() {
         if (!imageLoadedAtRef.current.get(panel)) {
           imageLoadedAtRef.current.set(panel, performance.now());
         }
-        if (waitingForDwellAdvanceRef.current.get(panel)) {
-          if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
-          pendingAdvanceRef.current = setTimeout(() => {
-            const dpNow = sender.getQuestionByName("comfort_loop");
-            const cur = dpNow?.panels[dpNow.currentIndex];
-            if (cur === panel && waitingForDwellAdvanceRef.current.get(panel)) {
-              waitingForDwellAdvanceRef.current.delete(panel);
-              doAdvanceFromPanel(panel);
-            }
-          }, MIN_DWELL_MS);
-        }
       };
-
       if (img.complete) markLoaded();
       else img.addEventListener("load", markLoaded, { once: true });
     });
@@ -515,8 +589,6 @@ export default function App() {
       if (!dp || !dp.panels.length) return;
 
       const first = dp.panels[0];
-      hidePanelRatings(first);
-
       const hidden = first.getQuestionByName("imageUrl");
       if (hidden?.value) return;
 
@@ -534,7 +606,6 @@ export default function App() {
     m.onDynamicPanelAdded.add((sender, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       const panel = opt.panel;
-      hidePanelRatings(panel);
 
       const url = nextImage();
       const imgQ = panel.getQuestionByName("image");
@@ -608,7 +679,7 @@ export default function App() {
         return;
       }
 
-      // No existing next: create or finish
+      // No existing next: create one if we still have images; otherwise complete
       if (imageQueue.length > 0) {
         m.__preloadNext?.(2);
         const snap = takeScrollSnapshot();
@@ -631,18 +702,18 @@ export default function App() {
       }
     };
 
-    // Auto-advance after both ratings + dwell
-    const hookDynamic = (m) => {
+    // Advance after both ratings + dwell
+    const hookDynamic = (mm) => {
       const RATING_KEYS = ["green", "pleasant"];
 
       const bothAnswered = (panel) => {
         const g = panel.getQuestionByName("green");
         const p = panel.getQuestionByName("pleasant");
         const has = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
-        return { ok: has(g) && has(p) };
+        return { g, p, ok: has(g) && has(p) };
       };
 
-      const handler = (sender, opt) => {
+      const handler = (_sender, opt) => {
         if (opt?.question?.name !== "comfort_loop") return;
         if (!RATING_KEYS.includes(opt?.name)) return;
 
@@ -679,16 +750,16 @@ export default function App() {
         }, remaining);
       };
 
-      if (m.onDynamicPanelValueChanged) {
-        m.onDynamicPanelValueChanged.add(handler);
-      } else if (m.onDynamicPanelItemValueChanged) {
-        m.onDynamicPanelItemValueChanged.add(handler);
+      if (mm.onDynamicPanelValueChanged) {
+        mm.onDynamicPanelValueChanged.add(handler);
+      } else if (mm.onDynamicPanelItemValueChanged) {
+        mm.onDynamicPanelItemValueChanged.add(handler);
       }
     };
 
     hookDynamic(m);
 
-    // Completion save with metadata
+    // Save completion (attach rating order + lexicon metadata)
     m.onComplete.add(async (survey) => {
       const responses = survey.data;
       const completeData = {
@@ -699,8 +770,10 @@ export default function App() {
           user_agent: navigator.userAgent,
           screen_resolution: `${window.screen.width}x${window.screen.height}`,
           survey_version: "1.0",
-          rating_order: ratingOrderStr,          // "GP" | "PG"
-          rating_order_source: ratingOrderSource // "url" | "override" | "env" | "persist" | "random"
+          rating_order: ratingOrderStr,           // "GP" | "PG"
+          rating_order_source: ratingOrderSource, // "url" | "override" | "env" | "persist" | "random"
+          lexicon_variant: lexVariant,            // "GREEN" | "VEG"
+          lexicon_source: lexSource,              // "url" | "override" | "env" | "persist" | "random"
         },
       };
       const result = await saveSurveyResponse(completeData);
@@ -712,32 +785,11 @@ export default function App() {
       }
     });
 
-    // Useful for debug/inspection
-    m.__meta = { ratingOrderStr, ratingOrderSource };
-
+    // Expose meta for debugging if needed
+    m.__meta = { ...(m.__meta || {}), ratingOrderStr, ratingOrderSource, lexVariant, lexSource };
     return m;
-  }, [ratingOrderStr, ratingOrderSource]);
-
-  const goPrev = React.useCallback(() => {
-    const dp = model.getQuestionByName("comfort_loop");
-    if (!dp || dp.currentIndex <= 0) return;
-    dp.currentIndex = dp.currentIndex - 1;
-    openLightboxForPanel(dp.panels[dp.currentIndex]);
-    model.__preloadNext?.(2);
-  }, [model, openLightboxForPanel]);
-
-  const goNext = React.useCallback(() => {
-    const dp = model.getQuestionByName("comfort_loop");
-    if (!dp) return;
-    const hasNext = dp.currentIndex < dp.panels.length - 1;
-    if (hasNext) {
-      dp.currentIndex = dp.currentIndex + 1;
-      openLightboxForPanel(dp.panels[dp.currentIndex]);
-      model.__preloadNext?.(2);
-    } else {
-      setLightbox(null);
-    }
-  }, [model, openLightboxForPanel]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ratingOrderStr, ratingOrderSource, lexVariant, lexSource]); // (metadata only)
 
   React.useEffect(() => {
     return () => {
@@ -747,6 +799,7 @@ export default function App() {
 
   return (
     <>
+      {/* Hide normal-view ratings; we rate inside the lightbox */}
       <style>{hideNormalRatingsStyle}</style>
 
       <Survey model={model} />
@@ -771,8 +824,8 @@ export default function App() {
               />
             </div>
 
-            {/* ✅ Ratings are ONLY rendered inside the lightbox, in chosen order */}
-            <PopupRatings panel={lightbox.panel} order={ratingOrder} />
+            {/* Ratings are ONLY rendered inside the lightbox */}
+            <PopupRatings panel={lightbox.panel} order={ratingOrder} lex={lex} />
 
             <button
               className="lightbox-close"
