@@ -326,6 +326,8 @@ export default function App() {
     const defaultNext = m.pageNextText || "Next";
     m.completeText = "Finish survey";
 
+
+
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") m.pageNextText = "I agree";
@@ -348,6 +350,10 @@ export default function App() {
       .filter(Boolean);
 
     const imageQueue = [...pool];
+    
+
+
+
 
     // Preloader
     const preloadedLocal = new Set();
@@ -456,6 +462,13 @@ export default function App() {
 
       if (img.complete) markLoaded();
       else img.addEventListener("load", markLoaded, { once: true });
+
+      if (options.question.name === "comfort_loop") {
+        options.htmlElement
+          .querySelectorAll(".sd-paneldynamic__footer")
+          .forEach(el => (el.style.display = "none"));
+      }
+
     });
 
     
