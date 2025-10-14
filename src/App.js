@@ -8,9 +8,7 @@ import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
 
-/* OPTIONAL safety net (kept here for clarity; you can move to App.css)
-   👉 Remove these rules later to show normal ratings again.
-*/
+/* OPTIONAL safety net (you can move this into App.css later) */
 const hideNormalRatingsStyle = `
 .sd-question[data-name="green"],
 .sd-question[data-name="pleasant"] {
@@ -18,21 +16,64 @@ const hideNormalRatingsStyle = `
 }
 `;
 
-function KeyboardRatings({ model, lightbox }) {
-  // Only allow 1→0 => 10 within this window
+/* =========================================================
+   Rating order resolver
+   precedence: URL > localStorage override > env default > persisted random
+   "GP" = green first, "PG" = pleasant first
+   ========================================================= */
+const ORDER_KEY_PERSIST = "ratingOrder.persist.v1";
+const ORDER_KEY_OVERRIDE = "ratingOrder.override.v1";
+
+function normalizeOrder(v) {
+  if (!v) return null;
+  const s = String(v).toLowerCase();
+  if (["gp", "green-first", "green"].includes(s)) return "GP";
+  if (["pg", "pleasant-first", "pleasant"].includes(s)) return "PG";
+  return null;
+}
+
+function resolveRatingOrder() {
+  const urlParam = new URLSearchParams(window.location.search).get("order");
+  const fromUrl = normalizeOrder(urlParam);
+  if (fromUrl) return { value: fromUrl, source: "url" };
+
+  const fromOverride = normalizeOrder(localStorage.getItem(ORDER_KEY_OVERRIDE));
+  if (fromOverride) return { value: fromOverride, source: "override" };
+
+  const fromEnv = normalizeOrder(process.env.REACT_APP_RATING_DEFAULT_ORDER);
+  if (fromEnv) return { value: fromEnv, source: "env" };
+
+  const saved = normalizeOrder(localStorage.getItem(ORDER_KEY_PERSIST));
+  if (saved) {
+    console.log("Persisted order:", saved);
+    return { value: saved, source: "persist" };
+  }
+
+  const assigned = Math.random() < 0.5 ? "GP" : "PG";
+  localStorage.setItem(ORDER_KEY_PERSIST, assigned);
+  console.log("Randomly assigned order:", assigned);
+  return { value: assigned, source: "random" };
+}
+
+
+/* =========================================================
+   KeyboardRatings (respects rating order)
+   ========================================================= */
+function KeyboardRatings({ model, lightbox, order }) {
   const TEN_MS = 800;
   const stateRef = React.useRef({
-    lastField: null,           // "green" | "pleasant" | null
-    greenArm10Until: 0,        // timestamp until which 1→0 is valid
+    lastField: null,
+    greenArm10Until: 0,
   });
 
   React.useEffect(() => {
     if (!model) return;
 
+    const [FIRST, SECOND] = order || ["green", "pleasant"];
+
     const getActivePanel = () => lightbox?.panel ?? null;
     const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
     const setVal = (q, val) => { if (!q || q.readOnly) return; q.value = val; };
-
     const clearArm = () => { stateRef.current.greenArm10Until = 0; };
 
     const onKeyDown = (e) => {
@@ -44,43 +85,43 @@ function KeyboardRatings({ model, lightbox }) {
       const panel = getActivePanel();
       if (!panel) return;
 
-      const qG = panel.getQuestionByName("green");     // 0–10
-      const qP = panel.getQuestionByName("pleasant");  // 1–7
+      const qFirst  = panel.getQuestionByName(FIRST);
+      const qSecond = panel.getQuestionByName(SECOND);
+      const qGreen  = panel.getQuestionByName("green");
       const now = performance.now();
 
-      // Backspace clears most-recent and disarms
+      // Backspace clears most recent field
       if (e.key === "Backspace") {
         clearArm();
-        if (hasVal(qP)) qP.value = null;
-        else if (hasVal(qG)) qG.value = null;
+        if (hasVal(qSecond)) qSecond.value = null;
+        else if (hasVal(qFirst)) qFirst.value = null;
         e.preventDefault();
         return;
       }
 
-      // Only number keys
+      // Digits only
       const isDigit = /^[0-9]$/.test(e.key) || /^Numpad[0-9]$/.test(e.code);
       if (!isDigit) return;
       const digit = /^[0-9]$/.test(e.key) ? e.key : e.code.replace("Numpad", "");
       const n = parseInt(digit, 10);
 
-      // Is Greenery armed for 1→0 = 10 and still showing 1?
+      // Armed 1→0 => 10 for greenery
       const greenArmed =
         now <= stateRef.current.greenArm10Until &&
         stateRef.current.lastField === "green" &&
-        String(qG?.value) === "1";
+        String(qGreen?.value) === "1";
 
-      // --- ARMED CASE: Only accept second digit 0 for 10 ---
       if (greenArmed) {
         if (digit === "0") {
-          setVal(qG, 10);
+          setVal(qGreen, 10);
           clearArm();
           stateRef.current.lastField = "green";
           e.preventDefault();
           return;
         }
-        // Any other digit while armed goes to Pleasant (if empty) and does NOT change the 1
-        if (!hasVal(qP) && n >= 1 && n <= 7) {
-          setVal(qP, n);
+        const qPleasant = panel.getQuestionByName("pleasant");
+        if (!hasVal(qPleasant) && n >= 1 && n <= 7) {
+          setVal(qPleasant, n);
           stateRef.current.lastField = "pleasant";
           e.preventDefault();
         }
@@ -88,61 +129,99 @@ function KeyboardRatings({ model, lightbox }) {
         return;
       }
 
-      // --- NORMAL ROUTING ---
-      // If Greenery empty, fill it first
-      if (!hasVal(qG)) {
-        if (digit === "1") {
-          // Set 1 and arm for possible 10
-          setVal(qG, 1);
-          stateRef.current.greenArm10Until = now + TEN_MS;
-          stateRef.current.lastField = "green";
-          e.preventDefault();
-          return;
-        }
-        // Single-digit 0–9 for greenery
-        if (n >= 0 && n <= 9) {
-          setVal(qG, n);
-          clearArm();
-          stateRef.current.lastField = "green";
-          e.preventDefault();
+      const fitsGreen = (x) => x >= 0 && x <= 10;
+      const fitsPleasant = (x) => x >= 1 && x <= 7;
+
+      const firstEmpty  = !hasVal(qFirst);
+      const secondEmpty = !hasVal(qSecond);
+
+      // Fill FIRST
+      if (firstEmpty) {
+        if (FIRST === "green") {
+          if (digit === "1") {
+            setVal(qFirst, 1);
+            stateRef.current.greenArm10Until = now + TEN_MS;
+            stateRef.current.lastField = "green";
+            e.preventDefault();
+            return;
+          }
+          if (fitsGreen(n)) {
+            setVal(qFirst, n);
+            stateRef.current.lastField = "green";
+            clearArm();
+            e.preventDefault();
+          }
+        } else {
+          if (fitsPleasant(n)) {
+            setVal(qFirst, n);
+            stateRef.current.lastField = "pleasant";
+            clearArm();
+            e.preventDefault();
+          }
         }
         return;
       }
 
-      // Otherwise, fill Pleasant next
-      if (!hasVal(qP)) {
-        if (n >= 1 && n <= 7) {
-          setVal(qP, n);
-          clearArm();
-          stateRef.current.lastField = "pleasant";
-          e.preventDefault();
+      // Fill SECOND
+      if (secondEmpty) {
+        if (SECOND === "green") {
+          if (digit === "1") {
+            setVal(qSecond, 1);
+            stateRef.current.greenArm10Until = now + TEN_MS;
+            stateRef.current.lastField = "green";
+            e.preventDefault();
+            return;
+          }
+          if (fitsGreen(n)) {
+            setVal(qSecond, n);
+            stateRef.current.lastField = "green";
+            clearArm();
+            e.preventDefault();
+          }
+        } else {
+          if (fitsPleasant(n)) {
+            setVal(qSecond, n);
+            stateRef.current.lastField = "pleasant";
+            clearArm();
+            e.preventDefault();
+          }
         }
-        return;
       }
-
       // Both filled → ignore
     };
 
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [model, lightbox]);
+  }, [model, lightbox, order]);
 
   return null;
 }
 
-
-
-function PopupRatings({ panel }) {
+/* =========================================================
+   PopupRatings (respects rating order)
+   ========================================================= */
+function PopupRatings({ panel, order }) {
   const [, force] = React.useState(0);
+  const scaleMeta = {
+    green: {
+      min: "0 = Not green at all",
+      mid: "5 = Half of the view is green",
+      max: "10 = Completely green",
+      choices: Array.from({ length: 11 }, (_, i) => i), // 0..10
+      className: "rating-row rating-row--green",
+      label: "Green",
+    },
+    pleasant: {
+      min: "1 = Very unpleasant",
+      mid: "4 = Neither pleasant or unpleasant",
+      max: "7 = Very pleasant",
+      choices: [1,2,3,4,5,6,7],
+      className: "rating-row rating-row--pleasant",
+      label: "Pleasant",
+    }
+  };
 
   const getQ = React.useCallback((name) => panel?.getQuestionByName(name), [panel]);
-
-  const qGreen = getQ("green");
-  const qPleasant = getQ("pleasant");
-  const choices_green = [0,1, 2, 3, 4, 5, 6, 7,8,9,10];
-  const choices_pleasant = [1, 2, 3, 4, 5, 6, 7];
-
-
   const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
   const isSelected = (q, n) => String(q?.value) === String(n);
 
@@ -160,7 +239,6 @@ function PopupRatings({ panel }) {
     const onValueChanged = (_sender, opt) => {
       if (RATING_KEYS.has(opt?.name)) force((x) => x + 1);
     };
-
     const onDP = (_sender, opt) => {
       const isDP = opt?.question?.name === "comfort_loop";
       const isThisPanel = opt?.panel === panel;
@@ -179,106 +257,65 @@ function PopupRatings({ panel }) {
     };
   }, [panel]);
 
-  const hasGreen = hasVal(qGreen);
-  const hasPleasant = hasVal(qPleasant);
-  const awaitingPleasant = hasGreen && !hasPleasant;
-  const awaitingGreen = hasPleasant && !hasGreen;
+  const [firstName, secondName] = order || ["green", "pleasant"];
+  const qFirst  = getQ(firstName);
+  const qSecond = getQ(secondName);
+
+  const awaitingSecond = hasVal(qFirst) && !hasVal(qSecond);
+  const awaitingFirst  = hasVal(qSecond) && !hasVal(qFirst);
+
+  const renderRow = (name, q) => {
+    const m = scaleMeta[name];
+    return (
+      <div className={m.className} key={name}>
+        <div className="rating-label">{m.label}</div>
+        <div className="rating-scale">
+          <div className="scale-header">
+            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>
+              {m.min}
+            </span>
+            <span className="scale-label scale-label--mid" style={{ gridColumn: name === "green" ? '6' : '4' }}>
+              {m.mid}
+            </span>
+            <span className="scale-label scale-label--max" style={{ gridColumn: name === "green" ? '11' : '7' }}>
+              {m.max}
+            </span>
+          </div>
+          <div className="rating-buttons">
+            {m.choices.map((n) => (
+              <button
+                key={`${name}-${n}`}
+                type="button"
+                className={isSelected(q, n) ? "active" : ""}
+                aria-pressed={isSelected(q, n)}
+                onClick={() => setVal(q, n)}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div
       className={[
         "rating-group",
-        awaitingPleasant ? "awaiting-pleasant" : "",
-        awaitingGreen ? "awaiting-green" : "",
+        awaitingSecond ? "awaiting-pleasant" : "",
+        awaitingFirst ? "awaiting-green" : "",
       ].join(" ").trim()}
     >
-      {/* GREEN */}
-      <div className="rating-row rating-row--green">
-        <div className="rating-label">Green</div>
-        <div className="rating-scale">
-          {/* header labels row */}
-          <div className="scale-header">
-            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>
-              0 = Not green at all
-            </span>
-            <span className="scale-label scale-label--mid" style={{ gridColumn: '6' }}>
-              5 = Half of the view is green
-            </span>
-            <span className="scale-label scale-label--max" style={{ gridColumn: '11' }}>
-              10 = Completely green
-            </span>
-          </div>
-
-          {/* buttons row (11 columns) */}
-          <div className="rating-buttons">
-            {choices_green.map((n) => (
-              <button
-                key={`g-${n}`}
-                type="button"
-                className={isSelected(qGreen, n) ? "active" : ""}
-                aria-pressed={isSelected(qGreen, n)}
-                onClick={() => setVal(qGreen, n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-
-      {/* PLEASANT */}
-      <div className="rating-row rating-row--pleasant">
-        <div className="rating-label">Pleasant</div>
-        <div className="rating-scale">
-          {/* header labels row */}
-          <div className="scale-header">
-            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>
-              1 = Very unpleasant
-            </span>
-            <span className="scale-label scale-label--mid" style={{ gridColumn: '4' }}>
-              4 = Neither pleasant or unpleasant
-            </span>
-            <span className="scale-label scale-label--max" style={{ gridColumn: '7' }}>
-              7 = Very pleasant
-            </span>
-          </div>
-
-          {/* buttons row (7 columns) */}
-          <div className="rating-buttons">
-            {choices_pleasant.map((n) => (
-              <button
-                key={`p-${n}`}
-                type="button"
-                className={isSelected(qPleasant, n) ? "active" : ""}
-                aria-pressed={isSelected(qPleasant, n)}
-                onClick={() => setVal(qPleasant, n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
+      {renderRow(firstName, qFirst)}
+      {renderRow(secondName, qSecond)}
     </div>
   );
 }
 
-const preloaded = new Set();
-const MAX_TRACKED = 64;
-const preload = (url) => {
-  if (!url || preloaded.has(url)) return;
-  const img = new Image();
-  img.decoding = "async";
-  img.src = url;
-  preloaded.add(url);
-  if (preloaded.size > MAX_TRACKED) {
-    const first = preloaded.values().next().value;
-    preloaded.delete(first);
-  }
-};
-
+/* =========================================================
+   App
+   ========================================================= */
 export default function App() {
   const MIN_DWELL_MS = 2000;
 
@@ -292,8 +329,6 @@ export default function App() {
 
   const lightboxRef = React.useRef(null);
   React.useEffect(() => { lightboxRef.current = lightbox; }, [lightbox]);
-
-  const cameFromPrevRef = React.useRef(false);
 
   const openLightboxForPanel = React.useCallback((panel) => {
     if (!panel) return;
@@ -309,10 +344,14 @@ export default function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [lightbox]);
 
+  // ------------- rating order -------------
+  const { value: ratingOrderStr, source: ratingOrderSource } = React.useMemo(resolveRatingOrder, []);
+  const ratingOrder = ratingOrderStr === "GP" ? ["green", "pleasant"] : ["pleasant", "green"];
+
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
 
-    // Apply theme + survey config
+    // Theme & base config
     m.applyTheme(themeJson);
     m.title = surveyConfig.title;
     m.description = surveyConfig.description;
@@ -322,26 +361,22 @@ export default function App() {
     m.focusFirstQuestionAutomatic = false;
     m.previewText = "Finish survey";
     m.showPreviewBeforeComplete = false;
-
     const defaultNext = m.pageNextText || "Next";
     m.completeText = "Finish survey";
 
-    // right after new Model(surveyJson) + basic setup
+    // Keep "progressTop" behavior but hide panel-level nav UI
     const killPanelNav = () => {
       const dp = m.getQuestionByName("comfort_loop");
       if (!dp) return;
-
-      // Keep one-at-a-time behavior
-      dp.renderMode = "progressTop";     // <- keep progress mode
-
-      // Remove panel-level nav actions
-      dp.showNavigationButtons = false;  // hides Prev/Next inside the panel
+      dp.renderMode = "progressTop";     // keep one-at-a-time advancing
+      dp.showNavigationButtons = false;  // hide Prev/Next inside the panel
       dp.allowAddPanel = false;
       dp.allowRemovePanel = false;
     };
     killPanelNav();
     m.onCurrentPageChanged.add(killPanelNav);
 
+    // Also remove any residual DOM buttons/progress from the panel
     m.onAfterRenderQuestion.add((_s, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       opt.htmlElement
@@ -352,10 +387,10 @@ export default function App() {
           .sd-paneldynamic__next-btn,
           .sd-action-bar
         `)
-        .forEach(el => (el.style.display = "none"));
+        .forEach((el) => (el.style.display = "none"));
     });
 
-
+    // Next button labels per page
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") m.pageNextText = "I agree";
@@ -376,12 +411,7 @@ export default function App() {
         return url;
       })
       .filter(Boolean);
-
     const imageQueue = [...pool];
-    
-
-
-
 
     // Preloader
     const preloadedLocal = new Set();
@@ -402,73 +432,60 @@ export default function App() {
       } catch (_) {}
     };
     const preloadNext = (n = 2) => {
-      for (let i = 0; i < n && i < imageQueue.length; i++) {
-        preloadLocal(imageQueue[i]);
-      }
+      for (let i = 0; i < n && i < imageQueue.length; i++) preloadLocal(imageQueue[i]);
     };
     m.__preloadNext = preloadNext;
     preloadNext(2);
 
     const nextImage = () => (imageQueue.length ? imageQueue.shift() : "");
 
-    // 🔒 Helper: hide normal-view ratings for a panel
+    // Hide normal-view ratings (we only use lightbox UI)
     const hidePanelRatings = (panel) => {
-      // 👉 Remove these lines later to restore normal ratings:
       const qG = panel.getQuestionByName("green");
       const qP = panel.getQuestionByName("pleasant");
-      if (qG) qG.visible = false;     // <— RESTORE: set to true or remove
-      if (qP) qP.visible = false;     // <— RESTORE: set to true or remove
+      if (qG) qG.visible = false;
+      if (qP) qP.visible = false;
     };
 
+    // Normal-image question: click to open lightbox + dwell tracking
     m.onAfterRenderQuestion.add((sender, options) => {
-      // Extra guard: force-hide DOM of normal-view ratings
       if (options.question.name === "green" || options.question.name === "pleasant") {
-        // 👉 RESTORE later by removing the next line:
         options.htmlElement.style.display = "none";
         return;
       }
-
       if (options.question.name !== "image") return;
 
       const img = options.htmlElement.querySelector("img");
       if (!img) return;
 
       const panel = options.question.parent;
-      hidePanelRatings(panel); // ensure ratings are hidden for this panel
+      hidePanelRatings(panel);
 
       img.style.cursor = "zoom-in";
       img.onclick = () => openLightboxForPanel(panel);
 
-      // Put a big “Click the image to start rating” banner under the image (normal view)
-      const host = options.htmlElement; // question root
+      // Tap-to-rate banners (optional)
+      const host = options.htmlElement;
       const bannerIdTop = `tap-to-rate-top-${panel.id}`;
       const bannerIdBottom = `tap-to-rate-${panel.id}`;
-
-      // Prefer the actual SurveyJS image class, fall back to <img>
-      const imgEl = host.querySelector('.sd-image__image, img');
+      const imgEl = host.querySelector(".sd-image__image, img");
       if (imgEl) {
         const makeBanner = (id) => {
-          const el = document.createElement('div');
+          const el = document.createElement("div");
           el.id = id;
-          el.className = 'tap-to-rate-banner';
-          el.textContent = 'Click the image to start rating';
+          el.className = "tap-to-rate-banner";
+          el.textContent = "Click the image to start rating";
           return el;
         };
-
-        // ---- TOP banner (before the image) ----
         if (!host.querySelector(`#${bannerIdTop}`)) {
           const topBanner = makeBanner(bannerIdTop);
-          // insert relative to the image’s own parent to avoid NotFoundError
-          imgEl.insertAdjacentElement('beforebegin', topBanner);
+          imgEl.insertAdjacentElement("beforebegin", topBanner);
         }
-
-        // ---- BOTTOM banner (after the image) ----
         if (!host.querySelector(`#${bannerIdBottom}`)) {
           const bottomBanner = makeBanner(bannerIdBottom);
-          imgEl.insertAdjacentElement('afterend', bottomBanner);
+          imgEl.insertAdjacentElement("afterend", bottomBanner);
         }
       }
-
 
       // Dwell stamp
       const markLoaded = () => {
@@ -490,16 +507,7 @@ export default function App() {
 
       if (img.complete) markLoaded();
       else img.addEventListener("load", markLoaded, { once: true });
-
-      if (options.question.name === "comfort_loop") {
-        options.htmlElement
-          .querySelectorAll(".sd-paneldynamic__footer")
-          .forEach(el => (el.style.display = "none"));
-      }
-
     });
-
-    
 
     // Seed first panel
     m.onAfterRenderSurvey.add((sender) => {
@@ -507,7 +515,7 @@ export default function App() {
       if (!dp || !dp.panels.length) return;
 
       const first = dp.panels[0];
-      hidePanelRatings(first); // hide ratings in normal view on first panel
+      hidePanelRatings(first);
 
       const hidden = first.getQuestionByName("imageUrl");
       if (hidden?.value) return;
@@ -522,11 +530,11 @@ export default function App() {
       preloadNext(2);
     });
 
-    // Seed each new panel & hide its normal-view ratings
+    // Seed each new panel
     m.onDynamicPanelAdded.add((sender, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       const panel = opt.panel;
-      hidePanelRatings(panel); // keep normal view clean
+      hidePanelRatings(panel);
 
       const url = nextImage();
       const imgQ = panel.getQuestionByName("image");
@@ -585,7 +593,7 @@ export default function App() {
       const wasOpen = !!lightboxRef.current;
       const hasExistingNext = dp.currentIndex < dp.panels.length - 1;
 
-      if (cameFromPrevRef.current && hasExistingNext) {
+      if (hasExistingNext) {
         const snap = takeScrollSnapshot();
         dp.currentIndex = dp.currentIndex + 1;
 
@@ -597,10 +605,10 @@ export default function App() {
         }
 
         restoreScroll(snap);
-        cameFromPrevRef.current = false;
         return;
       }
 
+      // No existing next: create or finish
       if (imageQueue.length > 0) {
         m.__preloadNext?.(2);
         const snap = takeScrollSnapshot();
@@ -623,7 +631,7 @@ export default function App() {
       }
     };
 
-    // Advance after both ratings + dwell
+    // Auto-advance after both ratings + dwell
     const hookDynamic = (m) => {
       const RATING_KEYS = ["green", "pleasant"];
 
@@ -631,7 +639,7 @@ export default function App() {
         const g = panel.getQuestionByName("green");
         const p = panel.getQuestionByName("pleasant");
         const has = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
-        return { g, p, ok: has(g) && has(p) };
+        return { ok: has(g) && has(p) };
       };
 
       const handler = (sender, opt) => {
@@ -671,13 +679,16 @@ export default function App() {
         }, remaining);
       };
 
-      if (m.onDynamicPanelValueChanged) m.onDynamicPanelValueChanged.add(handler);
-      else m.onDynamicPanelItemValueChanged.add(handler);
+      if (m.onDynamicPanelValueChanged) {
+        m.onDynamicPanelValueChanged.add(handler);
+      } else if (m.onDynamicPanelItemValueChanged) {
+        m.onDynamicPanelItemValueChanged.add(handler);
+      }
     };
 
     hookDynamic(m);
 
-    // Save completion
+    // Completion save with metadata
     m.onComplete.add(async (survey) => {
       const responses = survey.data;
       const completeData = {
@@ -688,6 +699,8 @@ export default function App() {
           user_agent: navigator.userAgent,
           screen_resolution: `${window.screen.width}x${window.screen.height}`,
           survey_version: "1.0",
+          rating_order: ratingOrderStr,          // "GP" | "PG"
+          rating_order_source: ratingOrderSource // "url" | "override" | "env" | "persist" | "random"
         },
       };
       const result = await saveSurveyResponse(completeData);
@@ -699,13 +712,15 @@ export default function App() {
       }
     });
 
+    // Useful for debug/inspection
+    m.__meta = { ratingOrderStr, ratingOrderSource };
+
     return m;
-  }, []);
+  }, [ratingOrderStr, ratingOrderSource]);
 
   const goPrev = React.useCallback(() => {
     const dp = model.getQuestionByName("comfort_loop");
     if (!dp || dp.currentIndex <= 0) return;
-    cameFromPrevRef.current = true;
     dp.currentIndex = dp.currentIndex - 1;
     openLightboxForPanel(dp.panels[dp.currentIndex]);
     model.__preloadNext?.(2);
@@ -718,7 +733,6 @@ export default function App() {
     if (hasNext) {
       dp.currentIndex = dp.currentIndex + 1;
       openLightboxForPanel(dp.panels[dp.currentIndex]);
-      cameFromPrevRef.current = false;
       model.__preloadNext?.(2);
     } else {
       setLightbox(null);
@@ -733,11 +747,10 @@ export default function App() {
 
   return (
     <>
-      {/* Safety-net CSS to hide any stray normal-view ratings */}
       <style>{hideNormalRatingsStyle}</style>
 
       <Survey model={model} />
-      <KeyboardRatings model={model} lightbox={lightbox} />
+      <KeyboardRatings model={model} lightbox={lightbox} order={ratingOrder} />
 
       {lightbox && (
         <div
@@ -758,10 +771,9 @@ export default function App() {
               />
             </div>
 
-            {/* ✅ Ratings are ONLY rendered inside the lightbox */}
-            <PopupRatings panel={lightbox.panel} />
+            {/* ✅ Ratings are ONLY rendered inside the lightbox, in chosen order */}
+            <PopupRatings panel={lightbox.panel} order={ratingOrder} />
 
-            {/* Top-right close button */}
             <button
               className="lightbox-close"
               onClick={() => setLightbox(null)}
@@ -775,3 +787,4 @@ export default function App() {
     </>
   );
 }
+

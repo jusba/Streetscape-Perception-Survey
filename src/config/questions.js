@@ -410,7 +410,8 @@ export const surveyPages = [
             rateMax: 10,
             rateStep: 1,
             minRateDescription: "0 = Not green at all",
-            maxRateDescription: "10 = Completely green"
+            maxRateDescription: "10 = Completely green",
+            clearIfInvisible: "none"
           },
           {
             // 👇 0–7 scale
@@ -423,7 +424,8 @@ export const surveyPages = [
             rateMax: 7,
             rateStep: 1,
             minRateDescription: "1 = Very unpleasant",
-            maxRateDescription: "7 = Very pleasant"
+            maxRateDescription: "7 = Very pleasant",
+            clearIfInvisible: "none"
           },
           {
             type: "image",
