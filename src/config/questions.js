@@ -4,7 +4,7 @@ import { getRandomImages } from "./streetImages.js";
 // ---------- Images ----------
 const generateQuestionImages = () => {
   const questionImages = {
-    comfort_rating: getRandomImages("comfort_rating", 50)
+    comfort_rating: getRandomImages("comfort_rating", 150)
   };
   return questionImages;
 };
