@@ -716,7 +716,7 @@ export default function App() {
 
         // Close lightbox and guide the user to finish
         setLightbox(null);
-        m.pageNextText = "Finish survey";
+        m.pageNextText = "Finish rating";
         alert('Thanks for rating! You’ve completed 100 images.\n\nPlease press “Finish rating” to continue.');
         return; // do NOT advance or add more panels
       }
