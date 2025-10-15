@@ -8,7 +8,6 @@ import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
 
-
 /* =========================================================
    Safety-net CSS: hide normal-view ratings (we render our own
    lightbox UI). This does NOT clear values—unlike visible=false.
@@ -378,10 +377,12 @@ function PopupRatings({ panel, order, lex }) {
    ========================================================= */
 export default function App() {
   const MIN_DWELL_MS = 2000;
+  const MAX_IMAGES = 100; // ← cap how many images to rate in the lightbox flow
 
   const imageLoadedAtRef = React.useRef(new WeakMap());
   const pendingAdvanceRef = React.useRef(null);
   const waitingForDwellAdvanceRef = React.useRef(new WeakMap());
+  const ratedCountRef = React.useRef(0); // ← count fully-rated images (both ratings + dwell)
 
   const [lightbox, setLightbox] = React.useState(null);
   const [lightboxLoaded, setLightboxLoaded] = React.useState(false);
@@ -411,6 +412,7 @@ export default function App() {
   const { value: lexVariant, source: lexSource } = React.useMemo(resolveLexicon, []);
   const lex = LEXMAP[lexVariant];
   const surveyJson = React.useMemo(() => buildSurveyForLexicon(lex), [lex]);
+
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
 
@@ -454,15 +456,16 @@ export default function App() {
         .forEach((el) => (el.style.display = "none"));
     });
 
-    // Page next button labels
+    // Page next button labels (cap-aware)
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") m.pageNextText = "I agree";
       else if (name === "consentPage") m.pageNextText = "Accept";
       else if (name === "instructionsPage") m.pageNextText = "Start survey";
       else if (name === "demographics") m.pageNextText = "Continue to rating";
-      else if (name === "comfort_loop_page") m.pageNextText = "Finish rating";
-      else m.pageNextText = defaultNext;
+      else if (name === "comfort_loop_page") {
+        m.pageNextText = ratedCountRef.current >= MAX_IMAGES ? "Finish survey" : "Finish rating";
+      } else m.pageNextText = defaultNext;
     };
     setNextLabel();
     m.onCurrentPageChanged.add(setNextLabel);
@@ -702,6 +705,26 @@ export default function App() {
       }
     };
 
+    // Cap-aware completion handler
+    const onPanelComplete = (panel) => {
+      const count = ++ratedCountRef.current;
+
+      // If we’ve hit the cap, close the lightbox and stop creating/advancing panels.
+      if (count >= MAX_IMAGES) {
+        const dp = m.getQuestionByName("comfort_loop");
+        dp.allowAddPanel = false; // hard stop adding more
+
+        // Close lightbox and guide the user to finish
+        setLightbox(null);
+        m.pageNextText = "Finish survey";
+        alert('Thanks for rating! You’ve completed 10 images.\n\nPlease press “Finish survey” to submit.');
+        return; // do NOT advance or add more panels
+      }
+
+      // Otherwise proceed to the next image as usual
+      doAdvanceFromPanel(panel);
+    };
+
     // Advance after both ratings + dwell
     const hookDynamic = (mm) => {
       const RATING_KEYS = ["green", "pleasant"];
@@ -745,7 +768,7 @@ export default function App() {
           const cur = dp.panels[dp.currentIndex];
           if (cur === panel && waitingForDwellAdvanceRef.current.get(panel)) {
             waitingForDwellAdvanceRef.current.delete(panel);
-            doAdvanceFromPanel(panel);
+            onPanelComplete(panel); // ← cap-aware path
           }
         }, remaining);
       };
@@ -774,6 +797,8 @@ export default function App() {
           rating_order_source: ratingOrderSource, // "url" | "override" | "env" | "persist" | "random"
           lexicon_variant: lexVariant,            // "GREEN" | "VEG"
           lexicon_source: lexSource,              // "url" | "override" | "env" | "persist" | "random"
+          rated_images_count: ratedCountRef.current,
+          max_images_cap: MAX_IMAGES,
         },
       };
       const result = await saveSurveyResponse(completeData);
@@ -789,7 +814,7 @@ export default function App() {
     m.__meta = { ...(m.__meta || {}), ratingOrderStr, ratingOrderSource, lexVariant, lexSource };
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ratingOrderStr, ratingOrderSource, lexVariant, lexSource]); // (metadata only)
+  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource]); // (metadata only)
 
   React.useEffect(() => {
     return () => {
@@ -840,4 +865,3 @@ export default function App() {
     </>
   );
 }
-
