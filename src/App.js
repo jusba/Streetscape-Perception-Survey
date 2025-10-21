@@ -35,24 +35,19 @@ function normalizeOrder(v) {
 }
 
 function resolveRatingOrder() {
-  // 1) ?order=gp | pg
   const urlParam = new URLSearchParams(window.location.search).get("order");
   const fromUrl = normalizeOrder(urlParam);
   if (fromUrl) return { value: fromUrl, source: "url" };
 
-  // 2) local override
   const fromOverride = normalizeOrder(localStorage.getItem(ORDER_KEY_OVERRIDE));
   if (fromOverride) return { value: fromOverride, source: "override" };
 
-  // 3) env default (to disable randomization later)
   const fromEnv = normalizeOrder(process.env.REACT_APP_RATING_DEFAULT_ORDER);
   if (fromEnv) return { value: fromEnv, source: "env" };
 
-  // 4) persisted random
   const saved = normalizeOrder(localStorage.getItem(ORDER_KEY_PERSIST));
   if (saved) return { value: saved, source: "persist" };
 
-  // 5) first-time random
   const assigned = Math.random() < 0.5 ? "GP" : "PG";
   localStorage.setItem(ORDER_KEY_PERSIST, assigned);
   return { value: assigned, source: "random" };
@@ -74,24 +69,19 @@ function normalizeLex(v) {
 }
 
 function resolveLexicon() {
-  // 1) ?lex=veg | green
   const urlParam = new URLSearchParams(window.location.search).get("lex");
   const fromUrl = normalizeLex(urlParam);
   if (fromUrl) return { value: fromUrl, source: "url" };
 
-  // 2) local override
   const fromOverride = normalizeLex(localStorage.getItem(LEX_KEY_OVERRIDE));
   if (fromOverride) return { value: fromOverride, source: "override" };
 
-  // 3) env default (disable randomization globally)
   const fromEnv = normalizeLex(process.env.REACT_APP_LEXICON_DEFAULT);
   if (fromEnv) return { value: fromEnv, source: "env" };
 
-  // 4) persisted random
   const saved = normalizeLex(localStorage.getItem(LEX_KEY_PERSIST));
   if (saved) return { value: saved, source: "persist" };
 
-  // 5) first-time random
   const assigned = Math.random() < 0.5 ? "GREEN" : "VEG";
   localStorage.setItem(LEX_KEY_PERSIST, assigned);
   return { value: assigned, source: "random" };
@@ -283,7 +273,6 @@ function PopupRatings({ panel, order, lex }) {
   const getQ = React.useCallback((name) => panel?.getQuestionByName(name), [panel]);
   const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
   const isSelected = (q, n) => String(q?.value) === String(n);
-
   const setVal = (q, val) => {
     if (!q || q.readOnly) return;
     q.value = val;
@@ -377,12 +366,15 @@ function PopupRatings({ panel, order, lex }) {
    ========================================================= */
 export default function App() {
   const MIN_DWELL_MS = 2000;
-  const MAX_IMAGES = 100; // ← cap how many images to rate in the lightbox flow
+  const MAX_IMAGES = 100; // cap
 
-  const imageLoadedAtRef = React.useRef(new WeakMap());
+  const surveyOpenedAtRef = React.useRef(new Date().toISOString());
+  const ratingStartRef = React.useRef(null); // first rating timestamp
+
+  const imageLoadedAtRef = React.useRef(new WeakMap()); // panel -> performance.now()
   const pendingAdvanceRef = React.useRef(null);
   const waitingForDwellAdvanceRef = React.useRef(new WeakMap());
-  const ratedCountRef = React.useRef(0); // ← count fully-rated images (both ratings + dwell)
+  const ratedCountRef = React.useRef(0);
 
   const [lightbox, setLightbox] = React.useState(null);
   const [lightboxLoaded, setLightboxLoaded] = React.useState(false);
@@ -391,11 +383,17 @@ export default function App() {
   const lightboxRef = React.useRef(null);
   React.useEffect(() => { lightboxRef.current = lightbox; }, [lightbox]);
 
+  const perfToISO = (t) => new Date(performance.timeOrigin + t).toISOString();
+
   const openLightboxForPanel = React.useCallback((panel) => {
     if (!panel) return;
     const imgQ = panel.getQuestionByName("image");
     const src = imgQ?.imageLink || "";
-    if (src) setLightbox({ src, panel });
+    if (src) {
+      const qOpen = panel.getQuestionByName("lightbox_opened_at");
+      if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
+      setLightbox({ src, panel });
+    }
   }, []);
 
   React.useEffect(() => {
@@ -434,7 +432,7 @@ export default function App() {
     const killPanelNav = () => {
       const dp = m.getQuestionByName("comfort_loop");
       if (!dp) return;
-      dp.renderMode = "progressTop";     // ← keep auto-advance logic behavior
+      dp.renderMode = "progressTop";     // keep auto-advance logic behavior
       dp.showNavigationButtons = false;  // hide Prev/Next inside the panel
       dp.allowAddPanel = false;
       dp.allowRemovePanel = false;
@@ -508,31 +506,6 @@ export default function App() {
 
     const nextImage = () => (imageQueue.length ? imageQueue.shift() : "");
 
-    // Update the wording on the SurveyJS rating question ("green")
-    const applyLexiconToSurvey = (mm, lexArg) => {
-      const dp = mm.getQuestionByName("comfort_loop");
-      if (!dp) return;
-
-      // Update template so new panels inherit wording
-      const tmplGreen = dp.template?.elements?.find(e => e.name === "green");
-      if (tmplGreen) {
-        tmplGreen.title = lexArg.greenLabel;
-        tmplGreen.minRateDescription = lexArg.greenMin;
-        tmplGreen.maxRateDescription = lexArg.greenMax;
-      }
-
-      // Update any existing panels (e.g., first panel)
-      dp.panels?.forEach(p => {
-        const qG = p.getQuestionByName("green");
-        if (qG) {
-          qG.title = lexArg.greenLabel;
-          qG.minRateDescription = lexArg.greenMin;
-          qG.maxRateDescription = lexArg.greenMax;
-        }
-      });
-    };
-    applyLexiconToSurvey(m, lex);
-
     // Normal view: attach click-to-open + dwell timing + banners
     m.onAfterRenderQuestion.add((sender, options) => {
       if (options.question.name === "green" || options.question.name === "pleasant") {
@@ -579,7 +552,10 @@ export default function App() {
       // Dwell stamp
       const markLoaded = () => {
         if (!imageLoadedAtRef.current.get(panel)) {
-          imageLoadedAtRef.current.set(panel, performance.now());
+          const nowPerf = performance.now();
+          imageLoadedAtRef.current.set(panel, nowPerf);
+          const qLoaded = panel.getQuestionByName("image_loaded_at");
+          if (qLoaded && !qLoaded.value) qLoaded.value = perfToISO(nowPerf);
         }
       };
       if (img.complete) markLoaded();
@@ -602,7 +578,7 @@ export default function App() {
         imgQ.locImageLink?.onChanged?.();
       }
       if (hidden) hidden.value = url;
-      preloadNext(2);
+      m.__preloadNext?.(2);
     });
 
     // Seed each new panel
@@ -618,49 +594,8 @@ export default function App() {
       }
       const hidden = panel.getQuestionByName("imageUrl");
       if (hidden) hidden.value = url;
-      preloadNext(2);
+      m.__preloadNext?.(2);
     });
-
-    // Scroll helpers
-    const getActiveScroller = () => {
-      const candidates = [
-        document.querySelector(".sd-body__page"),
-        document.querySelector(".sd-page"),
-        document.querySelector(".sd-body"),
-        document.scrollingElement,
-        document.documentElement,
-        document.body,
-      ].filter(Boolean);
-
-      for (const el of candidates) {
-        const style = getComputedStyle(el);
-        const scrollable =
-          (style.overflowY === "auto" || style.overflowY === "scroll") &&
-          el.scrollHeight > el.clientHeight + 1;
-        if (scrollable) return el;
-      }
-      return window;
-    };
-
-    const takeScrollSnapshot = () => {
-      const scroller = getActiveScroller();
-      return scroller === window
-        ? { scroller, y: window.scrollY }
-        : { scroller, y: scroller.scrollTop };
-    };
-
-    const restoreScroll = ({ scroller, y }) => {
-      const currentY = scroller === window ? window.scrollY : scroller.scrollTop;
-      if (y === 0 && currentY === 0) return;
-      const doScroll = () => {
-        if (scroller === window) window.scrollTo({ top: y, behavior: "auto" });
-        else scroller.scrollTo({ top: y, behavior: "auto" });
-      };
-      requestAnimationFrame(() => {
-        doScroll();
-        requestAnimationFrame(doScroll);
-      });
-    };
 
     const doAdvanceFromPanel = (panel) => {
       const dp = m.getQuestionByName("comfort_loop");
@@ -668,7 +603,6 @@ export default function App() {
       const hasExistingNext = dp.currentIndex < dp.panels.length - 1;
 
       if (hasExistingNext) {
-        const snap = takeScrollSnapshot();
         dp.currentIndex = dp.currentIndex + 1;
 
         if (wasOpen) {
@@ -677,15 +611,11 @@ export default function App() {
           const src = imgQ?.imageLink || "";
           if (src) setLightbox({ src, panel: nextPanel });
         }
-
-        restoreScroll(snap);
         return;
       }
 
-      // No existing next: create one if we still have images; otherwise complete
       if (imageQueue.length > 0) {
         m.__preloadNext?.(2);
-        const snap = takeScrollSnapshot();
         dp.addPanel();
         setTimeout(() => {
           dp.currentIndex = dp.currentIndex + 1;
@@ -695,7 +625,6 @@ export default function App() {
             const src = imgQ?.imageLink || "";
             if (src) setLightbox({ src, panel: nextPanel });
           }
-          restoreScroll(snap);
         }, 100);
       } else {
         setTimeout(() => {
@@ -709,19 +638,14 @@ export default function App() {
     const onPanelComplete = (panel) => {
       const count = ++ratedCountRef.current;
 
-      // If we’ve hit the cap, close the lightbox and stop creating/advancing panels.
       if (count >= MAX_IMAGES) {
         const dp = m.getQuestionByName("comfort_loop");
-        dp.allowAddPanel = false; // hard stop adding more
-
-        // Close lightbox and guide the user to finish
+        dp.allowAddPanel = false;
         setLightbox(null);
         m.pageNextText = "Finish rating";
         alert('Thanks for rating! You’ve completed 100 images.\n\nPlease press “Finish rating” to continue.');
-        return; // do NOT advance or add more panels
+        return;
       }
-
-      // Otherwise proceed to the next image as usual
       doAdvanceFromPanel(panel);
     };
 
@@ -740,11 +664,31 @@ export default function App() {
         if (opt?.question?.name !== "comfort_loop") return;
         if (!RATING_KEYS.includes(opt?.name)) return;
 
+        if (!ratingStartRef.current) {
+          ratingStartRef.current = new Date().toISOString();
+        }
+
         const dp = opt.question;
         const panel = opt.panel;
         if (!panel) return;
 
+        // per-field first-set timestamps
+        if (opt.name === "green") {
+          const q = panel.getQuestionByName("green_rated_at");
+          if (q && !q.value) q.value = new Date().toISOString();
+        }
+        if (opt.name === "pleasant") {
+          const q = panel.getQuestionByName("pleasant_rated_at");
+          if (q && !q.value) q.value = new Date().toISOString();
+        }
+
         const { ok } = bothAnswered(panel);
+
+        if (ok) {
+          const both = panel.getQuestionByName("both_rated_at");
+          if (both && !both.value) both.value = new Date().toISOString();
+        }
+
         if (!ok) {
           waitingForDwellAdvanceRef.current.delete(panel);
           if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
@@ -768,7 +712,21 @@ export default function App() {
           const cur = dp.panels[dp.currentIndex];
           if (cur === panel && waitingForDwellAdvanceRef.current.get(panel)) {
             waitingForDwellAdvanceRef.current.delete(panel);
-            onPanelComplete(panel); // ← cap-aware path
+
+            // compute dwell_ms and store in hidden field
+            const bothISO = panel.getQuestionByName("both_rated_at")?.value;
+            if (bothISO) {
+              const dwellField = panel.getQuestionByName("dwell_ms");
+              if (dwellField && !dwellField.value) {
+                const dwellMs = Math.max(
+                  0,
+                  Math.round(new Date(bothISO).getTime() - (performance.timeOrigin + loadedAt))
+                );
+                dwellField.value = dwellMs;
+              }
+            }
+
+            onPanelComplete(panel);
           }
         }, remaining);
       };
@@ -789,7 +747,9 @@ export default function App() {
         responses,
         displayed_images: displayedImages,
         survey_metadata: {
+          survey_opened_at: surveyOpenedAtRef.current,
           completion_time: new Date().toISOString(),
+          rating_started_at: ratingStartRef.current,
           user_agent: navigator.userAgent,
           screen_resolution: `${window.screen.width}x${window.screen.height}`,
           survey_version: "1.0",

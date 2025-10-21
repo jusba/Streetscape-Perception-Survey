@@ -4,7 +4,7 @@ import { getRandomImages } from "./streetImages.js";
 // ---------- Images ----------
 const generateQuestionImages = () => {
   const questionImages = {
-    comfort_rating: getRandomImages("comfort_rating", 150)
+    comfort_rating: getRandomImages("comfort_rating", 150),
   };
   return questionImages;
 };
@@ -18,14 +18,14 @@ export const displayedImages = generateQuestionImages();
  * }
  */
 export function buildSurveyForLexicon(lex) {
-  // DEMOGRAPHICS (unchanged — omitted for brevity, keep yours)
+  // DEMOGRAPHICS (unchanged — customize as you like)
   const demographicQuestions = [
     {
       name: "gender",
       title: "What is your gender identity?",
       type: "radiogroup",
       choices: ["Female", "Male", "Other", "Prefer not to say"],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "age",
@@ -38,9 +38,9 @@ export function buildSurveyForLexicon(lex) {
         "35-44",
         "45-54",
         "55-64",
-        "65 or older"
+        "65 or older",
       ],
-      isRequired: false
+      isRequired: false,
     },
     { name: "home_country", title: "Where are you from? (Country)", type: "text", isRequired: false },
     { name: "current_country", title: "Where are you currently living? (Country)", type: "text", isRequired: false },
@@ -54,9 +54,9 @@ export function buildSurveyForLexicon(lex) {
         "€3501 - €4500",
         "€4501 - €6000",
         "Over €6000",
-        "Prefer not to say"
+        "Prefer not to say",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "education",
@@ -69,9 +69,9 @@ export function buildSurveyForLexicon(lex) {
         "Bachelor's degree",
         "Master's degree",
         "Doctoral degree",
-        "Other"
+        "Other",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       type: "image",
@@ -80,7 +80,7 @@ export function buildSurveyForLexicon(lex) {
       imageFit: "contain",
       imageHeight: "auto",
       imageWidth: "auto",
-      showBanner: false
+      showBanner: false,
     },
     {
       name: "outdoor_activity",
@@ -90,8 +90,8 @@ export function buildSurveyForLexicon(lex) {
       choicesLayout: "horizontal",
       colCount: 7,
       choices: ["A", "B", "C", "D", "E", "F", "G"],
-      isRequired: false
-    }
+      isRequired: false,
+    },
   ];
 
   const feedbackQuestions = [
@@ -105,9 +105,9 @@ export function buildSurveyForLexicon(lex) {
         "Neither clear nor unclear",
         "Somewhat clear",
         "Very clear",
-        "Prefer not to say"
+        "Prefer not to say",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "instructions",
@@ -119,9 +119,9 @@ export function buildSurveyForLexicon(lex) {
         "Neither clear nor unclear",
         "Somewhat clear",
         "Very clear",
-        "Prefer not to say"
+        "Prefer not to say",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "rating_ease",
@@ -133,9 +133,9 @@ export function buildSurveyForLexicon(lex) {
         "Neither difficult nor easy",
         "Somewhat easy",
         "Very easy",
-        "Prefer not to say"
+        "Prefer not to say",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "length_feel",
@@ -147,9 +147,9 @@ export function buildSurveyForLexicon(lex) {
         "Neither long nor short",
         "Somewhat short",
         "Too short",
-        "Prefer not to say"
+        "Prefer not to say",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "benefits",
@@ -161,17 +161,17 @@ export function buildSurveyForLexicon(lex) {
         "Neither clear nor unclear",
         "Somewhat clear",
         "Very clear",
-        "Prefer not to say"
+        "Prefer not to say",
       ],
-      isRequired: false
+      isRequired: false,
     },
     {
       name: "open_feedback",
       title:
         "Open feedback or any additional comments and remarks regarding the previous questions?",
       type: "comment",
-      isRequired: false
-    }
+      isRequired: false,
+    },
   ];
 
   // PAGES (dynamic texts use `lex`)
@@ -198,9 +198,9 @@ export function buildSurveyForLexicon(lex) {
             <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
             <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>
             <h5>By continuing, you confirm: (1) you understand the purpose, (2) participation is voluntary, and (3) you are at least 18 years old.</h5>
-          `
-        }
-      ]
+          `,
+        },
+      ],
     },
     {
       name: "instructionsPage",
@@ -222,15 +222,15 @@ export function buildSurveyForLexicon(lex) {
             <p>Click the first image to open the rating window. You may also rate with the keyboard; Backspace clears your last selection. Press F11 to toggle full screen.</p>
             <img src="rating_instructions.png" alt="instruction image" />
             <p><strong>To complete the survey, please rate images for around 10 minutes. After that you will answer some feedback questions and can finish.</strong></p>
-          `
-        }
-      ]
+          `,
+        },
+      ],
     },
     {
       name: "demographics",
       title: "Part 1: Background Information (Optional)",
       description: "Please tell us a bit about yourself.",
-      elements: demographicQuestions
+      elements: demographicQuestions,
     },
     {
       name: "comfort_loop_page",
@@ -245,7 +245,7 @@ export function buildSurveyForLexicon(lex) {
               <li><b>${lex.greenLabel}:</b> How much ${lex.greenLabel.toLowerCase()} do you see?</li>
               <li><b>Pleasantness:</b> How pleasant do you find the scene as a whole?</li>
             </ul>
-          `
+          `,
         },
         {
           type: "paneldynamic",
@@ -259,6 +259,7 @@ export function buildSurveyForLexicon(lex) {
           allowRemovePanel: false,
           renderMode: "progressTop",
           templateElements: [
+            // Ratings (values the participant sets)
             {
               type: "rating",
               name: "green",
@@ -270,7 +271,7 @@ export function buildSurveyForLexicon(lex) {
               rateStep: 1,
               minRateDescription: lex.greenMin,
               maxRateDescription: lex.greenMax,
-              clearIfInvisible: "none"
+              clearIfInvisible: "none",
             },
             {
               type: "rating",
@@ -283,38 +284,53 @@ export function buildSurveyForLexicon(lex) {
               rateStep: 1,
               minRateDescription: "1 = Very unpleasant",
               maxRateDescription: "7 = Very pleasant",
-              clearIfInvisible: "none"
+              clearIfInvisible: "none",
             },
+
+            // Image shown
             {
               type: "image",
               name: "image",
               imageLink: "",
               imageFit: "contain",
               imageHeight: "auto",
-              imageWidth: "auto"
+              imageWidth: "auto",
             },
+
+            // Inline counter (optional)
             {
               type: "html",
               name: "n",
-              title: "<p>Image {panelIndex}.</p>"
+              title: "<p>Image {panelIndex}.</p>",
             },
+
+            // The image URL (stored)
             {
               type: "text",
               name: "imageUrl",
               visible: false,
-              clearIfInvisible: "none"
-            }
-          ]
-        }
-      ]
+              clearIfInvisible: "none",
+            },
+
+            // --- Hidden timestamp fields (saved with each panel/image) ---
+            { type: "text", name: "image_loaded_at",    visible: false, readOnly: true, clearIfInvisible: "none" },
+            { type: "text", name: "lightbox_opened_at", visible: false, readOnly: true, clearIfInvisible: "none" },
+            { type: "text", name: "green_rated_at",     visible: false, readOnly: true, clearIfInvisible: "none" },
+            { type: "text", name: "pleasant_rated_at",  visible: false, readOnly: true, clearIfInvisible: "none" },
+            { type: "text", name: "both_rated_at",      visible: false, readOnly: true, clearIfInvisible: "none" },
+            { type: "text", name: "dwell_ms",           visible: false, readOnly: true, clearIfInvisible: "none" },
+            // ----------------------------------------------------------------
+          ],
+        },
+      ],
     },
     {
       name: "feedback",
       title: "Survey feedback",
       description:
         "Please tell us briefly how you felt while completing the survey. All questions are optional and can be skipped.",
-      elements: feedbackQuestions
-    }
+      elements: feedbackQuestions,
+    },
   ];
 
   // FINAL SURVEY JSON
@@ -340,6 +356,6 @@ export function buildSurveyForLexicon(lex) {
           Click here to be redirected to the GREENTRAVEL project website.
         </a>
       </h4>
-    `
+    `,
   };
 }
