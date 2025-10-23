@@ -9,6 +9,17 @@ import { themeJson } from "./theme";
 import "./App.css";
 
 /* =========================================================
+   CONFIG: Trap logic
+   ========================================================= */
+const TRAP_EVERY = 25; // show a trap on the 5th, 10th, 15th, ... NORMAL rating
+const TRAP_IMAGES = [
+  "/trap/space1.png",
+  "/trap/space2.png",
+  "/trap/space3.png",
+  "/trap/space4.png",
+];
+
+/* =========================================================
    Safety-net CSS: hide normal-view ratings (we render our own
    lightbox UI). This does NOT clear values—unlike visible=false.
    ========================================================= */
@@ -20,8 +31,7 @@ const hideNormalRatingsStyle = `
 `;
 
 /* =========================================================
-   RATING ORDER resolver (GP = green first, PG = pleasant first)
-   precedence: URL > localStorage override > env default > persisted random
+   RATING ORDER resolver
    ========================================================= */
 const ORDER_KEY_PERSIST = "ratingOrder.persist.v1";
 const ORDER_KEY_OVERRIDE = "ratingOrder.override.v1";
@@ -33,7 +43,6 @@ function normalizeOrder(v) {
   if (["pg", "pleasant-first", "pleasant"].includes(s)) return "PG";
   return null;
 }
-
 function resolveRatingOrder() {
   const urlParam = new URLSearchParams(window.location.search).get("order");
   const fromUrl = normalizeOrder(urlParam);
@@ -54,8 +63,7 @@ function resolveRatingOrder() {
 }
 
 /* =========================================================
-   LEXICON randomizer (GREEN vs VEG)
-   precedence: URL > local override > env default > persisted random
+   LEXICON randomizer
    ========================================================= */
 const LEX_KEY_PERSIST = "lexicon.persist.v1";
 const LEX_KEY_OVERRIDE = "lexicon.override.v1";
@@ -67,7 +75,6 @@ function normalizeLex(v) {
   if (["veg", "vegetation", "v"].includes(s)) return "VEG";
   return null;
 }
-
 function resolveLexicon() {
   const urlParam = new URLSearchParams(window.location.search).get("lex");
   const fromUrl = normalizeLex(urlParam);
@@ -87,7 +94,6 @@ function resolveLexicon() {
   return { value: assigned, source: "random" };
 }
 
-// Wording map for each variant
 const LEXMAP = {
   GREEN: {
     greenLabel: "Greenery",
@@ -106,20 +112,25 @@ const LEXMAP = {
 };
 
 /* =========================================================
-   KeyboardRatings (honors rating order)
+   Utils
+   ========================================================= */
+function pickRandomTrap() {
+  if (!TRAP_IMAGES.length) return null;
+  const idx = Math.floor(Math.random() * TRAP_IMAGES.length);
+  return TRAP_IMAGES[idx];
+}
+
+/* =========================================================
+   KeyboardRatings
    ========================================================= */
 function KeyboardRatings({ model, lightbox, order }) {
   const TEN_MS = 800;
-  const stateRef = React.useRef({
-    lastField: null,
-    greenArm10Until: 0,
-  });
+  const stateRef = React.useRef({ lastField: null, greenArm10Until: 0 });
 
   React.useEffect(() => {
     if (!model) return;
 
     const [FIRST, SECOND] = order || ["green", "pleasant"];
-
     const getActivePanel = () => lightbox?.panel ?? null;
     const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
     const setVal = (q, val) => { if (!q || q.readOnly) return; q.value = val; };
@@ -139,7 +150,6 @@ function KeyboardRatings({ model, lightbox, order }) {
       const qGreen  = panel.getQuestionByName("green");
       const now = performance.now();
 
-      // Backspace clears most-recent and disarms
       if (e.key === "Backspace") {
         clearArm();
         if (hasVal(qSecond)) qSecond.value = null;
@@ -148,13 +158,11 @@ function KeyboardRatings({ model, lightbox, order }) {
         return;
       }
 
-      // Only number keys
       const isDigit = /^[0-9]$/.test(e.key) || /^Numpad[0-9]$/.test(e.code);
       if (!isDigit) return;
       const digit = /^[0-9]$/.test(e.key) ? e.key : e.code.replace("Numpad", "");
       const n = parseInt(digit, 10);
 
-      // Is greenery armed for 1→0 => 10?
       const greenArmed =
         now <= stateRef.current.greenArm10Until &&
         stateRef.current.lastField === "green" &&
@@ -184,7 +192,6 @@ function KeyboardRatings({ model, lightbox, order }) {
       const firstEmpty  = !hasVal(qFirst);
       const secondEmpty = !hasVal(qSecond);
 
-      // Fill FIRST
       if (firstEmpty) {
         if (FIRST === "green") {
           if (digit === "1") {
@@ -211,7 +218,6 @@ function KeyboardRatings({ model, lightbox, order }) {
         return;
       }
 
-      // Fill SECOND
       if (secondEmpty) {
         if (SECOND === "green") {
           if (digit === "1") {
@@ -253,51 +259,36 @@ function PopupRatings({ panel, order, lex }) {
 
   const scaleMeta = {
     green: {
-      min: lex.greenMin,
-      mid: lex.greenMid,
-      max: lex.greenMax,
-      choices: Array.from({ length: 11 }, (_, i) => i), // 0..10
-      className: "rating-row rating-row--green",
-      label: lex.greenLabel,
+      min: lex.greenMin, mid: lex.greenMid, max: lex.greenMax,
+      choices: Array.from({ length: 11 }, (_, i) => i),
+      className: "rating-row rating-row--green", label: lex.greenLabel,
     },
     pleasant: {
-      min: "1 = Very unpleasant",
-      mid: "4 = Neither pleasant or unpleasant",
-      max: "7 = Very pleasant",
-      choices: [1, 2, 3, 4, 5, 6, 7],
-      className: "rating-row rating-row--pleasant",
-      label: "Pleasant",
+      min: "1 = Very unpleasant", mid: "4 = Neither pleasant or unpleasant", max: "7 = Very pleasant",
+      choices: [1,2,3,4,5,6,7],
+      className: "rating-row rating-row--pleasant", label: "Pleasant",
     }
   };
 
   const getQ = React.useCallback((name) => panel?.getQuestionByName(name), [panel]);
   const hasVal = (q) => q && q.value !== undefined && q.value !== null && q.value !== "";
   const isSelected = (q, n) => String(q?.value) === String(n);
-  const setVal = (q, val) => {
-    if (!q || q.readOnly) return;
-    q.value = val;
-    force((x) => x + 1);
-  };
+  const setVal = (q, val) => { if (!q || q.readOnly) return; q.value = val; force(v => v + 1); };
 
   React.useEffect(() => {
     if (!panel) return;
     const s = panel.survey;
-    const RATING_KEYS = new Set(["green", "pleasant"]);
-
     const onValueChanged = (_sender, opt) => {
-      if (RATING_KEYS.has(opt?.name)) force((x) => x + 1);
+      if (opt?.name === "green" || opt?.name === "pleasant") force(v => v + 1);
     };
     const onDP = (_sender, opt) => {
       const isDP = opt?.question?.name === "comfort_loop";
       const isThisPanel = opt?.panel === panel;
-      if (!isDP || !isThisPanel) return;
-      if (RATING_KEYS.has(opt?.name)) force((x) => x + 1);
+      if (isDP && isThisPanel && (opt?.name === "green" || opt?.name === "pleasant")) force(v => v + 1);
     };
-
     s.onValueChanged.add(onValueChanged);
     if (s.onDynamicPanelValueChanged) s.onDynamicPanelValueChanged.add(onDP);
     else if (s.onDynamicPanelItemValueChanged) s.onDynamicPanelItemValueChanged.add(onDP);
-
     return () => {
       s.onValueChanged.remove(onValueChanged);
       if (s.onDynamicPanelValueChanged) s.onDynamicPanelValueChanged.remove(onDP);
@@ -308,7 +299,6 @@ function PopupRatings({ panel, order, lex }) {
   const [firstName, secondName] = order || ["green", "pleasant"];
   const qFirst  = getQ(firstName);
   const qSecond = getQ(secondName);
-
   const awaitingSecond = hasVal(qFirst) && !hasVal(qSecond);
   const awaitingFirst  = hasVal(qSecond) && !hasVal(qFirst);
 
@@ -319,15 +309,9 @@ function PopupRatings({ panel, order, lex }) {
         <div className="rating-label">{m.label}</div>
         <div className="rating-scale">
           <div className="scale-header">
-            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>
-              {m.min}
-            </span>
-            <span className="scale-label scale-label--mid" style={{ gridColumn: name === "green" ? '6' : '4' }}>
-              {m.mid}
-            </span>
-            <span className="scale-label scale-label--max" style={{ gridColumn: name === "green" ? '11' : '7' }}>
-              {m.max}
-            </span>
+            <span className="scale-label scale-label--min" style={{ gridColumn: '1' }}>{m.min}</span>
+            <span className="scale-label scale-label--mid" style={{ gridColumn: name === "green" ? '6' : '4' }}>{m.mid}</span>
+            <span className="scale-label scale-label--max" style={{ gridColumn: name === "green" ? '11' : '7' }}>{m.max}</span>
           </div>
           <div className="rating-buttons">
             {m.choices.map((n) => (
@@ -348,13 +332,7 @@ function PopupRatings({ panel, order, lex }) {
   };
 
   return (
-    <div
-      className={[
-        "rating-group",
-        awaitingSecond ? "awaiting-pleasant" : "",
-        awaitingFirst ? "awaiting-green" : "",
-      ].join(" ").trim()}
-    >
+    <div className={["rating-group", awaitingSecond ? "awaiting-pleasant" : "", awaitingFirst ? "awaiting-green" : ""].join(" ").trim()}>
       {renderRow(firstName, qFirst)}
       {renderRow(secondName, qSecond)}
     </div>
@@ -366,15 +344,22 @@ function PopupRatings({ panel, order, lex }) {
    ========================================================= */
 export default function App() {
   const MIN_DWELL_MS = 2000;
-  const MAX_IMAGES = 100; // cap
+  const MAX_IMAGES = 100; // NORMAL images only
 
   const surveyOpenedAtRef = React.useRef(new Date().toISOString());
-  const ratingStartRef = React.useRef(null); // first rating timestamp
+  const ratingStartRef = React.useRef(null);
 
-  const imageLoadedAtRef = React.useRef(new WeakMap()); // panel -> performance.now()
+  const imageLoadedAtRef = React.useRef(new WeakMap()); // normal
+  const trapLoadedAtRef  = React.useRef(new WeakMap()); // trap
+
   const pendingAdvanceRef = React.useRef(null);
   const waitingForDwellAdvanceRef = React.useRef(new WeakMap());
-  const ratedCountRef = React.useRef(0);
+
+  const normalRatedCountRef = React.useRef(0);
+  const lastTrapIndexRef = React.useRef(0); // <- prevent repeated trap on same nth index
+
+  const trapInfoMapRef = React.useRef(new WeakMap()); // panel -> trap info
+  const trapChecksRef = React.useRef([]);             // for survey_metadata
 
   const [lightbox, setLightbox] = React.useState(null);
   const [lightboxLoaded, setLightboxLoaded] = React.useState(false);
@@ -385,23 +370,15 @@ export default function App() {
 
   const perfToISO = (t) => new Date(performance.timeOrigin + t).toISOString();
 
-  const openLightboxForPanel = React.useCallback((panel) => {
-    if (!panel) return;
-    const imgQ = panel.getQuestionByName("image");
-    const src = imgQ?.imageLink || "";
-    if (src) {
-      const qOpen = panel.getQuestionByName("lightbox_opened_at");
-      if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
-      setLightbox({ src, panel });
-    }
+  // Should we show a trap before the upcoming normal?
+  const shouldShowTrap = React.useCallback(() => {
+    const nextNormalIdx = normalRatedCountRef.current + 1; // 1-based
+    if (TRAP_EVERY <= 0) return false;
+    if (nextNormalIdx % TRAP_EVERY !== 0) return false;
+    if (lastTrapIndexRef.current === nextNormalIdx) return false; // already showed for this index
+    lastTrapIndexRef.current = nextNormalIdx; // remember we fired it
+    return true;
   }, []);
-
-  React.useEffect(() => {
-    if (!lightbox) return;
-    const onKey = (e) => e.key === "Escape" && setLightbox(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lightbox]);
 
   // ---------------- rating order + lexicon ----------------
   const { value: ratingOrderStr, source: ratingOrderSource } = React.useMemo(resolveRatingOrder, []);
@@ -414,33 +391,32 @@ export default function App() {
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
 
-    // Apply theme + survey config
+    // Theme + config
     m.applyTheme(themeJson);
     m.title = surveyConfig.title;
     m.description = surveyConfig.description;
     m.logo = surveyConfig.logo;
     m.logoPosition = surveyConfig.logoPosition;
-    Object.keys(surveyConfig.settings).forEach((key) => (m[key] = surveyConfig.settings[key]));
+    Object.assign(m, surveyConfig.settings || {});
     m.focusFirstQuestionAutomatic = false;
     m.previewText = "Finish survey";
     m.showPreviewBeforeComplete = false;
-
     const defaultNext = m.pageNextText || "Next";
     m.completeText = "Finish survey";
 
-    // Keep one-at-a-time panel behavior, but hide panel-level nav UI
-    const killPanelNav = () => {
+    // Hide panel nav UI always (we drive via lightbox)
+    const removePanelUI = () => {
       const dp = m.getQuestionByName("comfort_loop");
       if (!dp) return;
-      dp.renderMode = "progressTop";     // keep auto-advance logic behavior
-      dp.showNavigationButtons = false;  // hide Prev/Next inside the panel
-      dp.allowAddPanel = false;
+      dp.renderMode = "progressTop";
+      dp.showNavigationButtons = false;
+      dp.allowAddPanel = false; // hide UI; programmatic add still OK
       dp.allowRemovePanel = false;
     };
-    killPanelNav();
-    m.onCurrentPageChanged.add(killPanelNav);
+    removePanelUI();
+    m.onCurrentPageChanged.add(removePanelUI);
 
-    // Remove any stray panel footer/progress/action bars from DOM
+    // Also strip any DOM bits
     m.onAfterRenderQuestion.add((_s, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       opt.htmlElement
@@ -454,7 +430,7 @@ export default function App() {
         .forEach((el) => (el.style.display = "none"));
     });
 
-    // Page next button labels (cap-aware)
+    // Next button label (based on NORMAL count)
     const setNextLabel = () => {
       const name = m.currentPage?.name;
       if (name === "introPage") m.pageNextText = "I agree";
@@ -462,7 +438,7 @@ export default function App() {
       else if (name === "instructionsPage") m.pageNextText = "Start survey";
       else if (name === "demographics") m.pageNextText = "Continue to rating";
       else if (name === "comfort_loop_page") {
-        m.pageNextText = ratedCountRef.current >= MAX_IMAGES ? "Finish survey" : "Finish rating";
+        m.pageNextText = normalRatedCountRef.current >= MAX_IMAGES ? "Finish survey" : "Finish rating";
       } else m.pageNextText = defaultNext;
     };
     setNextLabel();
@@ -494,39 +470,26 @@ export default function App() {
           link.href = url;
           document.head.appendChild(link);
         }
-      } catch (_) {}
+      } catch {}
     };
-    const preloadNext = (n = 2) => {
-      for (let i = 0; i < n && i < imageQueue.length; i++) {
-        preloadLocal(imageQueue[i]);
-      }
-    };
+    const preloadNext = (n = 2) => { for (let i = 0; i < n && i < imageQueue.length; i++) preloadLocal(imageQueue[i]); };
     m.__preloadNext = preloadNext;
     preloadNext(2);
 
     const nextImage = () => (imageQueue.length ? imageQueue.shift() : "");
 
-    // Normal view: attach click-to-open + dwell timing + banners
-    m.onAfterRenderQuestion.add((sender, options) => {
-      if (options.question.name === "green" || options.question.name === "pleasant") {
-        // keep hidden via CSS, do nothing here
-        return;
-      }
+    // Normal view: click opens lightbox; stamp dwell start
+    m.onAfterRenderQuestion.add((_sender, options) => {
+      if (options.question.name === "green" || options.question.name === "pleasant") return;
       if (options.question.name !== "image") return;
 
       const img = options.htmlElement.querySelector("img");
       if (!img) return;
-
       const panel = options.question.parent;
 
-      // Click to open lightbox
       img.style.cursor = "zoom-in";
-      img.onclick = () => {
-        const src = img.getAttribute("src") || options.question.imageLink || "";
-        if (src) setLightbox({ src, panel });
-      };
+      img.onclick = () => openLightboxForPanel(panel);
 
-      // “Tap to rate” banners (use lex text)
       const host = options.htmlElement;
       const bannerIdTop = `tap-to-rate-top-${panel.id}`;
       const bannerIdBottom = `tap-to-rate-${panel.id}`;
@@ -549,17 +512,15 @@ export default function App() {
         }
       }
 
-      // Dwell stamp
       const markLoaded = () => {
         if (!imageLoadedAtRef.current.get(panel)) {
           const nowPerf = performance.now();
           imageLoadedAtRef.current.set(panel, nowPerf);
           const qLoaded = panel.getQuestionByName("image_loaded_at");
-          if (qLoaded && !qLoaded.value) qLoaded.value = perfToISO(nowPerf);
+          if (qLoaded && !qLoaded.value) qLoaded.value = new Date(performance.timeOrigin + nowPerf).toISOString();
         }
       };
-      if (img.complete) markLoaded();
-      else img.addEventListener("load", markLoaded, { once: true });
+      if (img.complete) markLoaded(); else img.addEventListener("load", markLoaded, { once: true });
     });
 
     // Seed first panel
@@ -573,30 +534,25 @@ export default function App() {
 
       const url = nextImage();
       const imgQ = first.getQuestionByName("image");
-      if (imgQ) {
-        imgQ.imageLink = url;
-        imgQ.locImageLink?.onChanged?.();
-      }
+      if (imgQ) { imgQ.imageLink = url; imgQ.locImageLink?.onChanged?.(); }
       if (hidden) hidden.value = url;
       m.__preloadNext?.(2);
     });
 
     // Seed each new panel
-    m.onDynamicPanelAdded.add((sender, opt) => {
+    m.onDynamicPanelAdded.add((_sender, opt) => {
       if (opt.question.name !== "comfort_loop") return;
       const panel = opt.panel;
 
       const url = nextImage();
       const imgQ = panel.getQuestionByName("image");
-      if (imgQ) {
-        imgQ.imageLink = url;
-        imgQ.locImageLink?.onChanged?.();
-      }
+      if (imgQ) { imgQ.imageLink = url; imgQ.locImageLink?.onChanged?.(); }
       const hidden = panel.getQuestionByName("imageUrl");
       if (hidden) hidden.value = url;
       m.__preloadNext?.(2);
     });
 
+    // Programmatic advance (do NOT gate on allowAddPanel)
     const doAdvanceFromPanel = (panel) => {
       const dp = m.getQuestionByName("comfort_loop");
       const wasOpen = !!lightboxRef.current;
@@ -604,12 +560,9 @@ export default function App() {
 
       if (hasExistingNext) {
         dp.currentIndex = dp.currentIndex + 1;
-
         if (wasOpen) {
           const nextPanel = dp.panels[dp.currentIndex];
-          const imgQ = nextPanel.getQuestionByName("image");
-          const src = imgQ?.imageLink || "";
-          if (src) setLightbox({ src, panel: nextPanel });
+          openLightboxForPanel(nextPanel);
         }
         return;
       }
@@ -620,11 +573,7 @@ export default function App() {
         setTimeout(() => {
           dp.currentIndex = dp.currentIndex + 1;
           const nextPanel = dp.panels[dp.currentIndex];
-          if (wasOpen) {
-            const imgQ = nextPanel.getQuestionByName("image");
-            const src = imgQ?.imageLink || "";
-            if (src) setLightbox({ src, panel: nextPanel });
-          }
+          if (wasOpen) openLightboxForPanel(nextPanel);
         }, 100);
       } else {
         setTimeout(() => {
@@ -634,25 +583,9 @@ export default function App() {
       }
     };
 
-    // Cap-aware completion handler
-    const onPanelComplete = (panel) => {
-      const count = ++ratedCountRef.current;
-
-      if (count >= MAX_IMAGES) {
-        const dp = m.getQuestionByName("comfort_loop");
-        dp.allowAddPanel = false;
-        setLightbox(null);
-        m.pageNextText = "Finish rating";
-        alert('Thanks for rating! You’ve completed 100 images.\n\nPlease press “Finish rating” to continue.');
-        return;
-      }
-      doAdvanceFromPanel(panel);
-    };
-
     // Advance after both ratings + dwell
     const hookDynamic = (mm) => {
       const RATING_KEYS = ["green", "pleasant"];
-
       const bothAnswered = (panel) => {
         const g = panel.getQuestionByName("green");
         const p = panel.getQuestionByName("pleasant");
@@ -664,15 +597,12 @@ export default function App() {
         if (opt?.question?.name !== "comfort_loop") return;
         if (!RATING_KEYS.includes(opt?.name)) return;
 
-        if (!ratingStartRef.current) {
-          ratingStartRef.current = new Date().toISOString();
-        }
+        if (!ratingStartRef.current) ratingStartRef.current = new Date().toISOString();
 
         const dp = opt.question;
         const panel = opt.panel;
         if (!panel) return;
 
-        // per-field first-set timestamps
         if (opt.name === "green") {
           const q = panel.getQuestionByName("green_rated_at");
           if (q && !q.value) q.value = new Date().toISOString();
@@ -683,7 +613,6 @@ export default function App() {
         }
 
         const { ok } = bothAnswered(panel);
-
         if (ok) {
           const both = panel.getQuestionByName("both_rated_at");
           if (both && !both.value) both.value = new Date().toISOString();
@@ -695,14 +624,15 @@ export default function App() {
           return;
         }
 
-        const loadedAt = imageLoadedAtRef.current.get(panel);
-        if (!loadedAt) {
+        const trapInfo = trapInfoMapRef.current.get(panel);
+        const loadedAtPerf = trapInfo ? trapLoadedAtRef.current.get(panel) : imageLoadedAtRef.current.get(panel);
+        if (!loadedAtPerf) {
           waitingForDwellAdvanceRef.current.set(panel, true);
           if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
           return;
         }
 
-        const elapsed = performance.now() - loadedAt;
+        const elapsed = performance.now() - loadedAtPerf;
         const remaining = Math.max(0, MIN_DWELL_MS - elapsed);
 
         waitingForDwellAdvanceRef.current.set(panel, true);
@@ -713,16 +643,14 @@ export default function App() {
           if (cur === panel && waitingForDwellAdvanceRef.current.get(panel)) {
             waitingForDwellAdvanceRef.current.delete(panel);
 
-            // compute dwell_ms and store in hidden field
-            const bothISO = panel.getQuestionByName("both_rated_at")?.value;
-            if (bothISO) {
-              const dwellField = panel.getQuestionByName("dwell_ms");
-              if (dwellField && !dwellField.value) {
-                const dwellMs = Math.max(
-                  0,
-                  Math.round(new Date(bothISO).getTime() - (performance.timeOrigin + loadedAt))
-                );
-                dwellField.value = dwellMs;
+            if (!trapInfo) {
+              const bothISO = panel.getQuestionByName("both_rated_at")?.value;
+              if (bothISO) {
+                const dwellField = panel.getQuestionByName("dwell_ms");
+                if (dwellField && !dwellField.value) {
+                  const dwellMs = Math.max(0, Math.round(new Date(bothISO).getTime() - (performance.timeOrigin + loadedAtPerf)));
+                  dwellField.value = dwellMs;
+                }
               }
             }
 
@@ -731,16 +659,60 @@ export default function App() {
         }, remaining);
       };
 
-      if (mm.onDynamicPanelValueChanged) {
-        mm.onDynamicPanelValueChanged.add(handler);
-      } else if (mm.onDynamicPanelItemValueChanged) {
-        mm.onDynamicPanelItemValueChanged.add(handler);
+      if (mm.onDynamicPanelValueChanged) mm.onDynamicPanelValueChanged.add(handler);
+      else if (mm.onDynamicPanelItemValueChanged) mm.onDynamicPanelItemValueChanged.add(handler);
+    };
+
+    const onPanelComplete = (panel) => {
+      const trapInfo = trapInfoMapRef.current.get(panel);
+      if (trapInfo) {
+        const qG = panel.getQuestionByName("green");
+        const qP = panel.getQuestionByName("pleasant");
+        const bothISO = panel.getQuestionByName("both_rated_at")?.value;
+
+        const tLoaded = trapLoadedAtRef.current.get(panel);
+        const basePerf = typeof tLoaded === "number" ? tLoaded : imageLoadedAtRef.current.get(panel);
+        let dwellMs = null;
+        if (basePerf && bothISO) {
+          dwellMs = Math.max(0, Math.round(new Date(bothISO).getTime() - (performance.timeOrigin + basePerf)));
+        }
+
+        trapChecksRef.current.push({
+          sequence_index: trapInfo.seq,
+          trap_image: trapInfo.trapUrl,
+          opened_at: trapInfo.opened_at,
+          both_rated_at: bothISO || null,
+          green: qG?.value ?? null,
+          pleasant: qP?.value ?? null,
+          dwell_ms: dwellMs,
+          panel_id: panel.id,
+          underlying_image: panel.getQuestionByName("imageUrl")?.value || null,
+        });
+
+        // Clear so trap answers don't pollute normal responses
+        if (qG) qG.value = null;
+        if (qP) qP.value = null;
+
+        trapInfoMapRef.current.delete(panel);
+      } else {
+        normalRatedCountRef.current += 1; // ONLY normal images count
       }
+
+      if (normalRatedCountRef.current >= MAX_IMAGES) {
+        const dp = m.getQuestionByName("comfort_loop");
+        dp.allowAddPanel = false;
+        setLightbox(null);
+        m.pageNextText = "Finish rating";
+        alert(`Thanks for rating! You’ve completed ${MAX_IMAGES} images.\n\nPlease press “Finish rating” to continue.`);
+        return;
+      }
+
+      doAdvanceFromPanel(panel);
     };
 
     hookDynamic(m);
 
-    // Save completion (attach rating order + lexicon metadata)
+    // Save completion (attach rating order + lexicon metadata + trap checks)
     m.onComplete.add(async (survey) => {
       const responses = survey.data;
       const completeData = {
@@ -753,12 +725,14 @@ export default function App() {
           user_agent: navigator.userAgent,
           screen_resolution: `${window.screen.width}x${window.screen.height}`,
           survey_version: "1.0",
-          rating_order: ratingOrderStr,           // "GP" | "PG"
-          rating_order_source: ratingOrderSource, // "url" | "override" | "env" | "persist" | "random"
-          lexicon_variant: lexVariant,            // "GREEN" | "VEG"
-          lexicon_source: lexSource,              // "url" | "override" | "env" | "persist" | "random"
-          rated_images_count: ratedCountRef.current,
+          rating_order: ratingOrderStr,
+          rating_order_source: ratingOrderSource,
+          lexicon_variant: lexVariant,
+          lexicon_source: lexSource,
+          rated_images_count: normalRatedCountRef.current, // NORMAL only
           max_images_cap: MAX_IMAGES,
+          trap_every: TRAP_EVERY,
+          trap_checks: trapChecksRef.current,
         },
       };
       const result = await saveSurveyResponse(completeData);
@@ -770,33 +744,65 @@ export default function App() {
       }
     });
 
-    // Expose meta for debugging if needed
+    // Expose some debug meta
     m.__meta = { ...(m.__meta || {}), ratingOrderStr, ratingOrderSource, lexVariant, lexSource };
+
+    /* --------- Lightbox opener lives here so it can use shouldShowTrap() --------- */
+    function openLightboxForPanel(panel) {
+      if (!panel) return;
+      const imgQ = panel.getQuestionByName("image");
+      const normalSrc = imgQ?.imageLink || "";
+
+      // Trap as interstitial on exact Nth upcoming normal
+      if (shouldShowTrap()) {
+        const trapUrl = pickRandomTrap();
+        if (trapUrl) {
+          const qOpen = panel.getQuestionByName("lightbox_opened_at");
+          if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
+          const info = {
+            trapUrl,
+            seq: normalRatedCountRef.current + 1, // 5, 10, 15...
+            opened_at: new Date().toISOString(),
+          };
+          trapInfoMapRef.current.set(panel, info);
+          setLightbox({ src: trapUrl, panel, isTrap: true });
+          return;
+        }
+      }
+
+      if (normalSrc) {
+        const qOpen = panel.getQuestionByName("lightbox_opened_at");
+        if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
+        setLightbox({ src: normalSrc, panel, isTrap: false });
+      }
+    }
+    // expose to outer closures
+    window.__openLightboxForPanel = openLightboxForPanel;
+
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource]); // (metadata only)
+  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource, shouldShowTrap]);
+
+  // bridge to the lightbox opener stored in window (within the memo above)
+  const openLightboxForPanel = React.useCallback((panel) => {
+    if (typeof window.__openLightboxForPanel === "function") {
+      window.__openLightboxForPanel(panel);
+    }
+  }, []);
 
   React.useEffect(() => {
-    return () => {
-      if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current);
-    };
+    return () => { if (pendingAdvanceRef.current) clearTimeout(pendingAdvanceRef.current); };
   }, []);
 
   return (
     <>
-      {/* Hide normal-view ratings; we rate inside the lightbox */}
       <style>{hideNormalRatingsStyle}</style>
 
       <Survey model={model} />
       <KeyboardRatings model={model} lightbox={lightbox} order={ratingOrder} />
 
       {lightbox && (
-        <div
-          className="lightbox-overlay"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setLightbox(null)}
-        >
+        <div className="lightbox-overlay" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <div className={`lightbox-media ${lightboxLoaded ? "is-loaded" : ""}`}>
               <img
@@ -805,20 +811,20 @@ export default function App() {
                 alt=""
                 decoding="async"
                 fetchPriority="high"
-                onLoad={() => setLightboxLoaded(true)}
+                onLoad={() => {
+                  setLightboxLoaded(true);
+                  if (lightbox.isTrap && lightbox.panel) {
+                    trapLoadedAtRef.current.set(lightbox.panel, performance.now());
+                  }
+                }}
               />
+              
             </div>
 
             {/* Ratings are ONLY rendered inside the lightbox */}
             <PopupRatings panel={lightbox.panel} order={ratingOrder} lex={lex} />
 
-            <button
-              className="lightbox-close"
-              onClick={() => setLightbox(null)}
-              aria-label="Close"
-            >
-              ×
-            </button>
+            <button className="lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">×</button>
           </div>
         </div>
       )}
