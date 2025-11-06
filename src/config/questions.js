@@ -25,7 +25,7 @@ export function buildSurveyForLexicon(lex) {
       title: "What is your gender identity?",
       type: "radiogroup",
       choices: ["Female", "Male", "Other", "Prefer not to say"],
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "age",
@@ -40,7 +40,7 @@ export function buildSurveyForLexicon(lex) {
         "55-64",
         "65 or older",
       ],
-      isRequired: false,
+      isRequired: true,
     },
     { name: "home_country", title: "Where are you from? (Country)", type: "text", isRequired: false },
     { name: "current_country", title: "Where are you currently living? (Country)", type: "text", isRequired: false },
@@ -49,14 +49,15 @@ export function buildSurveyForLexicon(lex) {
       title: "What is your household monthly income level?",
       type: "radiogroup",
       choices: [
-        "Less than €2500",
+        "Less than €1500",
+        "€1500 - €2500",
         "€2501 - €3500",
         "€3501 - €4500",
         "€4501 - €6000",
         "Over €6000",
         "Prefer not to say",
       ],
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "education",
@@ -70,8 +71,9 @@ export function buildSurveyForLexicon(lex) {
         "Master's degree",
         "Doctoral degree",
         "Other",
+        "Prefer not to say"
       ],
-      isRequired: false,
+      isRequired: true,
     },
     {
       type: "image",
@@ -80,7 +82,7 @@ export function buildSurveyForLexicon(lex) {
       imageFit: "contain",
       imageHeight: "auto",
       imageWidth: "auto",
-      showBanner: false,
+      showBanner: true,
     },
     {
       name: "outdoor_activity",
@@ -90,7 +92,7 @@ export function buildSurveyForLexicon(lex) {
       choicesLayout: "horizontal",
       colCount: 7,
       choices: ["A", "B", "C", "D", "E", "F", "G"],
-      isRequired: false,
+      isRequired: true,
     },
   ];
 
@@ -107,7 +109,7 @@ export function buildSurveyForLexicon(lex) {
         "Very clear",
         "Prefer not to say",
       ],
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "instructions",
@@ -121,7 +123,7 @@ export function buildSurveyForLexicon(lex) {
         "Very clear",
         "Prefer not to say",
       ],
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "rating_ease",
@@ -135,7 +137,7 @@ export function buildSurveyForLexicon(lex) {
         "Very easy",
         "Prefer not to say",
       ],
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "length_feel",
@@ -149,7 +151,7 @@ export function buildSurveyForLexicon(lex) {
         "Too short",
         "Prefer not to say",
       ],
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "benefits",
@@ -163,13 +165,32 @@ export function buildSurveyForLexicon(lex) {
         "Very clear",
         "Prefer not to say",
       ],
-      isRequired: false,
+      isRequired: true,
+    },
+    {
+      name: "AI",
+      title: "Did you notice AI generated within the images shown?",
+      type: "radiogroup",
+      choices: ["No"],
+      showOtherItem: true,
+      otherText: "Yes",
+      otherPlaceholder: "Please describe what made you consider some of the images to be AI generated",
+      otherErrorText: "Please specify your answer",
+      isRequired: true,
     },
     {
       name: "open_feedback",
       title:
         "Open feedback or any additional comments and remarks regarding the previous questions?",
       type: "comment",
+      isRequired: false,
+    },
+    {
+      name: "email",
+      title:
+        "If you would like to participate in the raffle for a chance to win movie tickets, please provide your email address. Winners will be contacted at a later date.",
+      type: "text",
+      inputType: "email",
       isRequired: false,
     },
   ];
@@ -194,8 +215,11 @@ export function buildSurveyForLexicon(lex) {
             <a href="https://www.helsinki.fi/en/researchgroups/digital-geography-lab">Digital Geography Lab</a>
             <p></p>
             <a href="https://www.helsinki.fi/en">University of Helsinki</a>
-            <p>The survey comprises of four parts. It should take approximately 10–15 minutes to complete.</p>
+            <p></p>
+
+            <b>The survey comprises of four parts. It should take approximately 10–15 minutes to complete.</b>
             <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
+            <p>At the end of the survey, you will have the opportunity to enter your email address for a chance to win movie tickets.</p>
             <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>
             <h5>By continuing, you confirm: (1) you understand the purpose, (2) participation is voluntary, and (3) you are at least 18 years old.</h5>
           `,
