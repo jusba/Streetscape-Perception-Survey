@@ -217,7 +217,7 @@ export function buildSurveyForLexicon(lex) {
             <a href="https://www.helsinki.fi/en">University of Helsinki</a>
             <p></p>
 
-            <b>The survey comprises of four parts. It should take approximately 10–15 minutes to complete.</b>
+            <b>The survey comprises of four parts. It should take approximately 10–20 minutes to complete.</b>
             <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
             <p>At the end of the survey, you will have the opportunity to enter your email address for a chance to win movie tickets.</p>
             <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>
