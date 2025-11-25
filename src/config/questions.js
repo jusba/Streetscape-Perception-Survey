@@ -185,14 +185,6 @@ export function buildSurveyForLexicon(lex) {
       type: "comment",
       isRequired: false,
     },
-    {
-      name: "email",
-      title:
-        "If you would like to participate in the raffle for a chance to win movie tickets, please provide your email address. Winners will be contacted at a later date.",
-      type: "text",
-      inputType: "email",
-      isRequired: false,
-    },
   ];
 
   // PAGES (dynamic texts use `lex`)
@@ -371,6 +363,11 @@ export function buildSurveyForLexicon(lex) {
     autoGrowComment: true,
     completedHtml: `
       <h3>Thank you for your participation!</h3>
+      <h4>
+        <a href="https://elomake.helsinki.fi/lomakkeet/138006/lomake.html" style="color:#0911f9;">
+          Click here to input your email to join the raffle (movie tickets).
+        </a>
+      </h4> 
       <h4>
         If you have any questions, you can contact the responsible researcher at
         <b>jussi.torkko[at]helsinki.fi</b>.
