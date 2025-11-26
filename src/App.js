@@ -381,10 +381,22 @@ export default function App() {
   }, []);
 
   // ---------------- rating order + lexicon ----------------
-  const { value: ratingOrderStr, source: ratingOrderSource } = React.useMemo(resolveRatingOrder, []);
-  const ratingOrder = ratingOrderStr === "GP" ? ["green", "pleasant"] : ["pleasant", "green"];
 
-  const { value: lexVariant, source: lexSource } = React.useMemo(resolveLexicon, []);
+  //Uncomment this to test multiple rating orders
+  //const { value: ratingOrderStr, source: ratingOrderSource } = React.useMemo(resolveRatingOrder, []);
+  //Comment the next lines and uncomment the previous to test different orders
+  const ratingOrderStr = "GP";
+  const ratingOrderSource = "forced";
+  
+  const ratingOrder = ratingOrderStr === "GP" ? ["green", "pleasant"] : ["pleasant", "green"];
+  
+    
+  //Uncomment this to test multiple lexicons
+  //const { value: lexVariant, source: lexSource } = React.useMemo(resolveLexicon, []);
+  //Comment the next lines and uncomment the previous to test different lexicons
+  const lexVariant = "GREEN";
+  const lexSource = "forced";
+
   const lex = LEXMAP[lexVariant];
   const surveyJson = React.useMemo(() => buildSurveyForLexicon(lex), [lex]);
 
