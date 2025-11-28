@@ -1,5 +1,6 @@
 // questions.js
 import { getRandomImages } from "./streetImages.js";
+import { t, tmpl } from "./surveyTranslations";
 
 // ---------- Images ----------
 const generateQuestionImages = () => {
@@ -17,62 +18,47 @@ export const displayedImages = generateQuestionImages();
  *   tapToRate
  * }
  */
-export function buildSurveyForLexicon(lex) {
+export function buildSurveyForLexicon(lex, lang = "en") {
   // DEMOGRAPHICS (unchanged — customize as you like)
   const demographicQuestions = [
     {
       name: "gender",
-      title: "What is your gender identity?",
+      title: t(lang, "q_gender_title"),
       type: "radiogroup",
-      choices: ["Female", "Male", "Other", "Prefer not to say"],
+      choices: t(lang, "q_gender_choices"),
       isRequired: true,
     },
     {
       name: "age",
-      title: "What is your age group?",
+      title: t(lang, "q_age_title"),
       type: "radiogroup",
-      choices: [
-        "Under 18",
-        "18-24",
-        "25-34",
-        "35-44",
-        "45-54",
-        "55-64",
-        "65 or older",
-      ],
+      choices: t(lang, "q_age_choices"),
       isRequired: true,
     },
-    { name: "home_country", title: "Where are you from? (Country)", type: "text", isRequired: false },
-    { name: "current_country", title: "Where are you currently living? (Country)", type: "text", isRequired: false },
+    {
+      name: "home_country",
+      title: t(lang, "q_home_country_title"),
+      type: "text",
+      isRequired: false,
+    },
+    {
+      name: "current_country",
+      title: t(lang, "q_current_country_title"),
+      type: "text",
+      isRequired: false,
+    },
     {
       name: "income",
-      title: "What is your household monthly income level?",
+      title: t(lang, "q_income_title"),
       type: "radiogroup",
-      choices: [
-        "Less than €1500",
-        "€1500 - €2500",
-        "€2501 - €3500",
-        "€3501 - €4500",
-        "€4501 - €6000",
-        "Over €6000",
-        "Prefer not to say",
-      ],
+      choices: t(lang, "q_income_choices"),
       isRequired: true,
     },
     {
       name: "education",
-      title: "What is your highest level of education?",
+      title: t(lang, "q_education_title"),
       type: "radiogroup",
-      choices: [
-        "Secondary education",
-        "Upper secondary education",
-        "Trade/technical/vocational training",
-        "Bachelor's degree",
-        "Master's degree",
-        "Doctoral degree",
-        "Other",
-        "Prefer not to say"
-      ],
+      choices: t(lang, "q_education_choices"),
       isRequired: true,
     },
     {
@@ -86,8 +72,7 @@ export function buildSurveyForLexicon(lex) {
     },
     {
       name: "outdoor_activity",
-      title:
-        "Do you consider yourself part of nature? From the picture above, choose which corresponds best to your relationship with nature.",
+      title: t(lang, "q_outdoor_activity_title"),
       type: "radiogroup",
       choicesLayout: "horizontal",
       colCount: 7,
@@ -96,96 +81,62 @@ export function buildSurveyForLexicon(lex) {
     },
   ];
 
+
   const feedbackQuestions = [
     {
       name: "background",
-      title: "How clear was the background of the survey and the description of consent given?",
+      title: t(lang, "q_background_title"),
       type: "radiogroup",
-      choices: [
-        "Very unclear",
-        "Somewhat unclear",
-        "Neither clear nor unclear",
-        "Somewhat clear",
-        "Very clear",
-        "Prefer not to say",
-      ],
+      choices: t(lang, "q_background_choices"),
       isRequired: true,
     },
     {
       name: "instructions",
-      title: "How clear were the instructions of the survey?",
+      title: t(lang, "q_instructions_title"),
       type: "radiogroup",
-      choices: [
-        "Very unclear",
-        "Somewhat unclear",
-        "Neither clear nor unclear",
-        "Somewhat clear",
-        "Very clear",
-        "Prefer not to say",
-      ],
+      choices: t(lang, "q_instructions_choices"),
       isRequired: true,
     },
     {
       name: "rating_ease",
-      title: "How easy was the rating platform to use?",
+      title: t(lang, "q_rating_ease_title"),
       type: "radiogroup",
-      choices: [
-        "Very difficult",
-        "Somewhat difficult",
-        "Neither difficult nor easy",
-        "Somewhat easy",
-        "Very easy",
-        "Prefer not to say",
-      ],
+      choices: t(lang, "q_rating_ease_choices"),
       isRequired: true,
     },
     {
       name: "length_feel",
-      title: "How did you feel about the length of the survey?",
+      title: t(lang, "q_length_feel_title"),
       type: "radiogroup",
-      choices: [
-        "Too long",
-        "Somewhat long",
-        "Neither long nor short",
-        "Somewhat short",
-        "Too short",
-        "Prefer not to say",
-      ],
+      choices: t(lang, "q_length_feel_choices"),
       isRequired: true,
     },
     {
       name: "benefits",
-      title: "Is it clear to you what the benefits of the survey are?",
+      title: t(lang, "q_benefits_title"),
       type: "radiogroup",
-      choices: [
-        "Very unclear",
-        "Somewhat unclear",
-        "Neither clear nor unclear",
-        "Somewhat clear",
-        "Very clear",
-        "Prefer not to say",
-      ],
+      choices: t(lang, "q_benefits_choices"),
       isRequired: true,
     },
     {
       name: "AI",
-      title: "Did you notice AI generated within the images shown?",
+      title: t(lang, "q_ai_title"),
       type: "radiogroup",
-      choices: ["No"],
+      choices: [t(lang, "q_ai_choice_no")],
       showOtherItem: true,
-      otherText: "Yes",
-      otherPlaceholder: "Please describe what made you consider some of the images to be AI generated",
-      otherErrorText: "Please specify your answer",
+      otherText: t(lang, "q_ai_otherText"),
+      otherPlaceholder: t(lang, "q_ai_otherPlaceholder"),
+      otherErrorText: t(lang, "q_ai_otherErrorText"),
       isRequired: true,
     },
     {
       name: "open_feedback",
-      title:
-        "Open feedback or any additional comments and remarks regarding the previous questions?",
+      title: t(lang, "q_open_feedback_title"),
       type: "comment",
       isRequired: false,
     },
   ];
+
 
   // PAGES (dynamic texts use `lex`)
   const surveyPages = [
@@ -195,26 +146,10 @@ export function buildSurveyForLexicon(lex) {
         {
           type: "html",
           name: "instructions",
-          html: `
-            <img src="into_image.png" alt="banner image" />
-            <h2>Welcome to the Street ${lex.greenLabel} Survey</h2>
-            <b>Before you begin, please read the following information:</b>
-            <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023–2027) funded by the European Research Council (ERC, 101044906). It explores the use of street view images to capture the importance of ${lex.greenLabel.toLowerCase()} in people’s perception of street environments. The findings are expected to inform transportation and green infrastructure planning.</p>
-            <b>You can read more here:</b>
-            <p></p>
-            <a href="https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel">GREENTRAVEL</a>
-            <p></p>
-            <a href="https://www.helsinki.fi/en/researchgroups/digital-geography-lab">Digital Geography Lab</a>
-            <p></p>
-            <a href="https://www.helsinki.fi/en">University of Helsinki</a>
-            <p></p>
-
-            <b>The survey comprises of four parts. It should take approximately 10–20 minutes to complete.</b>
-            <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
-            <p>At the end of the survey, you will have the opportunity to enter your email address for a chance to win movie tickets.</p>
-            <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>
-            <h5>By continuing, you confirm: (1) you understand the purpose, (2) participation is voluntary, and (3) you are at least 18 years old.</h5>
-          `,
+          html: tmpl(t(lang, "intro_html"), {
+            greenLabel: lex.greenLabel,
+            greenLabelLower: lex.greenLabel.toLowerCase(),
+          }),
         },
       ],
     },
@@ -224,44 +159,34 @@ export function buildSurveyForLexicon(lex) {
         {
           type: "html",
           name: "infoText",
-          html: `
-            <h2>Instructions</h2>
-            <p>In the first part you’ll answer a few background questions. Then you will rate a series of street images.</p>
-            <p>You will be shown different images. <b>Consider the scene as it appears in the picture (do not imagine other seasons or conditions).</b> Please answer the following for each image:</p>
-            <p><b>${lex.greenLabel}:</b>
-              <i>How much ${lex.greenLabel.toLowerCase()} do you see in the image, based on your own estimation?</i>
-              <br/>${lex.greenMin} … ${lex.greenMax}</p>
-            <p><b>Pleasantness:</b>
-              <i>How pleasant is the image as a whole to you?</i>
-              <br/>1 = Very unpleasant … 7 = Very pleasant</p>
-            <p>After answering both questions, the next image will appear automatically.</p>
-            <p>Click the first image to open the rating window. You may also rate with the keyboard; Backspace clears your last selection. Press F11 to toggle full screen.</p>
-            <img src="rating_instructions.png" alt="instruction image" />
-            <p><strong>To complete the survey, please rate images for around 10 minutes. After that you will answer some feedback questions and can finish.</strong></p>
-          `,
+          html: tmpl(t(lang, "instructions_html"), {
+            greenLabel: lex.greenLabel,
+            greenLabelLower: lex.greenLabel.toLowerCase(),
+            greenMin: lex.greenMin,
+            greenMax: lex.greenMax,
+          }),
         },
       ],
     },
     {
       name: "demographics",
-      title: "Part 1: Background Information (Optional)",
-      description: "Please tell us a bit about yourself.",
+      title: t(lang, "page_demographics_title"),
+      description: t(lang, "page_demographics_description"),
       elements: demographicQuestions,
     },
     {
       name: "comfort_loop_page",
-      title: `${lex.greenLabel} rating`,
+      title: tmpl(t(lang, "page_comfort_title"), {
+        greenLabel: lex.greenLabel,
+      }),
       elements: [
         {
           type: "html",
           name: "while_rating_instructions",
-          html: `
-            <p>Please rate images for the requested time. Click an image to start rating. You can also use the keyboard; Backspace corrects the last rating. Press F11 to enter/exit full screen. Press Finish whenever you want to stop.</p>
-            <ul style="list-style:none;padding-left:0;">
-              <li><b>${lex.greenLabel}:</b> How much ${lex.greenLabel.toLowerCase()} do you see?</li>
-              <li><b>Pleasantness:</b> How pleasant do you find the scene as a whole?</li>
-            </ul>
-          `,
+          html: tmpl(t(lang, "while_rating_html"), {
+            greenLabel: lex.greenLabel,
+            greenLabelLower: lex.greenLabel.toLowerCase(),
+          }),
         },
         {
           type: "paneldynamic",
@@ -275,7 +200,7 @@ export function buildSurveyForLexicon(lex) {
           allowRemovePanel: false,
           renderMode: "progressTop",
           templateElements: [
-            // Ratings (values the participant sets)
+            // (keep your existing rating / image / hidden fields exactly as they are)
             {
               type: "rating",
               name: "green",
@@ -302,8 +227,6 @@ export function buildSurveyForLexicon(lex) {
               maxRateDescription: "7 = Very pleasant",
               clearIfInvisible: "none",
             },
-
-            // Image shown
             {
               type: "image",
               name: "image",
@@ -312,71 +235,47 @@ export function buildSurveyForLexicon(lex) {
               imageHeight: "auto",
               imageWidth: "auto",
             },
-
-            // Inline counter (optional)
             {
               type: "html",
               name: "n",
               title: "<p>Image {panelIndex}.</p>",
             },
-
-            // The image URL (stored)
             {
               type: "text",
               name: "imageUrl",
               visible: false,
               clearIfInvisible: "none",
             },
-
-            // --- Hidden timestamp fields (saved with each panel/image) ---
             { type: "text", name: "image_loaded_at",    visible: false, readOnly: true, clearIfInvisible: "none" },
             { type: "text", name: "lightbox_opened_at", visible: false, readOnly: true, clearIfInvisible: "none" },
             { type: "text", name: "green_rated_at",     visible: false, readOnly: true, clearIfInvisible: "none" },
             { type: "text", name: "pleasant_rated_at",  visible: false, readOnly: true, clearIfInvisible: "none" },
             { type: "text", name: "both_rated_at",      visible: false, readOnly: true, clearIfInvisible: "none" },
             { type: "text", name: "dwell_ms",           visible: false, readOnly: true, clearIfInvisible: "none" },
-            // ----------------------------------------------------------------
           ],
         },
       ],
     },
     {
       name: "feedback",
-      title: "Survey feedback",
-      description:
-        "Please tell us briefly how you felt while completing the survey. All questions are optional and can be skipped.",
+      title: t(lang, "page_feedback_title"),
+      description: t(lang, "page_feedback_description"),
       elements: feedbackQuestions,
     },
   ];
 
+
   // FINAL SURVEY JSON
   return {
-    title: `Urban ${lex.greenLabel} Survey`,
-    description:
-      "This survey helps us understand how people perceive different street environments. Your responses will help improve urban design.",
+    title: tmpl(t(lang, "survey_title"), { greenLabel: lex.greenLabel }),
+    description: t(lang, "survey_description"),
     firstPageIsStarted: false,
-    startSurveyText: "Start Survey",
+    startSurveyText: t(lang, "survey_startSurveyText"),
     pages: surveyPages,
     showQuestionNumbers: "off",
     showProgressBar: "aboveheader",
     progressBarType: "questions",
     autoGrowComment: true,
-    completedHtml: `
-      <h3>Thank you for your participation!</h3>
-      <h4>
-        <a href="https://elomake.helsinki.fi/lomakkeet/138006/lomake.html" style="color:#0911f9;">
-          Click here to input your email to join the raffle (movie tickets).
-        </a>
-      </h4> 
-      <h4>
-        If you have any questions, you can contact the responsible researcher at
-        <b>jussi.torkko[at]helsinki.fi</b>.
-      </h4>
-      <h4>
-        <a href="https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel" style="color:#16a34a;">
-          Click here to be redirected to the GREENTRAVEL project website.
-        </a>
-      </h4>
-    `,
+    completedHtml: t(lang, "completed_html"),
   };
 }

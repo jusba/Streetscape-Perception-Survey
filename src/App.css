@@ -404,6 +404,23 @@ html:has(.lightbox-overlay) {
 .rating-row {
   grid-template-columns: 1fr !important;  /* instead of 120px 1fr */
 }
+.survey-wrapper {
+  position: relative;
+}
+
+/* This will appear over the top-right of the SurveyJS body */
+.survey-wrapper .lang-switcher {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 100;
+
+  /* optional visual tweaks */
+  background: rgba(255, 255, 255, 0.85);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
 
 /* Remove bottom actions bar entirely */
 .lightbox-actions {

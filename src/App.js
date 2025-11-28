@@ -7,7 +7,7 @@ import { buildSurveyForLexicon, displayedImages } from "./config/questions";
 import { surveyConfig } from "./config/surveyConfig";
 import { themeJson } from "./theme";
 import "./App.css";
-
+import "survey-core/survey.i18n";
 /* =========================================================
    CONFIG: Trap logic
    ========================================================= */
@@ -96,20 +96,39 @@ function resolveLexicon() {
 
 const LEXMAP = {
   GREEN: {
-    greenLabel: "Greenery",
-    greenMin: "0 = Not green at all",
-    greenMid: "5 = Half of the view is green",
-    greenMax: "10 = Completely green",
-    tapToRate: "Click the image to start rating",
+    en: {
+      greenLabel: "Greenery",
+      greenMin: "0 = Not green at all",
+      greenMid: "5 = Half of the view is green",
+      greenMax: "10 = Completely green",
+      tapToRate: "Click the image to start rating",
+    },
+    fi: {
+      greenLabel: "Vihreys",
+      greenMin: "0 = Ei vihreyttä lainkaan",
+      greenMid: "5 = Näkymästä noin puolet on vihreää",
+      greenMax: "10 = Täysin vihreä näkymä",
+      tapToRate: "Klikkaa kuvaa aloittaaksesi arvioinnin",
+    },
   },
   VEG: {
-    greenLabel: "Vegetation",
-    greenMin: "0 = No vegetation",
-    greenMid: "5 = Vegetation covers about half the view",
-    greenMax: "10 = Fully covered by vegetation",
-    tapToRate: "Click the image to start rating",
+    en: {
+      greenLabel: "Vegetation",
+      greenMin: "0 = No vegetation",
+      greenMid: "5 = Vegetation covers about half the view",
+      greenMax: "10 = Fully covered by vegetation",
+      tapToRate: "Click the image to start rating",
+    },
+    fi: {
+      greenLabel: "Kasvillisuus",
+      greenMin: "0 = Ei kasvillisuutta",
+      greenMid: "5 = Kasvillisuutta noin puolet näkymästä",
+      greenMax: "10 = Näkymä täysin kasvillisuuden peittämä",
+      tapToRate: "Klikkaa kuvaa aloittaaksesi arvioinnin",
+    },
   },
 };
+
 
 /* =========================================================
    Utils
@@ -119,6 +138,48 @@ function pickRandomTrap() {
   const idx = Math.floor(Math.random() * TRAP_IMAGES.length);
   return TRAP_IMAGES[idx];
 }
+
+function resolveLang() {
+  const urlParam = new URLSearchParams(window.location.search).get("lang");
+  const s = (urlParam || "").toLowerCase();
+  if (s === "fi" || s === "fi-fi") return "fi";
+  return "en"; // default
+}
+
+const PLEASANT_SCALE_TEXT = {
+  en: {
+    label: "Pleasantness",
+    min: "1 = Very unpleasant",
+    mid: "4 = Neither pleasant or unpleasant",
+    max: "7 = Very pleasant",
+  },
+  fi: {
+    label: "Miellyttävyys",
+    min: "1 = Erittäin epämiellyttävä",
+    mid: "4 = Ei miellyttävä eikä epämiellyttävä",
+    max: "7 = Erittäin miellyttävä",
+  },
+};
+
+
+const STRINGS = {
+  en: {
+    finishRatingAlert: (n) =>
+      `Thanks for rating! You’ve completed ${n} images.\n\nPlease press “Finish rating” to continue.`,
+    saveSuccess: "Thank you for completing the survey! Your responses have been saved.",
+    saveError: "There was an error saving your responses. Please try again.",
+    finishSurveyLabel: "Finish survey",
+    finishRatingLabel: "Finish rating",
+  },
+  fi: {
+    finishRatingAlert: (n) =>
+      `Kiitos arvioista! Olet arvioinut ${n} kuvaa.\n\nPaina \"Lopeta arviointi\" jatkaaksesi.`,
+      saveSuccess: "Kiitos kyselyyn vastaamisesta! Vastauksesi on tallennettu.",
+      saveError: "Vastausten tallentamisessa tapahtui virhe. Yritä uudelleen.",
+      finishSurveyLabel: "Lopeta kysely",
+      finishRatingLabel: "Lopeta arviointi",
+  },
+};
 
 /* =========================================================
    KeyboardRatings
@@ -254,8 +315,10 @@ function KeyboardRatings({ model, lightbox, order }) {
 /* =========================================================
    PopupRatings (uses order + lexicon)
    ========================================================= */
-function PopupRatings({ panel, order, lex }) {
+function PopupRatings({ panel, order, lex, lang }) {
   const [, force] = React.useState(0);
+
+  const pleasantTexts = PLEASANT_SCALE_TEXT[lang] || PLEASANT_SCALE_TEXT.en;
 
   const scaleMeta = {
     green: {
@@ -264,10 +327,13 @@ function PopupRatings({ panel, order, lex }) {
       className: "rating-row rating-row--green", label: lex.greenLabel,
     },
     pleasant: {
-      min: "1 = Very unpleasant", mid: "4 = Neither pleasant or unpleasant", max: "7 = Very pleasant",
-      choices: [1,2,3,4,5,6,7],
-      className: "rating-row rating-row--pleasant", label: "Pleasant",
-    }
+      min: pleasantTexts.min,
+      mid: pleasantTexts.mid,
+      max: pleasantTexts.max,
+      choices: [1, 2, 3, 4, 5, 6, 7],
+      className: "rating-row rating-row--pleasant",
+      label: pleasantTexts.label,
+    },
   };
 
   const getQ = React.useCallback((name) => panel?.getQuestionByName(name), [panel]);
@@ -394,11 +460,20 @@ export default function App() {
   //Uncomment this to test multiple lexicons
   //const { value: lexVariant, source: lexSource } = React.useMemo(resolveLexicon, []);
   //Comment the next lines and uncomment the previous to test different lexicons
+  // Language state (en / fi) with initial value from URL
+  const [lang, setLang] = React.useState(resolveLang);  // "en" or "fi"
+  const t = STRINGS[lang];
+
   const lexVariant = "GREEN";
   const lexSource = "forced";
 
-  const lex = LEXMAP[lexVariant];
-  const surveyJson = React.useMemo(() => buildSurveyForLexicon(lex), [lex]);
+
+  const lex = LEXMAP[lexVariant][lang];
+
+  const surveyJson = React.useMemo(
+    () => buildSurveyForLexicon(lex, lang),
+    [lex, lang]
+  );
 
   const model = React.useMemo(() => {
     const m = new Model(surveyJson);
@@ -415,6 +490,7 @@ export default function App() {
     m.showPreviewBeforeComplete = false;
     const defaultNext = m.pageNextText || "Next";
     m.completeText = "Finish survey";
+    m.locale = lang;
 
     // Hide panel nav UI always (we drive via lightbox)
     const removePanelUI = () => {
@@ -445,12 +521,15 @@ export default function App() {
     // Next button label (based on NORMAL count)
     const setNextLabel = () => {
       const name = m.currentPage?.name;
-      if (name === "introPage") m.pageNextText = "I agree";
-      else if (name === "consentPage") m.pageNextText = "Accept";
-      else if (name === "instructionsPage") m.pageNextText = "Start survey";
-      else if (name === "demographics") m.pageNextText = "Continue to rating";
+      if (name === "introPage") m.pageNextText = lang === "fi" ? "Hyväksyn" : "I agree";
+      else if (name === "consentPage") m.pageNextText = lang === "fi" ? "Hyväksyn" : "Accept";
+      else if (name === "instructionsPage") m.pageNextText = lang === "fi" ? "Aloita kysely" : "Start survey";
+      else if (name === "demographics") m.pageNextText = lang === "fi" ? "Jatka arviointiin" : "Continue to rating";
       else if (name === "comfort_loop_page") {
-        m.pageNextText = normalRatedCountRef.current >= MAX_IMAGES ? "Finish survey" : "Finish rating";
+        m.pageNextText =
+          normalRatedCountRef.current >= MAX_IMAGES
+            ? t.finishSurveyLabel
+            : t.finishRatingLabel;
       } else m.pageNextText = defaultNext;
     };
     setNextLabel();
@@ -715,7 +794,7 @@ export default function App() {
         dp.allowAddPanel = false;
         setLightbox(null);
         m.pageNextText = "Finish rating";
-        alert(`Thanks for rating! You’ve completed ${MAX_IMAGES} images.\n\nPlease press “Finish rating” to continue.`);
+        alert(t.finishRatingAlert(MAX_IMAGES));
         return;
       }
 
@@ -749,10 +828,10 @@ export default function App() {
       };
       const result = await saveSurveyResponse(completeData);
       if (result.success) {
-        alert("Thank you for completing the survey! Your responses have been saved.");
+        alert(t.saveSuccess);
       } else {
         console.error("Failed to save survey response:", result.error);
-        alert("There was an error saving your responses. Please try again.");
+        alert(t.saveError);
       }
     });
 
@@ -793,7 +872,7 @@ export default function App() {
 
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource, shouldShowTrap]);
+  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource, shouldShowTrap, lang]);
 
   // bridge to the lightbox opener stored in window (within the memo above)
   const openLightboxForPanel = React.useCallback((panel) => {
@@ -810,7 +889,40 @@ export default function App() {
     <>
       <style>{hideNormalRatingsStyle}</style>
 
-      <Survey model={model} />
+      <div className="survey-wrapper">
+        <Survey model={model} />
+
+        <div className="lang-switcher">
+          <label>
+            <span style={{ marginRight: "0.5rem" }}>
+              {lang === "fi" ? "Kieli:" : "Language:"}
+            </span>
+            <select
+              value={lang}
+              onChange={(e) => {
+                const newLang = e.target.value;
+                if (newLang === lang) return;
+
+                const ok = window.confirm(
+                  lang === "fi"
+                    ? "Kielen vaihtaminen aloittaa kyselyn alusta. Haluatko jatkaa?"
+                    : "Changing language will restart the survey. Continue?"
+                );
+                if (!ok) return;
+
+                setLang(newLang);
+                const url = new URL(window.location.href);
+                url.searchParams.set("lang", newLang);
+                window.history.replaceState({}, "", url.toString());
+              }}
+            >
+              <option value="en">English</option>
+              <option value="fi">Suomi</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
       <KeyboardRatings model={model} lightbox={lightbox} order={ratingOrder} />
 
       {lightbox && (
@@ -834,7 +946,7 @@ export default function App() {
             </div>
 
             {/* Ratings are ONLY rendered inside the lightbox */}
-            <PopupRatings panel={lightbox.panel} order={ratingOrder} lex={lex} />
+            <PopupRatings panel={lightbox.panel} order={ratingOrder} lex={lex} lang={lang} />
 
             <button className="lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">×</button>
           </div>
