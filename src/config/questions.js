@@ -5,8 +5,9 @@ import { t, tmpl } from "./surveyTranslations";
 // ---------- Images ----------
 const generateQuestionImages = () => {
   const questionImages = {
-    comfort_rating: getRandomImages("comfort_rating", 150),
+    comfort_rating: getRandomImages("comfort_rating", 100),
   };
+  console.log(questionImages)
   return questionImages;
 };
 export const displayedImages = generateQuestionImages();

@@ -15,6 +15,661 @@ const SUPABASE_STORAGE_URL = "https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe
 
 // 🔧 STEP 2: Replace with YOUR actual uploaded image filenames
 // Example filenames shown below - replace with your own image names
+
+const imageFilenames  =
+  [['788196405523330.jpg', 'summer', 'q1'],
+  ['1255225358350258.jpg', 'autumn', 'q1'],
+  ['219797916239283.jpg', 'winter', 'q1'],
+  ['959719608147863.jpg', 'summer', 'q1'],
+  ['453619029266033.jpg', 'spring', 'q3'],
+  ['302249631571427.jpg', 'summer', 'q3'],
+  ['1004634297807544.jpg', 'summer', 'q2'],
+  ['448057101617271.jpg', 'autumn', 'q2'],
+  ['1443020799367970.jpg', 'spring', 'q3'],
+  ['168645185145330.jpg', 'summer', 'q3'],
+  ['304557161199435.jpg', 'summer', 'q1'],
+  ['469041370849877.jpg', 'autumn', 'q1'],
+  ['837751916829470.jpg', 'spring', 'q1'],
+  ['380626116554536.jpg', 'summer', 'q1'],
+  ['254364819765990.jpg', 'summer', 'q2'],
+  ['276144584153330.jpg', 'autumn', 'q2'],
+  ['525498818819061.jpg', 'winter', 'q2'],
+  ['226640498816207.jpg', 'summer', 'q2'],
+  ['207226647681309.jpg', 'winter', 'q2'],
+  ['812926275995729.jpg', 'summer', 'q2'],
+  ['4094690540577081.jpg', 'spring', 'q2'],
+  ['460693218329521.jpg', 'summer', 'q2'],
+  ['717099699441487.jpg', 'spring', 'q3'],
+  ['563311225522278.jpg', 'summer', 'q3'],
+  ['140250901411455.jpg', 'summer', 'q2'],
+  ['775241813098394.jpg', 'autumn', 'q2'],
+  ['910216596500190.jpg', 'spring', 'q3'],
+  ['156876146381069.jpg', 'summer', 'q3'],
+  ['342697450613341.jpg', 'winter', 'q1'],
+  ['245251824015923.jpg', 'summer', 'q1'],
+  ['290409092559387.jpg', 'summer', 'q1'],
+  ['206448247713404.jpg', 'autumn', 'q1'],
+  ['335853197888024.jpg', 'winter', 'q1'],
+  ['263189135494186.jpg', 'summer', 'q1'],
+  ['906845046838649.jpg', 'summer', 'q3'],
+  ['1860420364113058.jpg', 'autumn', 'q3'],
+  ['168755992246271.jpg', 'spring', 'q2'],
+  ['745648276888070.jpg', 'summer', 'q2'],
+  ['121107613343502.jpg', 'winter', 'q1'],
+  ['919162322205937.jpg', 'summer', 'q1'],
+  ['138710738240801.jpg', 'spring', 'q2'],
+  ['2047624988708672.jpg', 'summer', 'q2'],
+  ['820759115467492.jpg', 'summer', 'q3'],
+  ['486022915971113.jpg', 'autumn', 'q3'],
+  ['3750791765050545.jpg', 'spring', 'q3'],
+  ['491087862040327.jpg', 'summer', 'q3'],
+  ['1120731331803993.jpg', 'spring', 'q1'],
+  ['619975696330943.jpg', 'summer', 'q1'],
+  ['1350502222016903.jpg', 'summer', 'q1'],
+  ['1117582255395644.jpg', 'autumn', 'q1'],
+  ['488810719204262.jpg', 'winter', 'q3'],
+  ['291655569344691.jpg', 'summer', 'q3'],
+  ['738970917184751.jpg', 'summer', 'q2'],
+  ['464748169876262.jpg', 'autumn', 'q2'],
+  ['395132519348365.jpg', 'summer', 'q1'],
+  ['629604458564415.jpg', 'autumn', 'q1'],
+  ['3504533359793917.jpg', 'spring', 'q3'],
+  ['487082136997864.jpg', 'summer', 'q3'],
+  ['1138635146563375.jpg', 'winter', 'q3'],
+  ['379229941001350.jpg', 'summer', 'q3'],
+  ['150330096985622.jpg', 'winter', 'q2'],
+  ['1379376425768211.jpg', 'summer', 'q2'],
+  ['1283888085359361.jpg', 'winter', 'q1'],
+  ['311813467254811.jpg', 'summer', 'q1'],
+  ['584606681258053.jpg', 'spring', 'q3'],
+  ['1177998899892608.jpg', 'summer', 'q3'],
+  ['529426391405057.jpg', 'summer', 'q3'],
+  ['143585211076681.jpg', 'autumn', 'q3'],
+  ['310564030589023.jpg', 'summer', 'q2'],
+  ['302569374674579.jpg', 'autumn', 'q2'],
+  ['334797537977717.jpg', 'spring', 'q1'],
+  ['484752462844571.jpg', 'summer', 'q1'],
+  ['789743481910173.jpg', 'winter', 'q2'],
+  ['204632054833026.jpg', 'summer', 'q2'],
+  ['497139581482782.jpg', 'summer', 'q2'],
+  ['4315503841828715.jpg', 'autumn', 'q2'],
+  ['296258898791501.jpg', 'summer', 'q2'],
+  ['302862958006222.jpg', 'autumn', 'q2'],
+  ['319133573712544.jpg', 'spring', 'q1'],
+  ['180367454470710.jpg', 'summer', 'q1'],
+  ['915242312360829.jpg', 'summer', 'q1'],
+  ['894721647743491.jpg', 'autumn', 'q1'],
+  ['1023748214819485.jpg', 'winter', 'q1'],
+  ['530767961275249.jpg', 'summer', 'q1'],
+  ['300426801456522.jpg', 'summer', 'q3'],
+  ['1900659760087557.jpg', 'autumn', 'q3'],
+  ['2908159816074437.jpg', 'winter', 'q2'],
+  ['113282514164265.jpg', 'summer', 'q2'],
+  ['935266137223140.jpg', 'summer', 'q3'],
+  ['211085360512603.jpg', 'autumn', 'q3'],
+  ['1162659035337194.jpg', 'spring', 'q2'],
+  ['187748863607042.jpg', 'summer', 'q2'],
+  ['408694971008255.jpg', 'spring', 'q1'],
+  ['526368162480172.jpg', 'summer', 'q1'],
+  ['756374038409208.jpg', 'winter', 'q3'],
+  ['897790580769014.jpg', 'summer', 'q3'],
+  ['4126088464095141.jpg', 'winter', 'q2'],
+  ['1971739672994887.jpg', 'summer', 'q2'],
+  ['4014830848598621.jpg', 'winter', 'q3'],
+  ['1442145372789478.jpg', 'summer', 'q3'],
+  ['353141133585845.jpg', 'spring', 'q3'],
+  ['485555162929376.jpg', 'summer', 'q3'],
+  ['471565054136245.jpg', 'summer', 'q1'],
+  ['1157933168057093.jpg', 'autumn', 'q1'],
+  ['474479400555085.jpg', 'winter', 'q3'],
+  ['488948012553206.jpg', 'summer', 'q3'],
+  ['285771149822550.jpg', 'winter', 'q1'],
+  ['2231892980299524.jpg', 'summer', 'q1'],
+  ['479516443338309.jpg', 'spring', 'q2'],
+  ['2970685303178794.jpg', 'summer', 'q2'],
+  ['390516213113493.jpg', 'spring', 'q3'],
+  ['1198927390934360.jpg', 'summer', 'q3'],
+  ['487841235823472.jpg', 'spring', 'q2'],
+  ['487872459099803.jpg', 'summer', 'q2'],
+  ['759134461469314.jpg', 'spring', 'q3'],
+  ['805037956785314.jpg', 'summer', 'q3'],
+  ['319383376807307.jpg', 'spring', 'q1'],
+  ['430850219069159.jpg', 'summer', 'q1'],
+  ['1107017483120375.jpg', 'spring', 'q3'],
+  ['2936150033289562.jpg', 'summer', 'q3'],
+  ['952547925491954.jpg', 'spring', 'q2'],
+  ['194613155832408.jpg', 'summer', 'q2'],
+  ['1227145031056443.jpg', 'winter', 'q2'],
+  ['315649780191064.jpg', 'summer', 'q2'],
+  ['863565384504908.jpg', 'summer', 'q2'],
+  ['474942617164893.jpg', 'autumn', 'q2'],
+  ['390316693013467.jpg', 'spring', 'q1'],
+  ['420292346535319.jpg', 'summer', 'q1'],
+  ['122485833200041.jpg', 'winter', 'q3'],
+  ['988447011895668.jpg', 'summer', 'q3'],
+  ['465902662663576.jpg', 'spring', 'q1'],
+  ['1216166949798123.jpg', 'summer', 'q1'],
+  ['139548998484264.jpg', 'winter', 'q2'],
+  ['481586166440994.jpg', 'summer', 'q2'],
+  ['133478185970487.jpg', 'summer', 'q2'],
+  ['623930629329922.jpg', 'autumn', 'q2'],
+  ['816277545954712.jpg', 'spring', 'q3'],
+  ['159497809447853.jpg', 'summer', 'q3'],
+  ['707598520338902.jpg', 'summer', 'q1'],
+  ['489246146382889.jpg', 'autumn', 'q1'],
+  ['1642502972815143.jpg', 'summer', 'q1'],
+  ['970510150575011.jpg', 'autumn', 'q1'],
+  ['321380012726207.jpg', 'spring', 'q1'],
+  ['466711907743617.jpg', 'summer', 'q1'],
+  ['476027240350405.jpg', 'winter', 'q2'],
+  ['958906008246349.jpg', 'summer', 'q2'],
+  ['735552333752134.jpg', 'summer', 'q1'],
+  ['1602968170034802.jpg', 'autumn', 'q1'],
+  ['498529208417273.jpg', 'spring', 'q1'],
+  ['475596440166037.jpg', 'summer', 'q1'],
+  ['1203052770147930.jpg', 'winter', 'q2'],
+  ['4409429922425107.jpg', 'summer', 'q2'],
+  ['974288673109623.jpg', 'summer', 'q3'],
+  ['2847549655510413.jpg', 'autumn', 'q3'],
+  ['3543529082547893.jpg', 'spring', 'q2'],
+  ['1162230561897749.jpg', 'summer', 'q2'],
+  ['876655756397600.jpg', 'summer', 'q1'],
+  ['530262054635264.jpg', 'autumn', 'q1'],
+  ['181915293712515.jpg', 'winter', 'q2'],
+  ['5511925392211959.jpg', 'summer', 'q2'],
+  ['515595086297637.jpg', 'summer', 'q3'],
+  ['3552687201504663.jpg', 'autumn', 'q3'],
+  ['5375059622622509.jpg', 'summer', 'q1'],
+  ['542474914969918.jpg', 'autumn', 'q1'],
+  ['2938166143063329.jpg', 'summer', 'q3'],
+  ['477210230269752.jpg', 'autumn', 'q3'],
+  ['302936201422128.jpg', 'summer', 'q2'],
+  ['207468187658905.jpg', 'autumn', 'q2'],
+  ['193273779319402.jpg', 'summer', 'q2'],
+  ['136891028480154.jpg', 'autumn', 'q2'],
+  ['325663625614843.jpg', 'winter', 'q1'],
+  ['185898720054488.jpg', 'summer', 'q1'],
+  ['1454713991536610.jpg', 'summer', 'q3'],
+  ['218221849764317.jpg', 'autumn', 'q3'],
+  ['1803305313184849.jpg', 'spring', 'q1'],
+  ['489347372312462.jpg', 'summer', 'q1'],
+  ['157047533376245.jpg', 'winter', 'q1'],
+  ['414277040630953.jpg', 'summer', 'q1'],
+  ['867583167121822.jpg', 'summer', 'q3'],
+  ['157971369598931.jpg', 'autumn', 'q3'],
+  ['491341575548295.jpg', 'summer', 'q3'],
+  ['323696929107884.jpg', 'autumn', 'q3'],
+  ['1125439247965490.jpg', 'spring', 'q1'],
+  ['113815977443833.jpg', 'summer', 'q1'],
+  ['851902359003602.jpg', 'spring', 'q1'],
+  ['152897493463773.jpg', 'summer', 'q1'],
+  ['927064611463638.jpg', 'spring', 'q3'],
+  ['1447554815598130.jpg', 'summer', 'q3'],
+  ['1185095251958311.jpg', 'spring', 'q2'],
+  ['1654157424968778.jpg', 'summer', 'q2'],
+  ['132042675997879.jpg', 'summer', 'q2'],
+  ['464596088799887.jpg', 'autumn', 'q2'],
+  ['4352378058155470.jpg', 'spring', 'q2'],
+  ['4193429974043181.jpg', 'summer', 'q2'],
+  ['2399529420190785.jpg', 'spring', 'q1'],
+  ['386924039128665.jpg', 'summer', 'q1'],
+  ['927756378011195.jpg', 'winter', 'q2'],
+  ['299483991849333.jpg', 'summer', 'q2'],
+  ['1524164158513130.jpg', 'spring', 'q2'],
+  ['123743393746312.jpg', 'summer', 'q2'],
+  ['314424976718318.jpg', 'summer', 'q3'],
+  ['785089748878152.jpg', 'autumn', 'q3'],
+  ['193725895925819.jpg', 'winter', 'q3'],
+  ['161637955811291.jpg', 'summer', 'q3'],
+  ['970728383665521.jpg', 'winter', 'q3'],
+  ['277964297343862.jpg', 'summer', 'q3'],
+  ['297571512060163.jpg', 'spring', 'q2'],
+  ['532465734797673.jpg', 'summer', 'q2'],
+  ['214024843584579.jpg', 'summer', 'q3'],
+  ['863373824392688.jpg', 'autumn', 'q3'],
+  ['1158410914743835.jpg', 'winter', 'q3'],
+  ['1112658809804467.jpg', 'summer', 'q3'],
+  ['594837858617914.jpg', 'summer', 'q2'],
+  ['1616851612546902.jpg', 'autumn', 'q2'],
+  ['1497047971202454.jpg', 'summer', 'q2'],
+  ['518923784179870.jpg', 'autumn', 'q2'],
+  ['1129887727489671.jpg', 'spring', 'q1'],
+  ['1143326169500836.jpg', 'summer', 'q1'],
+  ['194638279171320.jpg', 'winter', 'q1'],
+  ['596046231361812.jpg', 'summer', 'q1'],
+  ['1624793404374999.jpg', 'summer', 'q3'],
+  ['303665831245691.jpg', 'autumn', 'q3'],
+  ['207177371215123.jpg', 'spring', 'q3'],
+  ['920711598783044.jpg', 'summer', 'q3'],
+  ['1129291657584508.jpg', 'summer', 'q2'],
+  ['471407630797669.jpg', 'autumn', 'q2'],
+  ['174896881200675.jpg', 'winter', 'q3'],
+  ['303427158011408.jpg', 'summer', 'q3'],
+  ['137506204977039.jpg', 'winter', 'q2'],
+  ['193415529172898.jpg', 'summer', 'q2'],
+  ['478815780037183.jpg', 'summer', 'q3'],
+  ['1591423131051025.jpg', 'autumn', 'q3'],
+  ['932475727328261.jpg', 'winter', 'q2'],
+  ['1355173051623787.jpg', 'summer', 'q2'],
+  ['942456109862184.jpg', 'winter', 'q1'],
+  ['318836883187080.jpg', 'summer', 'q1'],
+  ['524958831836664.jpg', 'summer', 'q1'],
+  ['711610830481708.jpg', 'autumn', 'q1'],
+  ['739871180016681.jpg', 'winter', 'q3'],
+  ['337044441180098.jpg', 'summer', 'q3'],
+  ['1628330347377590.jpg', 'summer', 'q1'],
+  ['519342562768452.jpg', 'autumn', 'q1'],
+  ['2519762878319478.jpg', 'winter', 'q3'],
+  ['2641043806041179.jpg', 'summer', 'q3'],
+  ['2592347337735276.jpg', 'winter', 'q1'],
+  ['501362964384521.jpg', 'summer', 'q1'],
+  ['111428887674618.jpg', 'spring', 'q1'],
+  ['5350249061714201.jpg', 'summer', 'q1'],
+  ['906557880125078.jpg', 'spring', 'q2'],
+  ['532601321078288.jpg', 'summer', 'q2'],
+  ['763704550961653.jpg', 'summer', 'q2'],
+  ['469452884313574.jpg', 'autumn', 'q2'],
+  ['477769476799437.jpg', 'spring', 'q1'],
+  ['236706308245667.jpg', 'summer', 'q1'],
+  ['501089605350985.jpg', 'summer', 'q1'],
+  ['276280935287255.jpg', 'autumn', 'q1'],
+  ['4025728260854734.jpg', 'winter', 'q2'],
+  ['306800541087461.jpg', 'summer', 'q2'],
+  ['869290053659004.jpg', 'spring', 'q2'],
+  ['484812052742301.jpg', 'summer', 'q2'],
+  ['136819641824008.jpg', 'spring', 'q2'],
+  ['198884088721303.jpg', 'summer', 'q2'],
+  ['780996243381561.jpg', 'spring', 'q3'],
+  ['1460609687701897.jpg', 'summer', 'q3'],
+  ['938899710294316.jpg', 'winter', 'q3'],
+  ['217322206522278.jpg', 'summer', 'q3'],
+  ['164978085465850.jpg', 'spring', 'q2'],
+  ['306823007562873.jpg', 'summer', 'q2'],
+  ['448694182891073.jpg', 'summer', 'q1'],
+  ['2239549236181461.jpg', 'autumn', 'q1'],
+  ['464277121466034.jpg', 'summer', 'q1'],
+  ['318328176325665.jpg', 'autumn', 'q1'],
+  ['173121001391320.jpg', 'winter', 'q1'],
+  ['590698675240934.jpg', 'summer', 'q1'],
+  ['223655905771905.jpg', 'spring', 'q3'],
+  ['532061351563304.jpg', 'summer', 'q3'],
+  ['3292318527715903.jpg', 'summer', 'q3'],
+  ['500932441395583.jpg', 'autumn', 'q3'],
+  ['254355386434812.jpg', 'summer', 'q1'],
+  ['1420225208323541.jpg', 'autumn', 'q1'],
+  ['177336477600708.jpg', 'summer', 'q2'],
+  ['229979238926822.jpg', 'autumn', 'q2'],
+  ['1718440475032771.jpg', 'winter', 'q3'],
+  ['207693060969769.jpg', 'summer', 'q3'],
+  ['1106261019884341.jpg', 'summer', 'q3'],
+  ['2403614423115780.jpg', 'autumn', 'q3'],
+  ['2742176272739614.jpg', 'spring', 'q3'],
+  ['965651007539673.jpg', 'summer', 'q3'],
+  ['368818841229863.jpg', 'winter', 'q3'],
+  ['1162314847540554.jpg', 'summer', 'q3'],
+  ['1066447033847929.jpg', 'summer', 'q2'],
+  ['387785899030569.jpg', 'autumn', 'q2'],
+  ['4047656561966481.jpg', 'winter', 'q1'],
+  ['836866881344123.jpg', 'summer', 'q1'],
+  ['781294652527354.jpg', 'winter', 'q2'],
+  ['1158178194609133.jpg', 'summer', 'q2'],
+  ['304967034530782.jpg', 'winter', 'q1'],
+  ['960941651377679.jpg', 'summer', 'q1'],
+  ['322414755989844.jpg', 'winter', 'q3'],
+  ['178112834093478.jpg', 'summer', 'q3'],
+  ['2951749165144062.jpg', 'winter', 'q1'],
+  ['382274819713331.jpg', 'summer', 'q1'],
+  ['556332482011594.jpg', 'winter', 'q1'],
+  ['502233240930402.jpg', 'summer', 'q1'],
+  ['207248111210215.jpg', 'spring', 'q2'],
+  ['552962609018499.jpg', 'summer', 'q2'],
+  ['1649349121924144.jpg', 'spring', 'q1'],
+  ['475086097033255.jpg', 'summer', 'q1'],
+  ['1463039570712268.jpg', 'winter', 'q1'],
+  ['144910444874600.jpg', 'summer', 'q1'],
+  ['807965743456812.jpg', 'winter', 'q3'],
+  ['592354528824450.jpg', 'summer', 'q3'],
+  ['886083078916684.jpg', 'summer', 'q3'],
+  ['269411051530210.jpg', 'autumn', 'q3'],
+  ['310377067162767.jpg', 'spring', 'q1'],
+  ['3092140434348033.jpg', 'summer', 'q1'],
+  ['153622046732947.jpg', 'spring', 'q3'],
+  ['469517017454322.jpg', 'summer', 'q3'],
+  ['315158283333320.jpg', 'summer', 'q1'],
+  ['2730589157232178.jpg', 'autumn', 'q1'],
+  ['5508395699232796.jpg', 'winter', 'q1'],
+  ['296873895304405.jpg', 'summer', 'q1'],
+  ['947442766605889.jpg', 'spring', 'q3'],
+  ['706551763777193.jpg', 'summer', 'q3'],
+  ['150327490319085.jpg', 'summer', 'q3'],
+  ['558516171797785.jpg', 'autumn', 'q3'],
+  ['393653608354376.jpg', 'spring', 'q3'],
+  ['151512843610556.jpg', 'summer', 'q3'],
+  ['325116802309775.jpg', 'winter', 'q2'],
+  ['133593712091803.jpg', 'summer', 'q2'],
+  ['521409192350071.jpg', 'spring', 'q2'],
+  ['124369989668813.jpg', 'summer', 'q2'],
+  ['488262375856441.jpg', 'winter', 'q2'],
+  ['226145529269888.jpg', 'summer', 'q2'],
+  ['1889627508077184.jpg', 'spring', 'q2'],
+  ['5208206555959680.jpg', 'summer', 'q2'],
+  ['1116923038904994.jpg', 'summer', 'q2'],
+  ['803224104219114.jpg', 'autumn', 'q2'],
+  ['512768153505008.jpg', 'summer', 'q3'],
+  ['2016495558505647.jpg', 'autumn', 'q3'],
+  ['824414981765839.jpg', 'winter', 'q3'],
+  ['173447721799036.jpg', 'summer', 'q3'],
+  ['485042226151203.jpg', 'spring', 'q1'],
+  ['209823837614710.jpg', 'summer', 'q1'],
+  ['175701220984724.jpg', 'summer', 'q2'],
+  ['972325836921308.jpg', 'autumn', 'q2'],
+  ['455899078845219.jpg', 'winter', 'q2'],
+  ['213802180553862.jpg', 'summer', 'q2'],
+  ['792773951867788.jpg', 'summer', 'q1'],
+  ['200351531711474.jpg', 'autumn', 'q1'],
+  ['270942024736057.jpg', 'spring', 'q2'],
+  ['510190977015266.jpg', 'summer', 'q2'],
+  ['734174200609408.jpg', 'winter', 'q2'],
+  ['931272857421873.jpg', 'summer', 'q2'],
+  ['513029009853802.jpg', 'winter', 'q3'],
+  ['828140911412465.jpg', 'summer', 'q3'],
+  ['1137276896741619.jpg', 'winter', 'q1'],
+  ['160553873221462.jpg', 'summer', 'q1'],
+  ['239868034587307.jpg', 'winter', 'q3'],
+  ['2506420589502348.jpg', 'summer', 'q3'],
+  ['1004634297807544_AI.png', 'autumn_AI', 'q2'],
+  ['1066447033847929_AI.png', 'autumn_AI', 'q2'],
+  ['1112658809804467_AI.png', 'winter_AI', 'q3'],
+  ['113282514164265_AI.png', 'winter_AI', 'q2'],
+  ['113815977443833_AI.png', 'spring_AI', 'q1'],
+  ['1158178194609133_AI.png', 'winter_AI', 'q2'],
+  ['1162314847540554_AI.png', 'winter_AI', 'q3'],
+  ['123743393746312_AI.png', 'spring_AI', 'q2'],
+  ['124369989668813_AI.png', 'spring_AI', 'q2'],
+  ['132042675997879_AI.png', 'autumn_AI', 'q2'],
+  ['1350502222016903_AI.png', 'autumn_AI', 'q1'],
+  ['1379376425768211_AI.png', 'winter_AI', 'q2'],
+  ['140250901411455_AI.png', 'autumn_AI', 'q2'],
+  ['1442145372789478_AI.png', 'winter_AI', 'q3'],
+  ['1447554815598130_AI.png', 'spring_AI', 'q3'],
+  ['152897493463773_AI.png', 'spring_AI', 'q1'],
+  ['156876146381069_AI.png', 'spring_AI', 'q3'],
+  ['159497809447853_AI.png', 'spring_AI', 'q3'],
+  ['160553873221462_AI.jpg', 'winter_AI', 'q1'],
+  ['180367454470710_AI.png', 'spring_AI', 'q1'],
+  ['187748863607042_AI.png', 'spring_AI', 'q2'],
+  ['193273779319402_AI.png', 'autumn_AI', 'q2'],
+  ['193415529172898_AI.png', 'winter_AI', 'q2'],
+  ['204632054833026_AI.png', 'winter_AI', 'q2'],
+  ['2047624988708672_AI.png', 'spring_AI', 'q2'],
+  ['214024843584579_AI.png', 'autumn_AI', 'q3'],
+  ['226145529269888_AI.png', 'winter_AI', 'q2'],
+  ['226640498816207_AI.png', 'winter_AI', 'q2'],
+  ['254355386434812_AI.png', 'autumn_AI', 'q1'],
+  ['263189135494186_AI.png', 'winter_AI', 'q1'],
+  ['2641043806041179_AI.png', 'winter_AI', 'q3'],
+  ['290409092559387_AI.png', 'autumn_AI', 'q1'],
+  ['291655569344691_AI.png', 'winter_AI', 'q3'],
+  ['2936150033289562_AI.png', 'spring_AI', 'q3'],
+  ['2970685303178794_AI.png', 'spring_AI', 'q2'],
+  ['299483991849333_AI.png', 'winter_AI', 'q2'],
+  ['300426801456522_AI.png', 'autumn_AI', 'q3'],
+  ['302249631571427_AI.png', 'spring_AI', 'q3'],
+  ['302936201422128_AI.png', 'autumn_AI', 'q2'],
+  ['303427158011408_AI.png', 'winter_AI', 'q3'],
+  ['306823007562873_AI.png', 'spring_AI', 'q2'],
+  ['310564030589023_AI.png', 'autumn_AI', 'q2'],
+  ['311813467254811_AI.png', 'winter_AI', 'q1'],
+  ['314424976718318_AI.png', 'autumn_AI', 'q3'],
+  ['318836883187080_AI.png', 'winter_AI', 'q1'],
+  ['3292318527715903_AI.png', 'autumn_AI', 'q3'],
+  ['337044441180098_AI.png', 'winter_AI', 'q3'],
+  ['380626116554536_AI.png', 'spring_AI', 'q1'],
+  ['395132519348365_AI.png', 'autumn_AI', 'q1'],
+  ['4193429974043181_AI.png', 'spring_AI', 'q2'],
+  ['4409429922425107_AI.png', 'winter_AI', 'q2'],
+  ['448694182891073_AI.png', 'autumn_AI', 'q1'],
+  ['460693218329521_AI.png', 'spring_AI', 'q2'],
+  ['469517017454322_AI.png', 'spring_AI', 'q3'],
+  ['475086097033255_AI.png', 'spring_AI', 'q1'],
+  ['475596440166037_AI.png', 'spring_AI', 'q1'],
+  ['484752462844571_AI.png', 'spring_AI', 'q1'],
+  ['489347372312462_AI.png', 'spring_AI', 'q1'],
+  ['491087862040327_AI.png', 'spring_AI', 'q3'],
+  ['491341575548295_AI.png', 'autumn_AI', 'q3'],
+  ['501362964384521_AI.png', 'winter_AI', 'q1'],
+  ['502233240930402_AI.png', 'winter_AI', 'q1'],
+  ['524958831836664_AI.png', 'autumn_AI', 'q1'],
+  ['526368162480172_AI.png', 'spring_AI', 'q1'],
+  ['529426391405057_AI.png', 'autumn_AI', 'q3'],
+  ['532061351563304_AI.png', 'spring_AI', 'q3'],
+  ['532465734797673_AI.png', 'spring_AI', 'q2'],
+  ['532601321078288_AI.png', 'spring_AI', 'q2'],
+  ['5350249061714201_AI.png', 'spring_AI', 'q1'],
+  ['5375059622622509_AI.png', 'autumn_AI', 'q1'],
+  ['5511925392211959_AI.png', 'winter_AI', 'q2'],
+  ['563311225522278_AI.png', 'spring_AI', 'q3'],
+  ['592354528824450_AI.png', 'winter_AI', 'q3'],
+  ['594837858617914_AI.png', 'autumn_AI', 'q2'],
+  ['596046231361812_AI.png', 'winter_AI', 'q1'],
+  ['735552333752134_AI.png', 'autumn_AI', 'q1'],
+  ['738970917184751_AI.png', 'autumn_AI', 'q2'],
+  ['763704550961653_AI.png', 'autumn_AI', 'q2'],
+  ['788196405523330_AI.png', 'autumn_AI', 'q1'],
+  ['805037956785314_AI.png', 'spring_AI', 'q3'],
+  ['828140911412465_AI.jpg', 'winter_AI', 'q3'],
+  ['867583167121822_AI.png', 'autumn_AI', 'q3'],
+  ['876655756397600_AI.png', 'autumn_AI', 'q1'],
+  ['886083078916684_AI.png', 'autumn_AI', 'q3'],
+  ['897790580769014_AI.png', 'winter_AI', 'q3'],
+  ['906845046838649_AI.png', 'autumn_AI', 'q3'],
+  ['919162322205937_AI.png', 'winter_AI', 'q1'],
+  ['935266137223140_AI.png', 'autumn_AI', 'q3'],
+  ['959719608147863_AI.png', 'winter_AI', 'q1'],
+  ['960941651377679_AI.png', 'winter_AI', 'q1']]
+
+// Optional: if you still want plain URL list somewhere else:
+export const streetImages = imageFilenames.map(
+  ([filename]) => `${SUPABASE_STORAGE_URL}${filename}`
+);
+
+// Helper: shuffle an array in-place (Fisher–Yates)
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// Helper: sample n distinct items
+function sampleWithoutReplacement(arr, n) {
+  const copy = [...arr];
+  shuffle(copy);
+  return copy.slice(0, Math.min(n, copy.length));
+}
+
+// MAIN: select 56 images with your stratified logic
+export function getRandomImages() {
+  const fullList = imageFilenames; // just for clarity
+
+  // 1) Group by season + q (e.g. "spring-q1", "summer_AI-q3")
+  const groups = new Map();
+  for (const [filename, season, q] of fullList) {
+    const key = `${season}-${q}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ filename, season, q });
+  }
+
+  // 2) Split into macro groups
+  const nonSummerSeasons = ["autumn", "spring", "winter"];
+  const nonSummerKeys = [];
+  const summerKeys = [];
+  const aiKeys = [];
+
+  for (const key of groups.keys()) {
+    const [season] = key.split("-");
+    const isAI = season.endsWith("_AI");
+    if (isAI) {
+      aiKeys.push(key);
+    } else if (season === "summer") {
+      summerKeys.push(key);
+    } else if (nonSummerSeasons.includes(season)) {
+      nonSummerKeys.push(key);
+    }
+  }
+
+  // 3) Choose macro totals so that grand total = 56
+  const macroOptions = [
+    { nonSummer: 22, summer: 22, ai: 12 },
+    { nonSummer: 22, summer: 23, ai: 11 },
+    { nonSummer: 23, summer: 22, ai: 11 },
+  ];
+  const macro = macroOptions[Math.floor(Math.random() * macroOptions.length)];
+
+  // 4) Helper to distribute counts within a macro group
+  function assignCountsForMacroGroup(subgroupKeys, minPer, maxPer, macroTotalTarget) {
+    const counts = {};
+    if (subgroupKeys.length === 0) return counts;
+
+    // Start with min per subgroup
+    let baseTotal = 0;
+    for (const key of subgroupKeys) {
+      const available = groups.get(key).length;
+      const initial = Math.min(minPer, available);
+      counts[key] = initial;
+      baseTotal += initial;
+    }
+
+    let remaining = macroTotalTarget - baseTotal;
+    if (remaining <= 0) return counts;
+
+    const keysShuffled = shuffle([...subgroupKeys]);
+
+    while (remaining > 0) {
+      let changedThisRound = false;
+
+      for (const key of keysShuffled) {
+        if (remaining <= 0) break;
+        const current = counts[key];
+        const maxAllowed = Math.min(maxPer, groups.get(key).length);
+
+        if (current < maxAllowed) {
+          counts[key] = current + 1;
+          remaining -= 1;
+          changedThisRound = true;
+          if (remaining <= 0) break;
+        }
+      }
+
+      if (!changedThisRound) break; // avoid infinite loop
+    }
+
+    return counts;
+  }
+
+  // 5) Get per-subgroup counts
+  const nonSummerCounts = assignCountsForMacroGroup(
+    nonSummerKeys,
+    2,
+    3,
+    macro.nonSummer
+  );
+
+  const summerCounts = assignCountsForMacroGroup(
+    summerKeys,
+    7,
+    8,
+    macro.summer
+  );
+
+  const aiCounts = assignCountsForMacroGroup(
+    aiKeys,
+    1,
+    2,
+    macro.ai
+  );
+
+  const allCounts = { ...nonSummerCounts, ...summerCounts, ...aiCounts };
+
+  // 6) Sample according to counts
+  const selected = [];
+
+  for (const [key, items] of groups.entries()) {
+    const n = allCounts[key] || 0;
+    if (n <= 0) continue;
+
+    const chosen = sampleWithoutReplacement(items, n);
+    for (const { filename, season, q } of chosen) {
+      selected.push({
+        value: filename,
+        imageLink: `${SUPABASE_STORAGE_URL}${filename}`,
+        season,
+        category: q,
+        subgroupKey: key,
+      });
+    }
+  }
+
+  shuffle(selected);
+  const final = selected.slice(0, 56);
+
+  console.log("Selected:", final.length, "images");
+  // Optional: log distribution
+  const summary = {};
+  for (const img of final) {
+    const key = `${img.season}-${img.category}`;
+    summary[key] = (summary[key] || 0) + 1;
+  }
+  console.log("Distribution:", summary);
+
+  return final;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+
+// 🔧 STEP 3: Automatically generate full URLs (no need to edit this part)
+export const streetImages = imageFilenames.map(filename => `${SUPABASE_STORAGE_URL}${filename}`);
+
+
+// Function to get random images for questions
+export function getRandomImages(questionName, count) {
+  let images = [...streetImages];
+  let result = [];
+  
+  for (let i = 0; i < Math.min(count, images.length); i++) {
+    const randomIndex = Math.floor(Math.random() * images.length);
+    const imageUrl = typeof images[randomIndex] === 'string' 
+      ? images[randomIndex] 
+      : images[randomIndex].url;
+    
+    const imageName = imageUrl.split('/').pop();
+    
+    result.push({
+      value: imageName,
+      imageLink: imageUrl
+    });
+    
+    images.splice(randomIndex, 1);
+  }
+  
+  return result;
+} 
+
+
 const imageFilenames = [
   "1004634297807544.jpg",
   "1004634297807544_AI.png",
@@ -467,32 +1122,4 @@ const imageFilenames = [
   "974288673109623.jpg",
   "988447011895668.jpg",
 ];
-
-
-// 🔧 STEP 3: Automatically generate full URLs (no need to edit this part)
-export const streetImages = imageFilenames.map(filename => `${SUPABASE_STORAGE_URL}${filename}`);
-
-
-// Function to get random images for questions
-export function getRandomImages(questionName, count) {
-  let images = [...streetImages];
-  let result = [];
-  
-  for (let i = 0; i < Math.min(count, images.length); i++) {
-    const randomIndex = Math.floor(Math.random() * images.length);
-    const imageUrl = typeof images[randomIndex] === 'string' 
-      ? images[randomIndex] 
-      : images[randomIndex].url;
-    
-    const imageName = imageUrl.split('/').pop();
-    
-    result.push({
-      value: imageName,
-      imageLink: imageUrl
-    });
-    
-    images.splice(randomIndex, 1);
-  }
-  
-  return result;
-} 
+*/

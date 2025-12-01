@@ -120,7 +120,7 @@ export const SURVEY_TEXT = {
         <br/>1 = Erittäin epämiellyttävä … 4 = ei miellyttävä eikä epämiellyttävä … 7 = Erittäin miellyttävä</p>
       <p>Kun olet vastannut molempiin kysymyksiin, seuraava kuva avautuu automaattisesti.</p>
       <p>Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla "Lopeta arviointi"-painiketta.</p>
-      <img src="rating_instructions.png" alt="ohjekuva" />
+      <img src="rating_instructions_fin.png" alt="ohjekuva" />
     `,
   },
 

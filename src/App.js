@@ -11,13 +11,7 @@ import "survey-core/survey.i18n";
 /* =========================================================
    CONFIG: Trap logic
    ========================================================= */
-const TRAP_EVERY = 25; // show a trap on the 5th, 10th, 15th, ... NORMAL rating
-const TRAP_IMAGES = [
-  "/trap/space1.png",
-  "/trap/space2.png",
-  "/trap/space3.png",
-  "/trap/space4.png",
-];
+const TRAP_EVERY = 12; // show a trap on the 5th, 10th, 15th, ... NORMAL rating
 
 /* =========================================================
    Safety-net CSS: hide normal-view ratings (we render our own
@@ -133,10 +127,10 @@ const LEXMAP = {
 /* =========================================================
    Utils
    ========================================================= */
-function pickRandomTrap() {
-  if (!TRAP_IMAGES.length) return null;
-  const idx = Math.floor(Math.random() * TRAP_IMAGES.length);
-  return TRAP_IMAGES[idx];
+function pickRandomTrap(trapImages) {
+  if (!trapImages || !trapImages.length) return null;
+  const idx = Math.floor(Math.random() * trapImages.length);
+  return trapImages[idx];
 }
 
 function resolveLang() {
@@ -410,7 +404,7 @@ function PopupRatings({ panel, order, lex, lang }) {
    ========================================================= */
 export default function App() {
   const MIN_DWELL_MS = 2000;
-  const MAX_IMAGES = 100; // NORMAL images only
+  const MAX_IMAGES = 60; // NORMAL images only
 
   const surveyOpenedAtRef = React.useRef(new Date().toISOString());
   const ratingStartRef = React.useRef(null);
@@ -463,6 +457,26 @@ export default function App() {
   // Language state (en / fi) with initial value from URL
   const [lang, setLang] = React.useState(resolveLang);  // "en" or "fi"
   const t = STRINGS[lang];
+
+  // Trap images depend on language
+  const trapImages = React.useMemo(
+    () =>
+      lang === "fi"
+        ? [
+            "/trap/space1_fin.png",
+            "/trap/space2_fin.png",
+            "/trap/space3_fin.png",
+            "/trap/space4_fin.png",
+          ]
+        : [
+            "/trap/space1.png",
+            "/trap/space2.png",
+            "/trap/space3.png",
+            "/trap/space4.png",
+          ],
+    [lang]
+  );
+
 
   const lexVariant = "GREEN";
   const lexSource = "forced";
@@ -667,10 +681,9 @@ export default function App() {
           if (wasOpen) openLightboxForPanel(nextPanel);
         }, 100);
       } else {
-        setTimeout(() => {
-          m.completeLastPage();
-          setLightbox(null);
-        }, 100);
+        dp.allowAddPanel = false;    // optional: hard-stop any more panels
+        setLightbox(null);           // close lightbox
+        alert(t.finishRatingAlert(MAX_IMAGES)); 
       }
     };
 
@@ -846,7 +859,7 @@ export default function App() {
 
       // Trap as interstitial on exact Nth upcoming normal
       if (shouldShowTrap()) {
-        const trapUrl = pickRandomTrap();
+        const trapUrl = pickRandomTrap(trapImages);
         if (trapUrl) {
           const qOpen = panel.getQuestionByName("lightbox_opened_at");
           if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
@@ -872,7 +885,7 @@ export default function App() {
 
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource, shouldShowTrap, lang]);
+  }, [surveyJson, ratingOrderStr, ratingOrderSource, lexVariant, lexSource, shouldShowTrap, lang, trapImages]);
 
   // bridge to the lightbox opener stored in window (within the memo above)
   const openLightboxForPanel = React.useCallback((panel) => {
