@@ -103,7 +103,7 @@ export const SURVEY_TEXT = {
         <i>How pleasant is the scene in the image as a whole to you?</i>
         <br/>1 = Very unpleasant … 4 = neither pleasant or unpleasant … 7 = Very pleasant</p>
       <p>After answering both questions, the next image will appear automatically.</p>
-      <p>Click an image to start rating. You can also use the keyboard numbers: Backspace corrects the last rating. Press F11 to enter/exit full screen. Click the "x" in the top right corner or outside of the white rating area to exit the rating. Press Finish rating whenever you want to stop.</p>
+      <p>Click an image to start rating. You can also use the keyboard numbers: Backspace corrects the last rating. Press F11 to enter/exit full screen. Click the "x" in the top right corner or outside of the white rating area to exit the rating. When the images to rate end, press "Finish rating" to move to the final section of the questionnaire.</p>
       <img src="rating_instructions.png" alt="instruction image" />
     `,
     fi: `
@@ -119,21 +119,21 @@ export const SURVEY_TEXT = {
         <i>Kuinka miellyttävänä koet kuvan maiseman kokonaisuutena?</i>
         <br/>1 = Erittäin epämiellyttävä … 4 = ei miellyttävä eikä epämiellyttävä … 7 = Erittäin miellyttävä</p>
       <p>Kun olet vastannut molempiin kysymyksiin, seuraava kuva avautuu automaattisesti.</p>
-      <p>Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla "Lopeta arviointi"-painiketta.</p>
+      <p>Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Arvioitavien kuvien loppuessa paina "Lopeta arviointi"-painiketta siirtyäksesi kyselyn seuraavaan vaiheeseen.</p>
       <img src="rating_instructions_fin.png" alt="ohjekuva" />
     `,
   },
 
   while_rating_html: {
     en: `
-      <p>Please rate images for the requested time. Click an image to start rating. You can also use the keyboard numbers: Backspace corrects the last rating. Press F11 to enter/exit full screen. Click the "x" in the top right corner or outside of the white rating area to exit the rating. Press Finish rating whenever you want to stop.</p>
+      <p>Please rate images until the survey prompts you to move to the next step. Click an image to start rating. You can also use the keyboard numbers: Backspace corrects the last rating. Press F11 to enter/exit full screen. Click the "x" in the top right corner or outside of the white rating area to exit the rating. When the images to rate end, press "Finish rating" to move to the final section of the questionnaire.</p>
       <ul style="list-style:none;padding-left:0;">
         <li><b>{greenLabel}:</b> How much {greenLabelLower}, as in visible vegetation, do you see?</li>
         <li><b>Pleasantness:</b> How pleasant do you find the scene in the image as a whole?</li>
       </ul>
     `,
     fi: `
-      <p>Arvioi kuvia pyydetty määrä. Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla "Lopeta arviointi"-painiketta.</p>
+      <p>Arvioi kuvia kunnes kysely kehottaa sinua siirtymään seuraavaan vaiheeseen. Paina ensimmäistä kuvaa aloittaaksesi arviointi. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Arvioitavien kuvien loppuessa paina "Lopeta arviointi"-painiketta siirtyäksesi kyselyn seuraavaan vaiheeseen.</p>
       <ul style="list-style:none;padding-left:0;">
         <li><b>{greenLabel}:</b> Kuinka paljon vihreyttä, eli näkyvää kasvillisuutta näet kuvassa?</li>
         <li><b>Miellyttävyys:</b> Kuinka miellyttävänä koet kuvan maiseman kokonaisuutena?</li>
