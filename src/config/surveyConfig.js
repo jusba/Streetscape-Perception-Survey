@@ -1,7 +1,8 @@
 export const surveyConfig = {
   // Basic Information
-  title: "Urban Greenery Perception Survey",
-  
+  title: {
+    en: "Urban Greenery Perception Survey",fin: "Vihreyden Kokemukset Katutasolla -kysely"
+  },
   // Lab Information - Replace with your own
   logo: "https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/logo.png",
   logoPosition: "right",

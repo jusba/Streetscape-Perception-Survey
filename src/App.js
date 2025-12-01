@@ -480,16 +480,16 @@ export default function App() {
 
     // Theme + config
     m.applyTheme(themeJson);
-    m.title = surveyConfig.title;
+    m.title = lang === "fi" ? surveyConfig.title.fin : surveyConfig.title.en;
     m.description = surveyConfig.description;
     m.logo = surveyConfig.logo;
     m.logoPosition = surveyConfig.logoPosition;
     Object.assign(m, surveyConfig.settings || {});
     m.focusFirstQuestionAutomatic = false;
-    m.previewText = "Finish survey";
+    m.previewText = t.finishSurveyLabel 
     m.showPreviewBeforeComplete = false;
     const defaultNext = m.pageNextText || "Next";
-    m.completeText = "Finish survey";
+    m.completeText = t.finishSurveyLabel
     m.locale = lang;
 
     // Hide panel nav UI always (we drive via lightbox)
@@ -793,7 +793,7 @@ export default function App() {
         const dp = m.getQuestionByName("comfort_loop");
         dp.allowAddPanel = false;
         setLightbox(null);
-        m.pageNextText = "Finish rating";
+        //m.pageNextText = "Finish rating";
         alert(t.finishRatingAlert(MAX_IMAGES));
         return;
       }

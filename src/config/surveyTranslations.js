@@ -50,7 +50,7 @@ export const SURVEY_TEXT = {
   intro_html: {
     en: `
       <img src="into_image.png" alt="banner image" />
-      <h2>Welcome to the Street {greenLabel} Survey</h2>
+      <h2>Welcome to the Urban Greenery Perception Survey</h2>
       <b>Before you begin, please read the following information:</b>
       <p>This study, conducted by the Digital Geography Lab of the University of Helsinki, is part of the GREENTRAVEL project (2023–2027) funded by the European Research Council (ERC, 101044906). It explores the use of street view images to capture the importance of {greenLabelLower} in people’s perception of street environments. The findings are expected to inform transportation and green infrastructure planning.</p>
       <b>You can read more here (click the link to open):</b>
@@ -66,13 +66,13 @@ export const SURVEY_TEXT = {
       <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
       <p>At the end of the survey, you will have the opportunity to enter your email address for a chance to win movie tickets.</p>
       <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>
-      <h5>By continuing, you confirm: (1) you understand the purpose, (2) participation is voluntary, and (3) you are at least 18 years old.</h5>
+      <b>By continuing, you confirm: (1) you understand the purpose, (2) participation is voluntary, and (3) you are at least 18 years old.</b>
     `,
     fi: `
       <img src="into_image.png" alt="banner image" />
-      <h2>Tervetuloa katutasovihreys-kyselyyn</h2>
+      <h2>Tervetuloa Vihreyden Kokemukset Katutasolla -kyselyyn</h2>
       <b>Ennen kuin aloitat, luethan seuraavat tiedot:</b>
-      <p>Tämä tutkimus on Helsingin yliopiston Digital Geography Lab -tutkimusryhmän toteuttama ja osa GREENTRAVEL-hanketta (2023–2027), jota rahoittaa Euroopan tutkimusneuvosto (ERC, 101044906). Tutkimuksessa tarkastellaan katunäkymäkuvia ja sitä, miten katutasovihreys koetaan kaupunkiympäristöissä. Tuloksia voidaan hyödyntää liikenne- ja viherverkostojen suunnittelussa.</p>
+      <p>Tämä tutkimus on Helsingin yliopiston Digital Geography Lab -tutkimusryhmän toteuttama ja osa GREENTRAVEL-hanketta (2023–2027), jota rahoittaa Euroopan tutkimusneuvosto (ERC, 101044906). Tutkimuksessa tarkastellaan katunäkymäkuvia ja sitä, miten vihreys koetaan kaupunkiympäristöissä. Tuloksia voidaan hyödyntää liikenne- ja viherverkostojen suunnittelussa.</p>
       <b>Lisätietoa löydät täältä (paina linkkiä avataksesi):</b>
       <p></p>
       <a href="https://www.helsinki.fi/en/researchgroups/digital-geography-lab/projects/greentravel">GREENTRAVEL</a>
@@ -83,16 +83,17 @@ export const SURVEY_TEXT = {
       <p></p>
 
       <b>Kysely koostuu kolmesta osasta ja sen täyttämiseen kuluu noin 10–15 minuuttia.</b>
-      <p>Vastauksesi kerätään, analysoidaan, julkaistaan ja säilytetään luottamuksellisesti ja anonyymisti EU:n tietosuoja-asetuksen (GDPR) mukaisesti. Täysi tietosuojaseloste: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Tieto- ja tietosuojailmoitus (englanniksi)</a></p>
+      <p>Vastauksesi kerätään, analysoidaan, julkaistaan ja säilytetään luottamuksellisesti ja anonyymisti EU:n tietosuoja-asetuksen (GDPR) mukaisesti. Täysi tietosuojaseloste: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Tietosuojaseloste (englanniksi)</a></p>
       <p>Kyselyn lopussa voit halutessasi jättää sähköpostiosoitteesi osallistuaksesi elokuvalippujen arvontaan.</p>
-      <p>Kysyttävää? Ota yhteyttä tutkimuksen vetäjään: Jussi Torkko (jussi.torkko[at]helsinki.fi)</p>
-      <h5>Jatkamalla eteenpäin vahvistat, että (1) ymmärrät tutkimuksen tarkoituksen, (2) tiedostat että osallistuminen on vapaaehtoista ja (3) olet vähintään 18-vuotias.</h5>
+      <p>Kysyttävää? Ota yhteyttä tutkimuksen vetäjään Jussi Torkkoon (jussi.torkko[at]helsinki.fi)</p>
+      <b>Jatkamalla eteenpäin vahvistat, että (1) ymmärrät tutkimuksen tarkoituksen, (2) tiedostat, että osallistuminen on vapaaehtoista ja (3) olet vähintään 18-vuotias.</b>
     `,
   },
 
   instructions_html: {
     en: `
       <h2>Instructions</h2>
+      <p><strong>To complete the survey, please rate images for approximately 10 minutes. After the final image, you will be prompted to move to the next section. Finally you will answer some feedback questions and can finish.</strong></p>
       <p>In the first part you’ll answer a few background questions. Then you will rate a series of street images.</p>
       <p>You will be shown different images. <b>Consider the scene as it appears in the picture (do not imagine other seasons or conditions).</b> Please answer the following for each image:</p>
       <p><b>{greenLabel}:</b>
@@ -104,11 +105,12 @@ export const SURVEY_TEXT = {
       <p>After answering both questions, the next image will appear automatically.</p>
       <p>Click an image to start rating. You can also use the keyboard numbers: Backspace corrects the last rating. Press F11 to enter/exit full screen. Click the "x" in the top right corner or outside of the white rating area to exit the rating. Press Finish rating whenever you want to stop.</p>
       <img src="rating_instructions.png" alt="instruction image" />
-      <p><strong>To complete the survey, please rate images for approximately 10 minutes. After the final image, you will be prompted to move to the next section. Finally you will answer some feedback questions and can finish.</strong></p>
     `,
     fi: `
       <h2>Ohjeet</h2>
-      <p>Kyselyn ensimmäisessä osassa vastaat muutamiin taustakysymyksiin. Sen jälkeen pääset tarkastelemaan katutasokuvia.</p>
+      <p><strong>Jotta saamme riittävästi vastauksia, pyydämme sinua arvioimaan kuvia noin 10 minuuttia. Viimeisen kuvan jälkeen kysely ohjaa sinut automaattisesti seuraavaan osioon. Tämän jälkeen vastaat lyhyeeseen palautekyselyyn ja voit lopettaa kyselyn.</strong></p>
+
+      <p>Kyselyn ensimmäisessä osassa vastaat muutamiin taustakysymyksiin. Sen jälkeen pääset tarkastelemaan katunäkymäkuvia.</p>
       <p>Sinulle esitetään erilaisia kuvia. <b>Arvioi näkymää sellaisena kuin se kuvassa näkyy (älä kuvittele esimerkiksi eri vuodenaikoja tai olosuhteita).</b> Vastaa jokaiseen kuvaan seuraavasti:</p>
       <p><b>{greenLabel}:</b>
         <i>Kuinka paljon vihreyttä, eli näkyvää kasvillisuutta näet kuvassa oman arviosi mukaan?</i>
@@ -117,9 +119,8 @@ export const SURVEY_TEXT = {
         <i>Kuinka miellyttävänä koet kuvan maiseman kokonaisuutena?</i>
         <br/>1 = Erittäin epämiellyttävä … 4 = ei miellyttävä eikä epämiellyttävä … 7 = Erittäin miellyttävä</p>
       <p>Kun olet vastannut molempiin kysymyksiin, seuraava kuva avautuu automaattisesti.</p>
-      <p>Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla Lopeta arviointi-painiketta.</p>
+      <p>Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla "Lopeta arviointi"-painiketta.</p>
       <img src="rating_instructions.png" alt="ohjekuva" />
-      <p><strong>Jotta saamme riittävästi vastauksia, pyydämme sinua arvioimaan kuvia noin 10 minuuttia. Viimeisen kuvan jälkeen kysely ohjaa sinut automaattisesti seuraavaan osioon. Tämän jälkeen vastaat lyhyeeseen palautekyselyyn ja voit lopettaa kyselyn.</strong></p>
     `,
   },
 
@@ -132,7 +133,7 @@ export const SURVEY_TEXT = {
       </ul>
     `,
     fi: `
-      <p>Arvioi kuvia pyydetty määrä. Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla Lopeta arviointi-painiketta.</p>
+      <p>Arvioi kuvia pyydetty määrä. Paina ensimmäistä kuvaa aloittaaksesi arvioinnin. Voit käyttää myös näppäimistön numeroita: askelpalautin korjaa viimeisimmän arvion. Paina F11 päästäksesi tai poistuaksesi selaimen koko näytön tilasta. Paina oikean yläkulman ruksia tai valkoisen arviointialueen ulkopuolelle poistuaksesi arvioinneista. Voit lopettaa milloin tahansa painamalla "Lopeta arviointi"-painiketta.</p>
       <ul style="list-style:none;padding-left:0;">
         <li><b>{greenLabel}:</b> Kuinka paljon vihreyttä, eli näkyvää kasvillisuutta näet kuvassa?</li>
         <li><b>Miellyttävyys:</b> Kuinka miellyttävänä koet kuvan maiseman kokonaisuutena?</li>
@@ -215,12 +216,12 @@ export const SURVEY_TEXT = {
   },
 
   q_home_country_title: {
-    en: "Where are you from? (Country)",
-    fi: "Mistä olet kotoisin? (maa)",
+    en: "Where are you from? (City, country)",
+    fi: "Mistä olet kotoisin? (Kaupunki, Maa)",
   },
   q_current_country_title: {
-    en: "Where are you currently living? (Country)",
-    fi: "Missä asut tällä hetkellä? (maa)",
+    en: "Where are you currently living? (City, Country)",
+    fi: "Missä asut tällä hetkellä? (Kaupunki, Maa)",
   },
 
   q_income_title: {
