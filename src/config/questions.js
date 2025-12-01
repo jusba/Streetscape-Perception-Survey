@@ -40,13 +40,13 @@ export function buildSurveyForLexicon(lex, lang = "en") {
       name: "home_country",
       title: t(lang, "q_home_country_title"),
       type: "text",
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "current_country",
       title: t(lang, "q_current_country_title"),
       type: "text",
-      isRequired: false,
+      isRequired: true,
     },
     {
       name: "income",

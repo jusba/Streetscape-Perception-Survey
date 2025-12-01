@@ -337,6 +337,46 @@ html:has(.lightbox-overlay) {
     right: 8px;
     font-size: 24px;
   }
+
+  .lightbox-content {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;
+    max-height: 100svh;
+    padding: 8px;                 /* slightly smaller padding */
+  }
+
+  .lightbox-media {
+    flex: 0 0 45vh;               /* was 55vh – give more space to buttons */
+  }
+
+  /* Ratings block */
+  .rating-group {
+    flex: 1 1 auto;
+    overflow-y: visible;          /* try to avoid scrolling if possible */
+    padding-top: 4px;
+  }
+
+  .rating-row {
+    grid-template-columns: 1fr !important;
+    row-gap: 4px;
+  }
+
+  .rating-buttons {
+    gap: 4px;                     /* less horizontal spacing */
+  }
+
+  .rating-buttons button {
+    min-height: 1.8rem;           /* shorter */
+    padding: 0.2rem 0.3rem;       /* tighter padding */
+    font-size: 0.75rem;           /* slightly smaller text */
+  }
+
+  .scale-label {
+    font-size: 0.7rem;
+  }
+
+
 }
 
 
@@ -344,100 +384,92 @@ html:has(.lightbox-overlay) {
    Equal total width for Greenery & Pleasant rows
    ========================================================= */
 
-/* Make both rating rows stretch to the same total width */
-.rating-buttons-and-right {
-  width: 100%;
+@media (min-width: 641px) {
+  /* =========================================================
+     Equal total width for Greenery & Pleasant rows
+     ========================================================= */
+
+  .rating-buttons-and-right {
+    width: 100%;
+  }
+
+  .rating-buttons {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .rating-buttons button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .rating-row {
+    display: grid;
+    grid-template-columns: 120px max-content auto;
+    column-gap: 12px;
+    align-items: center;
+  }
+
+  .rating-group {
+    --right-label-width: 220px;
+  }
+
+  .rating-buttons-and-right {
+    display: grid !important;
+    grid-template-columns: 1fr var(--right-label-width) !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .rating-buttons {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
+  }
+
+  .rating-buttons button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    min-height: 2.5rem;
+  }
+
+  .rating-right-label {
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .rating-row {
+    grid-template-columns: 120px 1fr !important;
+  }
+
+  .rating-scale {
+    display: grid;
+    row-gap: 6px;
+  }
+
+  .scale-header,
+  .rating-buttons {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 11), 1fr);
+    column-gap: 8px;
+    width: 100%;
+  }
+
+  .rating-row--green .rating-scale { --cols: 11; }
+  .rating-row--pleasant .rating-scale { --cols: 7; }
+
+  .scale-label {
+    font-size: 0.9rem;
+  }
 }
 
-/* Allow the buttons container to fill available space equally */
-.rating-buttons {
-  display: flex;
-  flex-wrap: nowrap;
-  width: 100%;
-  gap: 8px; /* spacing between buttons */
-  justify-content: space-between; /* distribute evenly across full width */
-}
-
-/* Each button can grow but respects its count (7 vs 11) */
-.rating-buttons button {
-  flex: 1 1 auto;     /* grow/shrink evenly within each row */
-  min-width: 0;       /* allow shrinkage */
-}
-.rating-row {
-  display: grid;
-  grid-template-columns: 120px max-content auto;
-  column-gap: 12px;
-  align-items: center;
-}
-
-/* Reserve the same space for the right label in both rows */
-.rating-group {
-  --right-label-width: 220px; /* adjust until both labels fit comfortably */
-}
-
-/* Make the buttons + right label a two-column grid:
-   [buttons take the rest] [right label fixed width] */
-.rating-buttons-and-right {
-  display: grid !important;
-  grid-template-columns: 1fr var(--right-label-width) !important;
-  align-items: center !important;
-  column-gap: 8px !important;
-  width: 100% !important;
-}
-
-/* Buttons container fills its grid column; no extra stretching of gaps */
-.rating-buttons {
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  width: 100% !important;
-  gap: 8px !important;           /* fixed gap between buttons */
-  justify-content: flex-start !important; /* don't space-between; let widths come from flex */
-  overflow: visible !important;
-}
-
-/* Each button shares row width evenly within its row */
-.rating-buttons button {
-  flex: 1 1 0 !important;
-  min-width: 0 !important;
-}
-
-/* Optional: align right label text nicely */
-.rating-right-label {
-  text-align: left;
-  white-space: nowrap;
-}
-
-/* ---------- Scale layout shared by both rows ---------- */
-.rating-row {
-  /* keep your left label column + content column layout */
-  grid-template-columns: 120px 1fr !important;
-}
-
-.rating-scale {
-  display: grid;
-  row-gap: 6px;           /* space between header labels and buttons */
-}
-
-/* Header row: uses the same column grid as the buttons below */
-.scale-header,
-.rating-buttons {
-  display: grid;
-  grid-template-columns: repeat(var(--cols, 11), 1fr); /* default 11 */
-  column-gap: 8px;
-  width: 100%;
-}
-
-/* Per-row column counts */
-.rating-row--green    .rating-scale { --cols: 11; } /* 0..10 */
-.rating-row--pleasant .rating-scale { --cols: 7; }  /* 1..7 */
-
-/* Header labels placement + look */
-.scale-label {
-  font-size: 0.9rem;
-  color: #555;
-  line-height: 1.2;
-  white-space: nowrap;
-}
 .scale-label--min,
 .scale-label--mid,
 .scale-label--max {
