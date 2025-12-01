@@ -38,17 +38,7 @@ html:has(.lightbox-overlay) {
   grid-column: 2;
 }
 
-/* Responsive stack for narrow screens */
-@media (max-width: 640px) {
-  .sd-question--left {
-    grid-template-columns: 1fr;
-  }
-  .sd-question--left .sd-question__header {
-    justify-self: start;
-    text-align: left;
-    margin-bottom: 6px;
-  }
-}
+
 
 /* =========================================================
    Navigation Buttons & Logo
@@ -252,23 +242,103 @@ html:has(.lightbox-overlay) {
 /* =========================================================
    Responsive Tweaks
    ========================================================= */
-@media (max-width: 640px) {
-  .lightbox-content {
-    width: 96vw;
-    max-height: 90svh;
-    padding: 10px;
+
+   @media (max-width: 640px) {
+  /* =========================
+     SurveyJS left-label layout
+     ========================= */
+  .sd-question--left {
+    grid-template-columns: 1fr;        /* stack title and content */
   }
 
+  .sd-question--left .sd-question__header {
+    justify-self: start;
+    text-align: left;
+    margin-bottom: 6px;
+  }
+
+  /* =========================
+     Lightbox layout on mobile
+     ========================= */
+  .lightbox-overlay {
+    align-items: stretch;              /* let content stretch full height */
+  }
+
+  .lightbox-content {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;                    /* full safe viewport height */
+    max-height: 100svh;
+    padding: 10px;
+    border-radius: 0;                  /* optional: flat edges on mobile */
+    display: flex;
+    flex-direction: column;            /* [image] above [ratings] */
+    row-gap: 0;
+  }
+
+  .lightbox-media {
+    flex: 0 0 55vh;                    /* reserve ~55% of screen for image */
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .lightbox-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Ratings block gets remaining space and can scroll if needed */
+  .rating-group {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding-top: 8px;
+  }
+
+  /* =========================
+     Rating layout tightening
+     ========================= */
   .rating-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;   /* single-column row */
     row-gap: 6px;
   }
 
-  .rating-label { order: 1; }
-  .rating-left-label { order: 2; }
-  .rating-buttons-and-right { order: 3; }
-  .rating-right-label { order: 4; }
+  .rating-label {
+    order: 1;
+  }
+
+  .rating-left-label {
+    order: 2;
+  }
+
+  .rating-buttons-and-right {
+    order: 3;
+  }
+
+  .rating-right-label {
+    order: 4;
+  }
+
+  .rating-buttons button {
+    min-height: 2.2rem;
+    padding: 0.3rem 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  .scale-label {
+    font-size: 0.8rem;
+  }
+
+  /* Close button sizing on mobile */
+  .lightbox-close {
+    top: 8px;
+    right: 8px;
+    font-size: 24px;
+  }
 }
+
 
 /* =========================================================
    Equal total width for Greenery & Pleasant rows
