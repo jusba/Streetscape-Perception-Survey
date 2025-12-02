@@ -790,7 +790,7 @@ export default function App() {
           pleasant: qP?.value ?? null,
           dwell_ms: dwellMs,
           panel_id: panel.id,
-          underlying_image: panel.getQuestionByName("imageUrl")?.value || null,
+          underlying_image: trapInfo.underlying_image ?? null,
         });
 
         // Clear so trap answers don't pollute normal responses
@@ -862,12 +862,27 @@ export default function App() {
         if (trapUrl) {
           const qOpen = panel.getQuestionByName("lightbox_opened_at");
           if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
+          
+          // Normal image back to queue.
+          if (normalSrc) {
+           imageQueue.unshift(normalSrc);
+          }
+          
           const info = {
-            trapUrl,
-            seq: normalRatedCountRef.current + 1, // 5, 10, 15...
-            opened_at: new Date().toISOString(),
+           trapUrl,
+           seq: normalRatedCountRef.current + 1, // 12th, 24th, ...
+           opened_at: new Date().toISOString(),
+           // keep track of the normal image that *would* have been shown
+           underlying_image: normalSrc || panel.getQuestionByName("imageUrl")?.value || null,
           };
+
           trapInfoMapRef.current.set(panel, info);
+          // Make the panel itself show the trap image instead of the normal one,
+          // so the normal image is NOT visible in the background.
+          if (imgQ) {
+            imgQ.imageLink = trapUrl;
+            imgQ.locImageLink?.onChanged?.();
+          }
           setLightbox({ src: trapUrl, panel, isTrap: true });
           return;
         }
@@ -922,10 +937,9 @@ export default function App() {
                 );
                 if (!ok) return;
 
-                setLang(newLang);
                 const url = new URL(window.location.href);
                 url.searchParams.set("lang", newLang);
-                window.history.replaceState({}, "", url.toString());
+                window.location.href = url.toString();   //full reset of browser           
               }}
             >
               <option value="en">English</option>

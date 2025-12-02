@@ -63,7 +63,7 @@ export const SURVEY_TEXT = {
       <p></p>
 
       <b>The survey comprises of three parts. It should take approximately 10–15 minutes to complete. You are recommended to use a computer or other big screen device for the rating.</b>
-      <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
+      <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
       <p>At the end of the survey, you will have the opportunity to enter your email address for a chance to win movie tickets.</p>
       <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi).</p>
       <b>By continuing, you confirm: (1) you understand the purpose the study, (2) participation is voluntary, and (3) you are at least 18 years old.</b>
@@ -83,7 +83,7 @@ export const SURVEY_TEXT = {
       <p></p>
 
       <b>Kysely koostuu kolmesta osasta ja sen täyttämiseen kuluu noin 10–15 minuuttia. Vastaamiseen on suositeltavaa käyttää tietokonetta tai muuta isoa ruutua.</b>
-      <p>Vastauksesi kerätään, analysoidaan, julkaistaan ja säilytetään luottamuksellisesti ja anonyymisti EU:n tietosuoja-asetuksen (GDPR) mukaisesti. Täysi tietosuojaseloste: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Tietosuojaseloste (englanniksi)</a></p>
+      <p>Vastauksesi kerätään, analysoidaan, julkaistaan ja säilytetään luottamuksellisesti ja anonyymisti EU:n tietosuoja-asetuksen (GDPR) mukaisesti. Täysi tietosuojaseloste: <a href="https://a3s.fi/swift/v1/survey_elements/Survey_Privacy_Notice_English.pdf">Tietosuojaseloste (englanniksi)</a></p>
       <p>Kyselyn lopussa voit halutessasi jättää sähköpostiosoitteesi osallistuaksesi elokuvalippujen arvontaan.</p>
       <p>Kysyttävää? Ota yhteyttä tutkimuksen vetäjään Jussi Torkkoon (jussi.torkko[at]helsinki.fi).</p>
       <b>Jatkamalla eteenpäin vahvistat, että (1) ymmärrät tutkimuksen tarkoituksen, (2) tiedostat, että osallistuminen on vapaaehtoista ja (3) olet vähintään 18-vuotias.</b>
