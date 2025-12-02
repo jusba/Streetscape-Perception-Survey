@@ -62,11 +62,11 @@ export const SURVEY_TEXT = {
       <a href="https://www.helsinki.fi/en">University of Helsinki</a>
       <p></p>
 
-      <b>The survey comprises of three parts. It should take approximately 10–15 minutes to complete. You are recommended to use a computer or other big screen for the rating.</b>
+      <b>The survey comprises of three parts. It should take approximately 10–15 minutes to complete. You are recommended to use a computer or other big screen device for the rating.</b>
       <p>We will collect, analyze, publish, and store your data confidentially and anonymously under the EU GDPR. Full notice: <a href="https://a3s.fi/swift/v1/AUTH_b76bb3a5f80349d9acabe9cd285f7497/survey_elements/Survey_Privacy_Notice_English.pdf">Data and privacy notice</a></p>
       <p>At the end of the survey, you will have the opportunity to enter your email address for a chance to win movie tickets.</p>
       <p>Questions? Email the responsible researcher Jussi Torkko (jussi.torkko[at]helsinki.fi).</p>
-      <b>By continuing, you confirm: (1) you understand the purpose, (2) participation is voluntary, and (3) you are at least 18 years old.</b>
+      <b>By continuing, you confirm: (1) you understand the purpose the study, (2) participation is voluntary, and (3) you are at least 18 years old.</b>
     `,
     fi: `
       <img src="into_image.png" alt="banner image" />
@@ -93,7 +93,7 @@ export const SURVEY_TEXT = {
   instructions_html: {
     en: `
       <h2>Instructions</h2>
-      <p><strong>To complete the survey, please rate images for approximately 10 minutes. After the final image, you will be prompted to move to the next section. Finally you will answer some feedback questions and can finish.</strong></p>
+      <p><strong>To complete the survey, please rate images until the platform prompts you to the next section. Finally you will answer some feedback questions and can finish.</strong></p>
       <p>In the first part you’ll answer a few background questions. Then you will rate a series of street images.</p>
       <p>You will be shown different images. <b>Consider the scene as it appears in the picture (do not imagine other seasons or conditions).</b> Please answer the following for each image:</p>
       <p><b>{greenLabel}:</b>
@@ -108,7 +108,7 @@ export const SURVEY_TEXT = {
     `,
     fi: `
       <h2>Ohjeet</h2>
-      <p><strong>Jotta saamme riittävästi vastauksia, pyydämme sinua arvioimaan kuvia noin 10 minuuttia. Viimeisen kuvan jälkeen kysely ohjaa sinut automaattisesti seuraavaan osioon. Tämän jälkeen vastaat lyhyeeseen palautekyselyyn ja voit lopettaa kyselyn.</strong></p>
+      <p><strong>Jotta saamme riittävästi vastauksia, pyydämme sinua arvioimaan kuvia kunnes kysely ohjaa sinut seuraavaan osioon. Tämän jälkeen vastaat lyhyeeseen palautekyselyyn ja voit lopettaa kyselyn.</strong></p>
 
       <p>Kyselyn ensimmäisessä osassa vastaat muutamiin taustakysymyksiin. Sen jälkeen pääset tarkastelemaan katunäkymäkuvia.</p>
       <p>Sinulle esitetään erilaisia kuvia. <b>Arvioi näkymää sellaisena kuin se kuvassa näkyy (älä kuvittele esimerkiksi eri vuodenaikoja tai olosuhteita).</b> Vastaa jokaiseen kuvaan seuraavasti:</p>
