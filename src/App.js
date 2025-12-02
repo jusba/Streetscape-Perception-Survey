@@ -12,6 +12,7 @@ import "survey-core/survey.i18n";
    CONFIG: Trap logic
    ========================================================= */
 const TRAP_EVERY = 12; // show a trap on the 5th, 10th, 15th, ... NORMAL rating
+const MAX_TRAPS = 4;
 
 /* =========================================================
    Safety-net CSS: hide normal-view ratings (we render our own
@@ -416,6 +417,8 @@ export default function App() {
   const waitingForDwellAdvanceRef = React.useRef(new WeakMap());
 
   const normalRatedCountRef = React.useRef(0);
+
+  const trapShownCountRef = React.useRef(0);
   const lastTrapIndexRef = React.useRef(0); // <- prevent repeated trap on same nth index
 
   const trapInfoMapRef = React.useRef(new WeakMap()); // panel -> trap info
@@ -432,12 +435,14 @@ export default function App() {
 
   // Should we show a trap before the upcoming normal?
   const shouldShowTrap = React.useCallback(() => {
-    const nextNormalIdx = normalRatedCountRef.current + 1; // 1-based
     if (TRAP_EVERY <= 0) return false;
-    if (nextNormalIdx % TRAP_EVERY !== 0) return false;
-    if (lastTrapIndexRef.current === nextNormalIdx) return false; // already showed for this index
-    lastTrapIndexRef.current = nextNormalIdx; // remember we fired it
-    return true;
+    if (trapShownCountRef.current >= MAX_TRAPS) return false;
+
+    // next image index INCLUDING traps
+    const nextIndex =
+      normalRatedCountRef.current + trapShownCountRef.current + 1; // 1-based
+
+    return nextIndex % TRAP_EVERY === 0;
   }, []);
 
   // ---------------- rating order + lexicon ----------------
@@ -792,6 +797,8 @@ export default function App() {
           panel_id: panel.id,
           underlying_image: trapInfo.underlying_image ?? null,
         });
+
+        trapShownCountRef.current += 1;
 
         // Clear so trap answers don't pollute normal responses
         if (qG) qG.value = null;
