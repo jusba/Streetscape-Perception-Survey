@@ -821,7 +821,6 @@ export default function App() {
       const responses = survey.data;
       const completeData = {
         responses,
-        displayed_images: displayedImages,
         survey_metadata: {
           survey_opened_at: surveyOpenedAtRef.current,
           completion_time: new Date().toISOString(),
