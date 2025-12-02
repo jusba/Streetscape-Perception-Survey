@@ -614,14 +614,14 @@ export function getRandomImages() {
   shuffle(selected);
   const final = selected.slice(0, 56);
 
-  console.log("Selected:", final.length, "images");
+  //console.log("Selected:", final.length, "images");
   // Optional: log distribution
   const summary = {};
   for (const img of final) {
     const key = `${img.season}-${img.category}`;
     summary[key] = (summary[key] || 0) + 1;
   }
-  console.log("Distribution:", summary);
+  //console.log("Distribution:", summary);
 
   return final;
 }

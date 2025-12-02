@@ -7,7 +7,7 @@ const generateQuestionImages = () => {
   const questionImages = {
     comfort_rating: getRandomImages("comfort_rating", 100),
   };
-  console.log(questionImages)
+  //console.log(questionImages)
   return questionImages;
 };
 export const displayedImages = generateQuestionImages();
