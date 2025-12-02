@@ -564,6 +564,20 @@ export default function App() {
       .filter(Boolean);
     const imageQueue = [...pool];
 
+    const preloadImage = (src) =>
+      new Promise((resolve, reject) => {
+        if (!src) {
+          resolve(null);
+          return;
+        }
+        const img = new Image();
+        img.decoding = "async";
+        img.onload = () => resolve(performance.now());
+        img.onerror = reject;
+        img.src = src;
+      });
+
+
     // Preloader
     const preloadedLocal = new Set();
     const preloadLocal = (url) => {
@@ -860,47 +874,83 @@ export default function App() {
     /* --------- Lightbox opener lives here so it can use shouldShowTrap() --------- */
     function openLightboxForPanel(panel) {
       if (!panel) return;
-      const imgQ = panel.getQuestionByName("image");
-      const normalSrc = imgQ?.imageLink || "";
 
-      // Trap as interstitial on exact Nth upcoming normal
+      const imgQ = panel.getQuestionByName("image");
+      let normalSrc = imgQ?.imageLink || "";
+      let isTrap = false;
+      let trapUrl = null;
+
+      // Decide trap vs normal, but DON'T switch lightbox yet
       if (shouldShowTrap()) {
-        const trapUrl = pickRandomTrap(trapImages);
+        trapUrl = pickRandomTrap(trapImages);
         if (trapUrl) {
+          isTrap = true;
+
           const qOpen = panel.getQuestionByName("lightbox_opened_at");
           if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
-          
-          // Normal image back to queue.
+
+          // Normal image back to queue (so it can appear later as a normal)
           if (normalSrc) {
-           imageQueue.unshift(normalSrc);
+            imageQueue.unshift(normalSrc);
           }
-          
+
           const info = {
-           trapUrl,
-           seq: normalRatedCountRef.current + 1, // 12th, 24th, ...
-           opened_at: new Date().toISOString(),
-           // keep track of the normal image that *would* have been shown
-           underlying_image: normalSrc || panel.getQuestionByName("imageUrl")?.value || null,
+            trapUrl,
+            seq: normalRatedCountRef.current + 1, // 12th, 24th, ...
+            opened_at: new Date().toISOString(),
+            underlying_image:
+              normalSrc || panel.getQuestionByName("imageUrl")?.value || null,
           };
 
           trapInfoMapRef.current.set(panel, info);
-          // Make the panel itself show the trap image instead of the normal one,
-          // so the normal image is NOT visible in the background.
+
+          // Make the *panel's* image be the trap (so background matches)
           if (imgQ) {
             imgQ.imageLink = trapUrl;
             imgQ.locImageLink?.onChanged?.();
           }
-          setLightbox({ src: trapUrl, panel, isTrap: true });
-          return;
+
+          normalSrc = trapUrl;
         }
       }
 
-      if (normalSrc) {
+      const srcToShow = normalSrc;
+      if (!srcToShow) return;
+
+      // For normal images, stamp open time here
+      if (!isTrap) {
         const qOpen = panel.getQuestionByName("lightbox_opened_at");
         if (qOpen && !qOpen.value) qOpen.value = new Date().toISOString();
-        setLightbox({ src: normalSrc, panel, isTrap: false });
       }
+
+      // Don't wipe out the old lightbox yet; just mark we're loading
+      setLightboxLoaded(false);
+
+      // Preload in the background; only when done do we actually swap panels
+      preloadImage(srcToShow)
+        .then((loadedPerf) => {
+          if (isTrap && panel) {
+            // For traps, dwell timing uses this
+            trapLoadedAtRef.current.set(panel, loadedPerf);
+          }
+
+          // NOW switch lightbox: new image + new panel become visible
+          setLightbox({
+            src: srcToShow,
+            panel,
+            isTrap,
+          });
+        })
+        .catch(() => {
+          // If preload fails, fall back to immediate switch
+          setLightbox({
+            src: srcToShow,
+            panel,
+            isTrap,
+          });
+        });
     }
+
     // expose to outer closures
     window.__openLightboxForPanel = openLightboxForPanel;
 
@@ -970,9 +1020,6 @@ export default function App() {
                 fetchPriority="high"
                 onLoad={() => {
                   setLightboxLoaded(true);
-                  if (lightbox.isTrap && lightbox.panel) {
-                    trapLoadedAtRef.current.set(lightbox.panel, performance.now());
-                  }
                 }}
               />
               
